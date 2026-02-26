@@ -1,0 +1,268 @@
+{% load static %}
+
+<!Doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeBoost</title>
+
+    <link rel="stylesheet" href="{% static 'css/home/master.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{% url 'home' %}">CodeBoost</a>
+        </div>
+        <div class="nav-links">
+            <a class="nav-links-a" href="{% url 'home' %}">Home</a>
+            <a class="nav-links-a" href="{% url 'problems' %}">Problems</a>
+            <a class="nav-links-a" href="#">Contests</a>
+            <a class="nav-links-a" href="#">Leaderboard</a>
+
+            <!-- Auth -->
+            {% if request.user.is_authenticated %}
+            <div class="nav-profile">
+                <button class="nav-profile-btn" id="profileBtn">
+                    <img src="{{ request.user.userprofile.avatar }}" />
+                    <span>{{ request.user.userprofile.display_name }}</span>
+                </button>
+
+
+                <div class="nav-profile-menu" id="profileMenu">
+                    <a href="">
+
+                        <div class="view-profile-grid">
+                            <div class="view-profile-grid-image">
+                                <img src="{{ request.user.userprofile.avatar }}">
+                            </div>
+                            <div class="menu-header">
+                                <strong>@{{ request.user.username }}</strong>
+                                <small>View profile</small>
+                            </div>
+                        </div>
+
+                    </a>
+                    <a href="#">Settings & privacy</a>
+                    <a href="#">Help & support</a>
+                    <a href="#">Display & accessibility</a>
+
+                    <div class="menu-divider"></div>
+
+                    <a href="{% url 'logout' %}" class="logout">Log out</a>
+                </div>
+
+
+
+            </div>
+            {% else %}
+            <button id="loginBtn" class="nav-btn">Login</button>
+            <button id="signUpBtn" class="nav-btn">Sign Up</button>
+            {% endif %}
+
+
+
+        </div>
+    </nav>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h3>Login to CodeBoost</h3>
+
+            <!-- <input type="text" placeholder="Username" />
+            <input type="password" placeholder="Password" />
+            <button>Login</button> -->
+
+
+            {% if request.GET.login == 'progress' %}
+            {% if messages %}
+            <div class="alert-container">
+                {% for message in messages %}
+                <div class="alert alert-error">
+                    <div class="alert-icon">
+                        !
+                    </div>
+                    <div class="alert-content">
+                        {{ message }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
+
+
+
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+
+                <input type="text" name="identifier" placeholder="Username/Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <button type="submit">Login</button>
+            </form>
+
+        </div>
+    </div>
+
+
+
+
+    <div class="modal" id="signUpModal">
+        <div class="modal-content">
+            <h3>Sign Up for CodeBoost</h3>
+
+            {% if request.GET.register == 'progress' %}
+            {% if messages %}
+            <div class="alert-container">
+                {% for message in messages %}
+                <div class="alert alert-error">
+                    <div class="alert-icon">
+                        !
+                    </div>
+                    <div class="alert-content">
+                        {{ message }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <form action="{% url 'registration' %}" method="post">
+                {% csrf_token %}
+
+                {{ user_form.username }}
+                {{ user_form.email }}
+                {{ user_form.password1 }}
+                {{ user_form.password2 }}
+
+                <button type="submit">Sign Up</button>
+            </form>
+
+
+        </div>
+    </div>
+
+    {% block content %}
+
+    {% endblock %}
+
+    <footer class="footer">
+        © 2026 CodeBoost — Built for Competitive Programmers. Developed by <a
+            href="https://www.mdimrankhansiam.pro.bd/">Imran Khan</a>.
+    </footer>
+
+
+
+    <script>
+
+        // Nav Profile
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileBtn = document.getElementById("profileBtn");
+            const profileMenu = document.getElementById("profileMenu");
+
+            if (!profileBtn || !profileMenu) return;
+
+            // Toggle menu
+            profileBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                profileMenu.classList.toggle("show");
+            });
+
+
+            // Close on outside click
+            document.addEventListener("click", function () {
+                profileMenu.classList.remove("show");
+            });
+
+
+            // Prevent closing when clicking inside
+            profileMenu.addEventListener("click", function (e) {
+                e.stopPropagation();
+            });
+
+            // Close with ESC
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    profileMenu.classList.remove("show");
+                }
+            });
+        });
+
+
+        // Nav Profile
+
+
+
+
+
+
+
+
+        const params = new URLSearchParams(window.location.search);
+
+        // Modal
+        const loginModal = document.getElementById("loginModal");
+        const signUpModal = document.getElementById("signUpModal");
+
+
+        const loginBtn = document.getElementById("loginBtn");
+        const loginParams = params.get("login");
+
+        if (loginParams === "progress") {
+            loginModal.classList.add("active");
+            signUpModal.classList.remove("active");
+            loginModal.onclick = (e) => {
+                if (e.target === loginModal) loginModal.classList.remove("active");
+            };
+        }
+
+
+        loginBtn.onclick = () => {
+            loginModal.classList.add("active");
+            signUpModal.classList.remove("active");
+        };
+
+
+        loginModal.onclick = (e) => {
+            if (e.target === loginModal) loginModal.classList.remove("active");
+        };
+
+
+
+        const signUpBtn = document.getElementById("signUpBtn");
+        const signUpParams = params.get("register");
+
+        if (signUpParams === "progress") {
+            signUpModal.classList.add("active");
+            loginModal.classList.remove("active");
+            signUpModal.onclick = (e) => {
+                if (e.target === signUpModal) signUpModal.classList.remove("active");
+            };
+        }
+
+        signUpBtn.onclick = () => {
+            signUpModal.classList.add("active");
+            loginModal.classList.remove("active");
+        };
+
+        signUpModal.onclick = (e) => {
+            if (e.target === signUpModal) signUpModal.classList.remove("active");
+        };
+
+
+
+    </script>
+</body>
+
+</html>

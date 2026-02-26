@@ -1,0 +1,145 @@
+{% extends 'home/master.html' %}
+
+
+{% block content %}
+
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Compete. Improve. Dominate.</h1>
+    <p>
+      Elite competitive programming platform built for serious coders.
+      Real-time judging, global contests, AI-powered analysis.
+    </p>
+    <div class="hero-buttons">
+      <button class="primary-btn">Start Solving</button>
+      <button class="secondary-btn">View Contests</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="code-window" id="typingCode"></div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat-card">
+    <h2 id="users">0</h2>
+    <p>Active Coders</p>
+  </div>
+  <div class="stat-card">
+    <h2 id="problems">0</h2>
+    <p>Problems</p>
+  </div>
+  <div class="stat-card">
+    <h2 id="submissions">0</h2>
+    <p>Submissions</p>
+  </div>
+  <div class="stat-card">
+    <h2 id="contests">0</h2>
+    <p>Contests Hosted</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Platform Features</h2>
+  <div class="features">
+    <div class="feature">
+      <h3>⚡ Real-Time Judging</h3>
+      <p>Instant verdicts with distributed execution servers.</p>
+    </div>
+    <div class="feature">
+      <h3>🏆 Global Contests</h3>
+      <p>Weekly rated contests with live leaderboard updates.</p>
+    </div>
+    <div class="feature">
+      <h3>📊 Performance Analytics</h3>
+      <p>Track accuracy, speed, and topic mastery.</p>
+    </div>
+    <div class="feature">
+      <h3>🤖 AI Code Review</h3>
+      <p>Get intelligent feedback on your solutions.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Trending Problems</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Difficulty</th>
+          <th>Submissions</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Binary Search Tree Validation</td>
+          <td><span class="difficulty easy">Easy</span></td>
+          <td>12,340</td>
+          <td><button class="solve-btn">Solve</button></td>
+        </tr>
+        <tr>
+          <td>Dynamic Programming Knapsack</td>
+          <td><span class="difficulty medium">Medium</span></td>
+          <td>8,942</td>
+          <td><button class="solve-btn">Solve</button></td>
+        </tr>
+        <tr>
+          <td>Advanced Graph Cycles</td>
+          <td><span class="difficulty hard">Hard</span></td>
+          <td>4,221</td>
+          <td><button class="solve-btn">Solve</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+  // Animated Stats
+  const counters = {
+    users: 184530,
+    problems: 5421,
+    submissions: 1282134,
+    contests: 142,
+  };
+  for (const id in counters) {
+    let el = document.getElementById(id);
+    let target = counters[id];
+    let count = 0;
+    let step = Math.ceil(target / 150);
+    let interval = setInterval(() => {
+      count += step;
+      if (count >= target) {
+        count = target;
+        clearInterval(interval);
+      }
+      el.textContent = count.toLocaleString();
+    }, 15);
+  }
+
+  // Typing Code Animation
+  const codeSnippet = `{{ code_snippet.code }}`;
+  let i = 0;
+  const typingCodeDiv = document.getElementById("typingCode");
+  function type() {
+    if (i < codeSnippet.length) {
+      typingCodeDiv.textContent += codeSnippet.charAt(i);
+      i++;
+      setTimeout(type, 15);
+
+      const distanceFromBottom = typingCodeDiv.scrollHeight - typingCodeDiv.scrollTop - typingCodeDiv.clientHeight;
+
+      if (distanceFromBottom < 50) {
+        typingCodeDiv.scrollTop = typingCodeDiv.scrollHeight;
+      }
+    }
+  }
+  type();
+
+</script>
+
+{% endblock %}
