@@ -1,0 +1,113 @@
+.problems-section {
+  padding: 60px 80px;
+  max-width: 1300px;
+  margin: auto;
+}
+
+/* HEADER */
+
+.problems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.problems-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+}
+
+.controls input,
+.controls select {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #0f172a;
+  color: white;
+  font-size: 14px;
+}
+
+.controls select option {
+  background: #0f172a;
+}
+
+/* TABLE */
+
+.problems-wrapper {
+  background: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.problem-row {
+  display: grid;
+  grid-template-columns: 0.6fr 2fr 1fr 1fr 1fr 0.6fr;
+  padding: 18px 24px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: 0.2s ease;
+  cursor: pointer;
+}
+
+.problem-row:last-child {
+  border-bottom: none;
+}
+
+.problem-row:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.problem-row.header {
+  background: rgba(255,255,255,0.05);
+  font-weight: 600;
+  cursor: default;
+}
+
+.problem-row.header:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Difficulty Colors */
+
+.difficulty.easy { color: #22c55e; }
+.difficulty.medium { color: #f59e0b; }
+.difficulty.hard { color: #ef4444; }
+
+/* Tag */
+
+.tag {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Status */
+
+.status {
+  font-size: 18px;
+  text-align: center;
+  color: #64748b;
+}
+
+.problem-row.solved .status {
+  color: #22c55e;
+}
+
+/* Solved Title */
+
+.problem-row.solved .title {
+  color: #22c55e;
+}
+
+/* Sortable */
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}

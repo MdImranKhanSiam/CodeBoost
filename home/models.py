@@ -30,5 +30,8 @@ class UserProfile(models.Model):
     website = models.URLField(blank=True, null=True)
     social = models.URLField(blank=True, null=True)
 
+    rating = models.IntegerField(default=1200, blank=True, null=True)
+    solved_count = models.IntegerField(default=0, blank=True, null=True)
+
     def __str__(self):
         return self.user.username

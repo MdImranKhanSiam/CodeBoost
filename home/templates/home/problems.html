@@ -1,9 +1,124 @@
 {% extends 'home/master.html' %}
-
-
 {% block content %}
+{% load static %}
 
-<h1>Problems Set</h1>
+<link rel="stylesheet" href="{% static 'css/home/problems.css' %}" />
+
+<section class="problems-section">
+
+  <div class="problems-header">
+    <h1>Problems</h1>
+
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Search problems..." />
+
+      <select id="difficultyFilter">
+        <option value="">All Difficulty</option>
+        <option value="easy">1 - 3</option>
+        <option value="medium">4 - 6</option>
+        <option value="hard">7 - 10</option>
+      </select>
+
+      <select id="tagFilter">
+        <option value="">All Categories</option>
+        <option value="dp">Dynamic Programming</option>
+        <option value="graph">Graph</option>
+        <option value="math">Math</option>
+        <option value="string">String</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="problems-wrapper">
+
+    <!-- Table Header -->
+    <div class="problem-row header">
+      <div>ID</div>
+      <div>Title</div>
+      <div onclick="sortByDifficulty()" class="sortable">
+        Difficulty ↑↓
+      </div>
+      <div>Acceptance</div>
+      <div>Tag</div>
+      <div>Solved</div>
+    </div>
+
+    <!-- Problem 1 -->
+    <div class="problem-row" 
+         data-id="101"
+         data-difficulty="2"
+         data-tag="dp">
+
+      <div class="id">101</div>
+      <div class="title">Fibonacci Sequence</div>
+      <div class="difficulty easy">2</div>
+      <div class="accept">78%</div>
+      <div class="tag">DP</div>
+      <div class="status"></div>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-row" 
+         data-id="102"
+         data-difficulty="5"
+         data-tag="graph">
+
+      <div class="id">102</div>
+      <div class="title">Shortest Path</div>
+      <div class="difficulty medium">5</div>
+      <div class="accept">56%</div>
+      <div class="tag">Graph</div>
+      <div class="status"></div>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-row" 
+         data-id="103"
+         data-difficulty="8"
+         data-tag="math">
+
+      <div class="id">103</div>
+      <div class="title">Prime Factorization</div>
+      <div class="difficulty hard">8</div>
+      <div class="accept">34%</div>
+      <div class="tag">Math</div>
+      <div class="status"></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const rows = document.querySelectorAll(".problem-row:not(.header)");
+
+rows.forEach(row => {
+  const id = row.dataset.id;
+  const statusCell = row.querySelector(".status");
+
+  if (localStorage.getItem("solved_" + id)) {
+    row.classList.add("solved");
+    statusCell.innerHTML = "✔";
+  } else {
+    statusCell.innerHTML = "•";
+  }
+
+  row.addEventListener("click", () => {
+    localStorage.setItem("solved_" + id, true);
+    row.classList.add("solved");
+    statusCell.innerHTML = "✔";
+  });
+});
+
+function sortByDifficulty() {
+  const wrapper = document.querySelector(".problems-wrapper");
+  const rowsArray = Array.from(rows);
+
+  rowsArray.sort((a, b) =>
+    a.dataset.difficulty - b.dataset.difficulty
+  );
+
+  rowsArray.forEach(row => wrapper.appendChild(row));
+}
+</script>
 
 {% endblock %}
-    

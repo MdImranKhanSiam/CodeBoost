@@ -7,20 +7,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CodeBoost</title>
+    <link rel="icon" href="{% static 'image/other/codeboost.png' %}">
 
     <link rel="stylesheet" href="{% static 'css/home/master.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet" />
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
 </head>
 
 <body>
-
+    <div id="logoModal" class="logoModal" onclick="closeLogo()">
+        <img id="modalLogo">
+    </div>
     <nav class="navbar">
-        <div class="logo">
-            <a href="{% url 'home' %}">CodeBoost</a>
-        </div>
+
+        <button class="logo-icon">
+            <img onclick="openLogo(this.src)" class="logo-icon-img" src="{% static 'image/other/codeboost.png' %}" />
+
+            <span>
+                <div class="logo">
+                    <a href="{% url 'home' %}">CodeBoost</a>
+                </div>
+            </span>
+        </button>
+
+
         <div class="nav-links">
             <a class="nav-links-a" href="{% url 'home' %}">Home</a>
             <a class="nav-links-a" href="{% url 'problems' %}">Problems</a>
@@ -260,6 +270,18 @@
             if (e.target === signUpModal) signUpModal.classList.remove("active");
         };
 
+
+        // Logo Modal
+        function openLogo(src) {
+            const logoModal = document.getElementById("logoModal");
+            const logo = document.getElementById("modalLogo");
+            logo.src = src;
+            logoModal.style.display = "flex";
+        }
+
+        function closeLogo() {
+            document.getElementById("logoModal").style.display = "none";
+        }
 
 
     </script>

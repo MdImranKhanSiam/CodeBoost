@@ -58,6 +58,86 @@ button {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.logo-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+
+}
+
+.logo-icon img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+}
+
+.logo-icon span {
+    font-size: 16px;
+    transition: 0.3s;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.logo-icon span:hover {
+    color: var(--text);
+}
+
+
+
+
+
+
+
+
+.logo-icon-img {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.logo-icon-img:hover {
+    transform: scale(1.5);
+}
+
+.logoModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.logoModal img {
+    max-width: 60vw;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 0px;
+    /* box-shadow: 0 10px 40px rgba(0,0,0,0.6); */
+    border: none;
+    top: 0px;
+}
+
+
+
+
+
+
+
+
+
+
+
 .logo {
     font-size: 24px;
     font-weight: 800;
