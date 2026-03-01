@@ -404,6 +404,7 @@ button {
 }
 
 .code-window {
+    width: 100%;
     background: #0f172a;
     border-radius: 14px;
     padding: 20px;
