@@ -9,7 +9,7 @@ from django.db.models import Q
 from . models import UserProfile, CodeSnippet
 from . forms import RegisterForm
 
-# Create your views here.
+
 
 def home(request):
     code_snippet = CodeSnippet.objects.get(title='Welcome to competitive programming')
@@ -20,13 +20,8 @@ def home(request):
 
     return render(request, 'home/home.html', context)
 
-def problems(request):
-    
-    context = {
-        
-    }
 
-    return render(request, 'home/problems.html', context)
+
 
 
 def register_user(request):
@@ -79,13 +74,6 @@ def register_user(request):
 
 
 
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from django.contrib.auth.models import User
-
 def login_view(request):
     if request.method == "POST":
         identifier = request.POST.get("identifier")  # username or email
@@ -110,6 +98,11 @@ def login_view(request):
             messages.error(request, "Invalid username/email or password")
 
     return render(request, "login.html")
+
+
+
+
+
 
 
 

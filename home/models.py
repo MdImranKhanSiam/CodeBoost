@@ -33,5 +33,40 @@ class UserProfile(models.Model):
     rating = models.IntegerField(default=1200, blank=True, null=True)
     solved_count = models.IntegerField(default=0, blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['rating']),
+        ]
+
     def __str__(self):
         return self.user.username
+    
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('submission', 'Submission'),
+        ('contest', 'Contest'),
+        ('system', 'System'),
+        ('message', 'Message'),
+    ]
+
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # user_notifications = Notification.objects.filter(user=request.user)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    # user = request.user
+    # user.notifications.all()           # all notifications
+    # user.notifications.filter(is_read=False)  # unread notifications
+
+    content = models.TextField()
+    type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES, default='system')
+    link = models.CharField(max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    # user.notifications.order_by('-created_at')[:10]  # latest 10 notifications
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+        ]

@@ -122,7 +122,8 @@
   }
 
   // Typing Code Animation
-  const codeSnippet = `{{ code_snippet.code }}`;
+  const welcome = "hello {% if request.user.is_authenticated %}{{ request.user.userprofile.display_name|escapejs }}{% else %}world{% endif %}\n"
+  const codeSnippet = welcome + `{{ code_snippet.code }}`.replace(/\t/g, "    ");
   let i = 0;
   const typingCodeDiv = document.getElementById("typingCode");
   function type() {
