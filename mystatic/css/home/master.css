@@ -253,7 +253,7 @@ button {
     transform: translateY(-10px);
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s ease;
-    
+
 }
 
 
@@ -587,8 +587,14 @@ tr:hover {
     margin-bottom: 15px;
     border-radius: 10px;
     border: none;
+    outline: none;
     background: var(--card-light);
     color: var(--text);
+}
+
+.modal-content input:focus {
+    border: 1px solid #4f7cff;
+    box-shadow: 0 0 5px rgba(79,124,255,0.5);
 }
 
 .modal-content button {
@@ -704,12 +710,9 @@ tr:hover {
     }
 
     .modal-content {
-        
         padding: 40px;
-        
         width: 350px;
     }
-
 
 
     .mobile-toggle {
