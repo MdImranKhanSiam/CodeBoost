@@ -173,12 +173,12 @@
         {% else %}
 
         <div class="drawer-auth">
-          <a href="{% url 'login' %}" class="mobile-login-btn">
-            <span class="mobile-login">Login</span>
-          </a>
-          <a href="{% url 'registration' %}" class="mobile-register-btn">
-            <span class="mobile-signup">Sign up</span>
-          </a>
+          <button id="mobileLoginBtn" class="mobile-login-btn">
+            Login
+          </button>
+          <button id="mobileSignUpBtn" class="mobile-register-btn">
+            Sign up
+          </button>
         </div>
         {% endif %}
       </div>
@@ -364,6 +364,8 @@
 
 
         const loginBtn = document.getElementById("loginBtn");
+        const mobileLoginBtn = document.getElementById("mobileLoginBtn");
+
         const loginParams = params.get("login");
 
         if (loginParams === "progress") {
@@ -380,6 +382,11 @@
             signUpModal.classList.remove("active");
         };
 
+        mobileLoginBtn.onclick = () => {
+            loginModal.classList.add("active");
+            signUpModal.classList.remove("active");
+        };
+
 
         loginModal.onclick = (e) => {
             if (e.target === loginModal) loginModal.classList.remove("active");
@@ -388,6 +395,8 @@
 
 
         const signUpBtn = document.getElementById("signUpBtn");
+        const mobileSignUpBtn = document.getElementById("mobileSignUpBtn");
+
         const signUpParams = params.get("register");
 
         if (signUpParams === "progress") {
@@ -399,6 +408,11 @@
         }
 
         signUpBtn.onclick = () => {
+            signUpModal.classList.add("active");
+            loginModal.classList.remove("active");
+        };
+
+        mobileSignUpBtn.onclick = () => {
             signUpModal.classList.add("active");
             loginModal.classList.remove("active");
         };

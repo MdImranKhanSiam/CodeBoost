@@ -253,7 +253,7 @@ button {
     transform: translateY(-10px);
     pointer-events: none;
     transition: opacity 0.25s ease, transform 0.25s ease;
-    z-index: 50000;
+    
 }
 
 
@@ -696,9 +696,19 @@ tr:hover {
         display: block;
         position: sticky;
         top: 0;
-        z-index: 10000;
+        z-index: 5000;
     }
 
+    .modal {
+        z-index: 6000;
+    }
+
+    .modal-content {
+        
+        padding: 40px;
+        
+        width: 350px;
+    }
 
 
 
@@ -757,14 +767,14 @@ tr:hover {
         background: #0f1b2d;
         border: 1px solid rgba(255, 255, 255, 0.05);
         box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.6),
-        0 0 20px rgba(59, 130, 246, 0.15);
-        
+            0 10px 30px rgba(0, 0, 0, 0.6),
+            0 0 20px rgba(59, 130, 246, 0.15);
+
         padding: 90px 20px 20px 20px;
         transition: 0.3s ease;
         z-index: 2500;
         overflow-y: auto;
-        
+
     }
 
     /* Left */
@@ -793,7 +803,7 @@ tr:hover {
         text-decoration: none;
         color: #111827;
         font-weight: 500;
-        
+
 
         color: var(--muted);
     }
@@ -806,7 +816,7 @@ tr:hover {
         gap: 12px;
         align-items: center;
         padding-bottom: 15px;
-       
+
     }
 
     .view-profile-grid-image img {
@@ -821,18 +831,6 @@ tr:hover {
         font-size: 13px;
     }
 
-    .menu-divider {
-        /* height: 1px;
-        background: #eee;
-        margin: 10px 0; */
-    }
-
-    /* .logout .mobile-logout {
-    color: #e74c3c;
-} */
-
-
-
 
     .drawer-auth {
         display: flex;
@@ -841,48 +839,31 @@ tr:hover {
         margin-top: 35px;
     }
 
-    /* Shared Button Style */
+
     .mobile-login-btn,
     .mobile-register-btn,
     .mobile-logout-btn {
         display: block;
         text-align: center;
-        /* padding: 14px 0; */
-        /* border-radius: 40px; */
-        /* font-size: 15px; */
-        /* font-weight: 600; */
-        /* text-decoration: none; */
-        /* transition: all 0.25s ease; */
-
-
         background: #1e40af;
         padding: 10px 20px;
         border-radius: 10px;
         font-size: 16px;
         font-weight: 500;
-        
         transition: 0.3s;
+        color: var(--muted);
     }
 
 
-
-    /* REGISTER (Primary Action) */
-    .mobile-register-btn,
-    .mobile-login-btn {
-        /* background: linear-gradient(135deg, #4f46e5, #4338ca); */
-        /* color: white; */
-        /* box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); */
-    }
 
     .mobile-register-btn:hover,
     .mobile-login-btn:hover {
         transform: translateY(-2px);
-        /* box-shadow: 0 12px 26px rgba(79, 70, 229, 0.35); */
         background: var(--primary);
         color: var(--text);
     }
 
-    /* LOGOUT */
+
     .mobile-logout-btn {
         background: #ef4444;
     }
@@ -892,9 +873,9 @@ tr:hover {
     }
 
 
-    .mobile-login,
-    .mobile-signup {
-        color: var(--muted);
+    .mobile-login:hover,
+    .mobile-signup:hover {
+        color: var(--text);
     }
 
     .mobile-logout-btn:hover {
