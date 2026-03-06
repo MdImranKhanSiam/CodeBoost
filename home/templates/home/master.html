@@ -10,15 +10,95 @@
     <link rel="icon" href="{% static 'image/other/codeboost.png' %}">
 
     <link rel="stylesheet" href="{% static 'css/home/master.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
 <body>
+
     <div id="logoModal" class="logoModal" onclick="closeLogo()">
         <img id="modalLogo">
     </div>
-    <nav class="navbar">
+
+    <div class="desktop-only-navbar">
+        <nav class="navbar">
+
+            <button class="logo-icon">
+                <img onclick="openLogo(this.src)" class="logo-icon-img" src="{% static 'image/other/codeboost.png' %}" />
+
+                <span>
+                    <div class="logo">
+                        <a href="{% url 'home' %}">CodeBoost</a>
+                    </div>
+                </span>
+            </button>
+
+
+            <div class="nav-links">
+                <a class="nav-links-a" href="{% url 'home' %}">Home</a>
+                <a class="nav-links-a" href="{% url 'problems' %}">Problems</a>
+                <a class="nav-links-a" href="#">Contests</a>
+                <a class="nav-links-a" href="#">Leaderboard</a>
+
+                <!-- Auth -->
+                {% if request.user.is_authenticated %}
+                <div class="nav-profile">
+                    <button class="nav-profile-btn" id="profileBtn">
+                        <img src="{{ request.user.userprofile.avatar }}" />
+                        <span>{{ request.user.userprofile.display_name }}</span>
+                    </button>
+
+
+                    <div class="nav-profile-menu" id="profileMenu">
+                        <a href="">
+
+                            <div class="view-profile-grid">
+                                <div class="view-profile-grid-image">
+                                    <img src="{{ request.user.userprofile.avatar }}">
+                                </div>
+                                <div class="menu-header">
+                                    <strong>@{{ request.user.username }}</strong>
+                                    <small>View profile</small>
+                                </div>
+                            </div>
+
+                        </a>
+                        <a href="#">Settings & privacy</a>
+                        <a href="#">Help & support</a>
+                        <a href="#">Display & accessibility</a>
+
+                        <div class="menu-divider"></div>
+
+                        <a href="{% url 'logout' %}" class="logout">Log out</a>
+                    </div>
+
+
+
+                </div>
+                {% else %}
+                <button id="loginBtn" class="nav-btn">Login</button>
+                <button id="signUpBtn" class="nav-btn">Sign Up</button>
+                {% endif %}
+
+
+
+            </div>
+        </nav>
+    </div>
+
+
+
+
+
+
+    <!-- Mobile Responsive -->
+    <div class="mobile-only-navbar">
+      <nav class="navbar">
+        <!-- Left Toggle -->
+        <button class="mobile-toggle" id="leftToggle">☰</button>
+
+        <!-- Center Logo -->
 
         <button class="logo-icon">
             <img onclick="openLogo(this.src)" class="logo-icon-img" src="{% static 'image/other/codeboost.png' %}" />
@@ -31,56 +111,84 @@
         </button>
 
 
-        <div class="nav-links">
-            <a class="nav-links-a" href="{% url 'home' %}">Home</a>
-            <a class="nav-links-a" href="{% url 'problems' %}">Problems</a>
-            <a class="nav-links-a" href="#">Contests</a>
-            <a class="nav-links-a" href="#">Leaderboard</a>
+        <!-- <div class="nav-center-logo">
+          <a href="{% url 'home' %}" class="logo">StudyRoom</a>
+        </div> -->
 
-            <!-- Auth -->
-            {% if request.user.is_authenticated %}
-            <div class="nav-profile">
-                <button class="nav-profile-btn" id="profileBtn">
-                    <img src="{{ request.user.userprofile.avatar }}" />
-                    <span>{{ request.user.userprofile.display_name }}</span>
-                </button>
+        <!-- Right Toggle -->
+        <button class="mobile-toggle" id="rightToggle">
+            <i class="fa-solid fa-user"></i>
+        </button>
+      </nav>
 
+      <!-- Overlay -->
+      <div class="drawer-overlay" id="draweroverlay"></div>
 
-                <div class="nav-profile-menu" id="profileMenu">
-                    <a href="">
+      <!-- LEFT DRAWER -->
+      <div class="mobile-drawer left-drawer" id="leftDrawer">
+        <a href="">Home</a>
+        <a href="">Inbox</a>
+        <!-- <a href="#">Rooms</a> -->
+        <a href="?search_people=all_users">People</a>
+      </div>
 
-                        <div class="view-profile-grid">
-                            <div class="view-profile-grid-image">
-                                <img src="{{ request.user.userprofile.avatar }}">
-                            </div>
-                            <div class="menu-header">
-                                <strong>@{{ request.user.username }}</strong>
-                                <small>View profile</small>
-                            </div>
-                        </div>
+      <!-- RIGHT DRAWER -->
+      <div class="mobile-drawer right-drawer" id="rightDrawer">
 
-                    </a>
-                    <a href="#">Settings & privacy</a>
-                    <a href="#">Help & support</a>
-                    <a href="#">Display & accessibility</a>
+        {% if request.user.is_authenticated %}
 
-                    <div class="menu-divider"></div>
-
-                    <a href="{% url 'logout' %}" class="logout">Log out</a>
-                </div>
-
-
-
+        <!-- Profile Header -->
+        <a href="">
+          <div class="view-profile-grid">
+            <div class="view-profile-grid-image">
+              <img
+                src="
+                    {% if request.user.userprofile.avatar %}
+                        {{ request.user.userprofile.avatar }}
+                    {% else %}
+                        {% static 'image/other/default-avatar.jpg' %}
+                    {% endif %}
+                "
+              />
             </div>
-            {% else %}
-            <button id="loginBtn" class="nav-btn">Login</button>
-            <button id="signUpBtn" class="nav-btn">Sign Up</button>
-            {% endif %}
+            <div class="menu-header">
+              <strong>{{ request.user.username }}</strong>
+              <small>View profile</small>
+            </div>
+          </div>
+        </a>
 
+        <a href="#">Settings & privacy</a>
+        <a href="#">Help & support</a>
+        <a href="#">Display & accessibility</a>
 
+        <div class="menu-divider"></div>
 
+        <div class="drawer-auth">
+          <a href="{% url 'logout' %}" class="mobile-logout-btn">
+            <span class="mobile-logout">Log out</span>
+          </a>
         </div>
-    </nav>
+
+        {% else %}
+
+        <div class="drawer-auth">
+          <a href="{% url 'login' %}" class="mobile-login-btn">
+            <span class="mobile-login">Login</span>
+          </a>
+          <a href="{% url 'registration' %}" class="mobile-register-btn">
+            <span class="mobile-signup">Sign up</span>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Mobile Responsive -->
+
+
+
+
+
 
 
     <div class="modal" id="loginModal">
@@ -213,6 +321,35 @@
         // Nav Profile
 
 
+
+
+        // Mobile Responsive
+
+        
+
+        const masterleftToggle = document.getElementById("leftToggle");
+        const masterrightToggle = document.getElementById("rightToggle");
+        const masterleftDrawer = document.getElementById("leftDrawer");
+        const masterrightDrawer = document.getElementById("rightDrawer");
+        const masteroverlay = document.getElementById("draweroverlay");
+
+        masterleftToggle.onclick = () => {
+        masterleftDrawer.classList.toggle("active");
+        masteroverlay.classList.toggle("active");
+        };
+
+        masterrightToggle.onclick = () => {
+        masterrightDrawer.classList.toggle("active");
+        masteroverlay.classList.toggle("active");
+        };
+
+        masteroverlay.onclick = () => {
+        masterleftDrawer.classList.remove("active");
+        masterrightDrawer.classList.remove("active");
+        masteroverlay.classList.remove("active");
+        };
+
+        // Mobile Responsive
 
 
 
