@@ -141,15 +141,7 @@
         <a href="">
           <div class="view-profile-grid">
             <div class="view-profile-grid-image">
-              <img
-                src="
-                    {% if request.user.userprofile.avatar %}
-                        {{ request.user.userprofile.avatar }}
-                    {% else %}
-                        {% static 'image/other/default-avatar.jpg' %}
-                    {% endif %}
-                "
-              />
+              <img src="{{ request.user.userprofile.avatar }}"/>
             </div>
             <div class="menu-header">
               <strong>{{ request.user.username }}</strong>
@@ -283,6 +275,8 @@
 
     <script>
 
+        const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
+
         // Nav Profile
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -358,68 +352,72 @@
 
         const params = new URLSearchParams(window.location.search);
 
+        if ( !authenticatedUser ) {
+
         // Modal
-        const loginModal = document.getElementById("loginModal");
-        const signUpModal = document.getElementById("signUpModal");
+
+            const loginModal = document.getElementById("loginModal");
+            const signUpModal = document.getElementById("signUpModal");
 
 
-        const loginBtn = document.getElementById("loginBtn");
-        const mobileLoginBtn = document.getElementById("mobileLoginBtn");
+            const loginBtn = document.getElementById("loginBtn");
+            const mobileLoginBtn = document.getElementById("mobileLoginBtn");
 
-        const loginParams = params.get("login");
+            const loginParams = params.get("login");
 
-        if (loginParams === "progress") {
-            loginModal.classList.add("active");
-            signUpModal.classList.remove("active");
+            if (loginParams === "progress") {
+                loginModal.classList.add("active");
+                signUpModal.classList.remove("active");
+                loginModal.onclick = (e) => {
+                    if (e.target === loginModal) loginModal.classList.remove("active");
+                };
+            }
+
+
+            loginBtn.onclick = () => {
+                loginModal.classList.add("active");
+                signUpModal.classList.remove("active");
+            };
+
+            mobileLoginBtn.onclick = () => {
+                loginModal.classList.add("active");
+                signUpModal.classList.remove("active");
+            };
+
+
             loginModal.onclick = (e) => {
                 if (e.target === loginModal) loginModal.classList.remove("active");
             };
-        }
 
 
-        loginBtn.onclick = () => {
-            loginModal.classList.add("active");
-            signUpModal.classList.remove("active");
-        };
+            const signUpBtn = document.getElementById("signUpBtn");
+            const mobileSignUpBtn = document.getElementById("mobileSignUpBtn");
 
-        mobileLoginBtn.onclick = () => {
-            loginModal.classList.add("active");
-            signUpModal.classList.remove("active");
-        };
+            const signUpParams = params.get("register");
 
+            if (signUpParams === "progress") {
+                signUpModal.classList.add("active");
+                loginModal.classList.remove("active");
+                signUpModal.onclick = (e) => {
+                    if (e.target === signUpModal) signUpModal.classList.remove("active");
+                };
+            }
 
-        loginModal.onclick = (e) => {
-            if (e.target === loginModal) loginModal.classList.remove("active");
-        };
+            signUpBtn.onclick = () => {
+                signUpModal.classList.add("active");
+                loginModal.classList.remove("active");
+            };
 
+            mobileSignUpBtn.onclick = () => {
+                signUpModal.classList.add("active");
+                loginModal.classList.remove("active");
+            };
 
-
-        const signUpBtn = document.getElementById("signUpBtn");
-        const mobileSignUpBtn = document.getElementById("mobileSignUpBtn");
-
-        const signUpParams = params.get("register");
-
-        if (signUpParams === "progress") {
-            signUpModal.classList.add("active");
-            loginModal.classList.remove("active");
             signUpModal.onclick = (e) => {
                 if (e.target === signUpModal) signUpModal.classList.remove("active");
             };
+
         }
-
-        signUpBtn.onclick = () => {
-            signUpModal.classList.add("active");
-            loginModal.classList.remove("active");
-        };
-
-        mobileSignUpBtn.onclick = () => {
-            signUpModal.classList.add("active");
-            loginModal.classList.remove("active");
-        };
-
-        signUpModal.onclick = (e) => {
-            if (e.target === signUpModal) signUpModal.classList.remove("active");
-        };
 
 
         // Logo Modal
