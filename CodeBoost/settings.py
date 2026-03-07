@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
+    'problem',
+    'contest',
 ]
 
 ASGI_APPLICATION = 'CodeBoost.asgi.application'

@@ -126,10 +126,10 @@
 
       <!-- LEFT DRAWER -->
       <div class="mobile-drawer left-drawer" id="leftDrawer">
-        <a href="">Home</a>
-        <a href="">Inbox</a>
-        <!-- <a href="#">Rooms</a> -->
-        <a href="?search_people=all_users">People</a>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'problems' %}">Problems</a>
+        <a href="">Contests</a>
+        <a href="">Leaderboard</a>
       </div>
 
       <!-- RIGHT DRAWER -->
@@ -150,9 +150,9 @@
           </div>
         </a>
 
-        <a href="#">Settings & privacy</a>
-        <a href="#">Help & support</a>
-        <a href="#">Display & accessibility</a>
+        <!-- <a href="#">Settings & privacy</a> -->
+        <!-- <a href="#">Help & support</a> -->
+        <!-- <a href="#">Display & accessibility</a> -->
 
         <div class="menu-divider"></div>
 

@@ -1,0 +1,162 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
+
+
+
+
+<div class="problem-page">
+
+<!-- LEFT SIDE -->
+<div class="problem-section">
+
+<h1>{{ problem.title }}</h1>
+
+<div class="problem-meta">
+<span>{{ problem.difficulty }}</span>
+<span>Time Limit: {{ problem.time_limit }}s</span>
+<span>Memory: {{ problem.memory_limit }}MB</span>
+</div>
+
+<section>
+<h2>Description</h2>
+<p>{{ problem.statement|linebreaks }}</p>
+</section>
+
+<section>
+<h2>Input</h2>
+<p>{{ problem.problem_input|linebreaks }}</p>
+</section>
+
+<section>
+<h2>Output</h2>
+<p>{{ problem.problem_output|linebreaks }}</p>
+</section>
+
+{% if problem.note %}
+<section>
+<h2>Note</h2>
+<p>{{ problem.note|linebreaks }}</p>
+</section>
+{% endif %}
+
+<!-- SAMPLE TESTCASES -->
+
+<section>
+
+<h2>Examples</h2>
+
+{% for testcase in testcases %}
+
+<div class="example-box">
+
+<h4>Example {{ forloop.counter }}</h4>
+
+<div class="example-io">
+
+<div>
+<strong>Input</strong>
+<pre>{{ testcase.input_data }}</pre>
+</div>
+
+<div>
+<strong>Output</strong>
+<pre>{{ testcase.expected_output }}</pre>
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</section>
+
+</div>
+
+
+<!-- RIGHT SIDE (EDITOR) -->
+
+<div class="editor-section">
+
+<select id="language">
+<option value="python">Python</option>
+<option value="cpp">C++</option>
+<option value="java">Java</option>
+</select>
+
+<textarea id="code-editor" placeholder="Write your code..."></textarea>
+
+<div class="editor-buttons">
+
+<button id="run-btn">Run Code</button>
+<button id="submit-btn">Submit</button>
+
+</div>
+
+<div class="custom-input">
+
+<h4>Custom Input</h4>
+
+<textarea id="custom-input"></textarea>
+
+</div>
+
+<div class="console">
+
+<h4>Output</h4>
+
+<pre id="console-output"></pre>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+document.getElementById("run-btn").onclick = function(){
+
+const code = document.getElementById("code-editor").value
+const input = document.getElementById("custom-input").value
+const language = document.getElementById("language").value
+
+fetch("/run-code/",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"X-CSRFToken": csrftoken
+},
+
+body:JSON.stringify({
+
+code:code,
+input:input,
+language:language
+
+})
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+document.getElementById("console-output").textContent = data.output
+
+})
+
+}
+
+</script>
+
+
+{% endblock %}

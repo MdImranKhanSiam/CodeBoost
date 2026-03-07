@@ -4,13 +4,20 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Problem(models.Model):
+    DIFFICULTY_LEVEL = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+        ('challenging', 'Challenging'),
+    ]
+
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    # slug = models.SlugField(unique=True)
     statement = models.TextField()
-    input = models.TextField()
-    output = models.TextField()
+    problem_input = models.TextField()
+    problem_output = models.TextField()
     note = models.TextField(blank=True, null=True)
-    difficulty = models.CharField(max_length=55)
+    difficulty = models.CharField(max_length=55, choices=DIFFICULTY_LEVEL, default='easy')
     time_limit = models.IntegerField(default=1)
     memory_limit = models.IntegerField(default=512)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -30,6 +37,7 @@ class TestCase(models.Model):
     input_data = models.TextField()
     expected_output = models.TextField()
     is_hidden = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 

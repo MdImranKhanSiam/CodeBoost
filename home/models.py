@@ -33,6 +33,7 @@ class UserProfile(models.Model):
     rating = models.IntegerField(default=1200, blank=True, null=True)
     solved_count = models.IntegerField(default=0, blank=True, null=True)
 
+
     class Meta:
         indexes = [
             models.Index(fields=['rating']),

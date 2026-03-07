@@ -68,44 +68,6 @@ def register_user(request):
 
 
 
-
-
-
-
-
-
-def login_view(request):
-    if request.method == "POST":
-        identifier = request.POST.get("identifier")  # username or email
-        password = request.POST.get("password")
-        
-        # First try to get user by username or email
-        user = None
-        try:
-            user_obj = User.objects.get(username=identifier)
-            user = authenticate(request, username=user_obj.username, password=password)
-        except User.DoesNotExist:
-            try:
-                user_obj = User.objects.get(email=identifier)
-                user = authenticate(request, username=user_obj.username, password=password)
-            except User.DoesNotExist:
-                user = None
-
-        if user is not None:
-            login(request, user)
-            return redirect("home")  # change to your home URL
-        else:
-            messages.error(request, "Invalid username/email or password")
-
-    return render(request, "login.html")
-
-
-
-
-
-
-
-
 def login_user(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -138,25 +100,6 @@ def login_user(request):
         return redirect(urlunparse(url_parts))
     
     return redirect('home')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

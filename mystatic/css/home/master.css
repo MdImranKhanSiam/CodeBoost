@@ -692,7 +692,7 @@ tr:hover {
 
 
 /* MOBILE RESPONSIVE */
-@media (max-width: 1000px) {
+@media (max-width: 768px) {
 
     .desktop-only-navbar {
         display: none;

@@ -1,0 +1,111 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/create_problem.css' %}" />
+
+
+<div class="create-problem-container">
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <h2>Create Problem</h2>
+
+    <input type="text" name="title" placeholder="Problem Title" required>
+
+    <textarea name="statement" placeholder="Problem Statement" required></textarea>
+
+    <textarea name="problem_input" placeholder="Input Description" required></textarea>
+
+    <textarea name="problem_output" placeholder="Output Description" required></textarea>
+
+    <textarea name="note" placeholder="Note (optional)"></textarea>
+
+    <label for="difficulty">Difficulty:</label>
+    <select name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="challenging">Challenging</option>
+    </select>
+
+    <label for="time_limit">Time Limit</label>
+    <input type="number" name="time_limit" value="1">
+
+    <label for="memory_limit">Memory Limit</label>
+    <input type="number" name="memory_limit" value="512">
+
+
+    <div class="divider"></div>
+
+    <h3 class="section-title">Test Cases</h3>
+
+    <div id="testcases-container">
+
+    <div class="testcase">
+
+    <textarea name="testcase_input[]" placeholder="Input" required></textarea>
+
+    <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
+
+    <label>
+    <input type="checkbox" name="testcase_hidden[]" value="0" checked>
+        Hidden Test Case
+    </label>
+
+    </div>
+
+    </div>
+
+
+    <button type="button" class="btn btn-add" onclick="addTestcase()">
+        Add Test Case
+    </button>
+
+
+    <br>
+
+    <button type="submit" class="btn btn-submit">
+        Create Problem
+    </button>
+
+</form>
+
+</div>
+
+<script>
+    let testCaseIndex = 1;
+
+    function addTestcase(){
+
+    const container = document.getElementById("testcases-container")
+
+    const div = document.createElement("div")
+    div.classList.add("testcase")
+
+    div.innerHTML = `
+        <textarea name="testcase_input[]" placeholder="Input" required></textarea>
+
+        <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
+
+        <label>
+            <input type="checkbox" name="testcase_hidden[]" value="${testCaseIndex}" checked>
+            Hidden Test Case
+        </label>
+
+        <button type="button" class="btn btn-remove"
+        onclick="this.parentElement.remove()">
+        Remove
+        </button>
+    `
+
+    container.appendChild(div)
+
+    testCaseIndex++;
+}
+</script>
+
+
+{% endblock %}
