@@ -178,9 +178,6 @@
 
 
 
-
-
-
     <div class="modal" id="loginModal">
         <div class="modal-content">
             <h3>Login to CodeBoost</h3>
@@ -207,19 +204,14 @@
 
     <script>
 
+        
+
 
         const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
 
-
-
-        if ( authenticatedUser && !sessionStorage.getItem("Reloaded")) {
-            sessionStorage.setItem("Reloaded", "true");
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+        if ( authenticatedUser ) {
+            history.replaceState({}, '', '/');
         }
-
-
         // Nav Profile
 
         document.addEventListener("DOMContentLoaded", function () {
