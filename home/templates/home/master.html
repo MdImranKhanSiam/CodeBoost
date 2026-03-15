@@ -207,6 +207,25 @@
 
     <script>
 
+        // navigationEntries[0].type can be:
+
+        // "navigate" → normal link click
+
+        // "reload" → user pressed refresh
+
+        // "back_forward" → user used back / forward button
+
+        window.addEventListener("pageshow", function (event) {
+        const navigationEntries = performance.getEntriesByType("navigation");
+
+        if (navigationEntries.length > 0) {
+            if (navigationEntries[0].type === "back_forward") {
+            // console.log("User came using Back/Forward button");
+            location.reload();
+            }
+        }
+        });
+
         const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
 
         // Nav Profile
