@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'axes',
 ]
 
 SITE_ID = 3
@@ -111,13 +112,18 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'home.middleware.BlockDirectGoogleCallbackMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
-# Needs Changes
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 5  # hour
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_RESET_ON_SUCCESS = False
+AXES_LOCKOUT_PARAMETERS = ["ip_address"]
+
+
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-
 CSRF_COOKIE_SECURE = True
-
 SESSION_COOKIE_SECURE = True
 
 
@@ -216,6 +222,7 @@ cloudinary.config(
 
 
 AUTHENTICATION_BACKENDS = (
+    "axes.backends.AxesStandaloneBackend",
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
