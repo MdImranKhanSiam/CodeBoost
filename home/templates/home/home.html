@@ -99,6 +99,13 @@
 </section>
 
 <script>
+
+  if (screen.width <= 768 && !sessionStorage.getItem("mobileReloaded")) {
+      sessionStorage.setItem("mobileReloaded", "true");
+      setTimeout(() => {
+          location.reload();
+      }, 100);
+  }
   // Animated Stats
   const counters = {
     users: 184530,
