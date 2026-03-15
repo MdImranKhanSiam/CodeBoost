@@ -115,7 +115,7 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
 ]
 
-AXES_FAILURE_LIMIT = 5
+AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = 5  # hour
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = False
