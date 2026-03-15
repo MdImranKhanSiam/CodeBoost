@@ -186,7 +186,7 @@
             <h3>Login to CodeBoost</h3>
 
             <!-- Google Login Button -->
-            <a href="{% provider_login_url 'google' %}" class="btn-google">
+            <a href="{% provider_login_url 'google' %}?next=/" class="btn-google">
                 <img src=" https://res.cloudinary.com/dxd9uxsfv/image/upload/v1773589312/ck9h9xcxmqmmuahs58jj.png" alt="Google Logo">
                 Continue with Google
             </a>
@@ -207,24 +207,6 @@
 
     <script>
 
-        // navigationEntries[0].type can be:
-
-        // "navigate" → normal link click
-
-        // "reload" → user pressed refresh
-
-        // "back_forward" → user used back / forward button
-
-        window.addEventListener("pageshow", function (event) {
-        const navigationEntries = performance.getEntriesByType("navigation");
-
-        if (navigationEntries.length > 0) {
-            if (navigationEntries[0].type === "back_forward") {
-            // console.log("User came using Back/Forward button");
-            location.reload();
-            }
-        }
-        });
 
         const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
 
