@@ -110,6 +110,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'home.middleware.BlockDirectGoogleCallbackMiddleware',
 ]
 
 # Needs Changes

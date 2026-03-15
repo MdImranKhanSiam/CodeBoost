@@ -209,9 +209,7 @@
 
         const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
 
-        if ( authenticatedUser ) {
-            history.replaceState({}, '', '/');
-        }
+        
         // Nav Profile
 
         document.addEventListener("DOMContentLoaded", function () {
