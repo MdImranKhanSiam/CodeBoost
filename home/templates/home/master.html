@@ -212,8 +212,8 @@
 
 
 
-        if (screen.width <= 768 && !sessionStorage.getItem("mobileReloaded")) {
-            sessionStorage.setItem("mobileReloaded", "true");
+        if (!sessionStorage.getItem("Reloaded")) {
+            sessionStorage.setItem("Reloaded", "true");
             setTimeout(() => {
                 location.reload();
             }, 100);
