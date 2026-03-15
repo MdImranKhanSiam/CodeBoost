@@ -212,11 +212,11 @@
 
 
 
-        if (!sessionStorage.getItem("Reloaded")) {
+        if ( authenticatedUser && !sessionStorage.getItem("Reloaded")) {
             sessionStorage.setItem("Reloaded", "true");
             setTimeout(() => {
                 location.reload();
-            }, 100);
+            }, 1000);
         }
 
 
