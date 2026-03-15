@@ -210,6 +210,16 @@
 
         const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
 
+
+
+        if (screen.width <= 768 && !sessionStorage.getItem("mobileReloaded")) {
+            sessionStorage.setItem("mobileReloaded", "true");
+            setTimeout(() => {
+                location.reload();
+            }, 100);
+        }
+
+
         // Nav Profile
 
         document.addEventListener("DOMContentLoaded", function () {
