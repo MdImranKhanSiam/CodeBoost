@@ -1,10 +1,10 @@
-from . forms import RegisterForm
+# from . forms import RegisterForm
 
-def global_forms(request):
-    user_form = RegisterForm()
+# def global_forms(request):
+#     user_form = RegisterForm()
 
-    context = {
-        'user_form' : user_form,
-    }
+#     context = {
+#         'user_form' : user_form,
+#     }
 
-    return context
+#     return context
