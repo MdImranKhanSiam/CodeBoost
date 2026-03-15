@@ -290,7 +290,7 @@
         // Modal
 
             const loginModal = document.getElementById("loginModal");
-            const signUpModal = document.getElementById("signUpModal");
+            
 
 
             const loginBtn = document.getElementById("loginBtn");
@@ -300,7 +300,6 @@
 
             if (loginParams === "progress") {
                 loginModal.classList.add("active");
-                signUpModal.classList.remove("active");
                 loginModal.onclick = (e) => {
                     if (e.target === loginModal) loginModal.classList.remove("active");
                 };
@@ -309,45 +308,15 @@
 
             loginBtn.onclick = () => {
                 loginModal.classList.add("active");
-                signUpModal.classList.remove("active");
             };
 
             mobileLoginBtn.onclick = () => {
                 loginModal.classList.add("active");
-                signUpModal.classList.remove("active");
             };
 
 
             loginModal.onclick = (e) => {
                 if (e.target === loginModal) loginModal.classList.remove("active");
-            };
-
-
-            const signUpBtn = document.getElementById("signUpBtn");
-            const mobileSignUpBtn = document.getElementById("mobileSignUpBtn");
-
-            const signUpParams = params.get("register");
-
-            if (signUpParams === "progress") {
-                signUpModal.classList.add("active");
-                loginModal.classList.remove("active");
-                signUpModal.onclick = (e) => {
-                    if (e.target === signUpModal) signUpModal.classList.remove("active");
-                };
-            }
-
-            signUpBtn.onclick = () => {
-                signUpModal.classList.add("active");
-                loginModal.classList.remove("active");
-            };
-
-            mobileSignUpBtn.onclick = () => {
-                signUpModal.classList.add("active");
-                loginModal.classList.remove("active");
-            };
-
-            signUpModal.onclick = (e) => {
-                if (e.target === signUpModal) signUpModal.classList.remove("active");
             };
 
         }
