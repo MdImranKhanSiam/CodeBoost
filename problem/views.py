@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
 from . models import Problem, TestCase
@@ -90,3 +91,8 @@ def create_problem(request):
     }
 
     return render(request, 'problem/create_problem.html', context)
+
+
+
+def submission(request):
+    return HttpResponse('Submission')
