@@ -1,28 +1,8 @@
-.problem-page {
 
-    display: grid;
-
-    grid-template-columns: 1fr;
-
-    gap: 25px;
-
-    max-width: 1300px;
-
-    margin: auto;
-
-    padding: 20px;
-
-}
 
 .problem-section {
 
-    background: #0f172a;
-
     padding: 25px;
-
-    border-radius: 10px;
-
-    border: 1px solid #1e293b;
 
 }
 
@@ -180,13 +160,6 @@ button {
 
 }
 
-#submit-btn {
-
-    background: #16a34a;
-
-    color: white;
-
-}
 
 .custom-input textarea {
 
@@ -228,7 +201,7 @@ button {
 
 /* MOBILE */
 
-@media (max-width:900px) {
+/* @media (max-width:900px) {
 
     .problem-page {
 
@@ -246,6 +219,82 @@ button {
 
         grid-template-columns: 1fr;
 
+    }
+
+} */
+
+
+/* Submit Button */
+
+.iframe-container {
+  position: relative; /* makes children with absolute position relative to this container */
+  /* width: 100%;
+  max-width: 800px;
+  margin: 0 auto;  */
+}
+
+.submit-btn {
+  position: absolute; /* allows overlapping */
+  top: 14px;          /* distance from top of iframe container */
+        
+  left: 415px;
+  /* left: 245px; */
+  z-index: 10;        /* ensures it appears above the iframe */
+  
+ font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+font-weight: 500; /* SemiBold */
+letter-spacing: 0;
+   
+   background: #2B3A8F;
+  /* background-color: rgba(59, 130, 246, 0.5);  */
+  color: white;
+  font-size: 15px;            /* matching IDE button */
+  padding: 9px 23px 9px 23px; /* top right bottom left */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;       /* for icon + text */
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+  /* background-color: #2563EB;  */
+  background: #202D81;
+
+}
+
+.submit-btn:active {
+  transform: translateY(1px);  /* pressed effect */
+}
+
+/* .submit-btn .icon {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  background: url('data:image/svg+xml;utf8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4 3l8 5-8 5V3z"/></svg>') no-repeat center center;
+  background-size: contain;
+} */
+
+/* Submit Button */
+
+
+
+
+
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+    .submit-btn {
+        position: relative;
+        left: 50%;               
+        transform: translateX(-50%); 
+    }
+
+    #judge0-ide {
+        width: 150%;
     }
 
 }

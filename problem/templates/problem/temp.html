@@ -1,0 +1,56 @@
+<div id="judge0-site-navigation" class="ui top fixed borderless menu judge0-showNavigation inverted">
+        <a id="judge0-header" href="https://judge0.com" target="_blank" class="header item judge0-showLogo judge0-style-hidden">
+            <img id="judge0-logo" src="./images/icon_var2_rounded_512.png">
+        </a>
+        <div class="ui simple dropdown item judge0-showFileMenu judge0-style-hidden">
+            <span class="text">File</span>
+            <i class="dropdown icon"></i>
+            <div class="menu judge0-file-menu">
+                <div id="judge0-open-file-btn" class="item">
+                    <span class="description">Ctrl+O</span>
+                    <span class="text"><i class="file icon"></i>Open File...</span>
+                    <input type="file" id="open-file-input" style="display: none;">
+                </div>
+                <div id="judge0-save-btn" class="item">
+                    <span class="description">Ctrl+S</span>
+                    <span class="text"><i class="save icon"></i>Save</span>
+                </div>
+            </div>
+        </div>
+        <div class="ui simple dropdown item judge0-showHelpMenu judge0-style-hidden">
+            <span class="text">Help</span>
+            <i class="dropdown icon"></i>
+            <div class="menu judge0-file-menu">
+                <a href="https://github.com/judge0/ide" class="link text item" target="_blank"><i class="external square alternate icon"></i>GitHub Repository</a>
+                <a href="/embed" class="link text item" target="_blank"><i class="external square alternate icon"></i>Embed Guide</a>
+                <a href="https://platform.sulu.sh/apis/judge0" class="link text item" target="_blank"><i class="external square alternate icon"></i>HTTP API Documentation</a>
+
+
+
+
+    <div class="item judge0-showRunButton">
+            <button id="run-btn" class="ui primary labeled icon button" data-content="Ctrl+↵" data-variation="inverted very wide">
+                <i class="play icon"></i>
+                Run Code
+            </button>
+        </div>
+
+
+
+
+
+
+
+
+        const codeSubmitBtn = document.querySelector(".item.judge0-showRunButton");
+            const getIt = document.getElementById("judge0-site-navigation");
+            
+            console.log(codeSubmitBtn);
+            console.log(getIt);
+
+            codeSubmitBtn.innerHTML = `
+                <button onclick="getDataFromJudge0IDE()" id="submit-btn" class="ui primary labeled icon button" data-content="Ctrl+↵" data-variation="inverted very wide">
+                    <i class="play icon"></i>
+                    Submit Code
+                </button>
+            `;

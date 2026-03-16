@@ -5,157 +5,202 @@
 <link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
 
 
-
-
-<div class="problem-page">
+<!-- <div class="problem-page"> -->
 
 <!-- LEFT SIDE -->
 <div class="problem-section">
 
-<h1>{{ problem.title }}</h1>
+    <h1>{{ problem.title }}</h1>
 
-<div class="problem-meta">
-<span>{{ problem.difficulty }}</span>
-<span>Time Limit: {{ problem.time_limit }}s</span>
-<span>Memory: {{ problem.memory_limit }}MB</span>
+    <div class="problem-meta">
+        <span>{{ problem.difficulty }}</span>
+        <span>Time Limit: {{ problem.time_limit }}s</span>
+        <span>Memory: {{ problem.memory_limit }}MB</span>
+    </div>
+
+    <section>
+        <h2>Description</h2>
+        <p>{{ problem.statement|linebreaks }}</p>
+    </section>
+
+    <section>
+        <h2>Input</h2>
+        <p>{{ problem.problem_input|linebreaks }}</p>
+    </section>
+
+    <section>
+        <h2>Output</h2>
+        <p>{{ problem.problem_output|linebreaks }}</p>
+    </section>
+
+    {% if problem.note %}
+        <section>
+            <h2>Note</h2>
+            <p>{{ problem.note|linebreaks }}</p>
+        </section>
+    {% endif %}
+
+    <!-- SAMPLE TESTCASES -->
+
+    <section>
+
+        <h2>Examples</h2>
+
+        {% for testcase in testcases %}
+
+        <div class="example-box">
+
+            <h4>Example {{ forloop.counter }}</h4>
+
+            <div class="example-io">
+
+                <div>
+                    <strong>Input</strong>
+                    <pre>{{ testcase.input_data }}</pre>
+                </div>
+
+                <div>
+                    <strong>Output</strong>
+                    <pre>{{ testcase.expected_output }}</pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </section>
+
 </div>
 
-<section>
-<h2>Description</h2>
-<p>{{ problem.statement|linebreaks }}</p>
-</section>
-
-<section>
-<h2>Input</h2>
-<p>{{ problem.problem_input|linebreaks }}</p>
-</section>
-
-<section>
-<h2>Output</h2>
-<p>{{ problem.problem_output|linebreaks }}</p>
-</section>
-
-{% if problem.note %}
-<section>
-<h2>Note</h2>
-<p>{{ problem.note|linebreaks }}</p>
-</section>
-{% endif %}
-
-<!-- SAMPLE TESTCASES -->
-
-<section>
-
-<h2>Examples</h2>
-
-{% for testcase in testcases %}
-
-<div class="example-box">
-
-<h4>Example {{ forloop.counter }}</h4>
-
-<div class="example-io">
-
-<div>
-<strong>Input</strong>
-<pre>{{ testcase.input_data }}</pre>
-</div>
-
-<div>
-<strong>Output</strong>
-<pre>{{ testcase.expected_output }}</pre>
-</div>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</section>
-
-</div>
 
 
-<!-- RIGHT SIDE (EDITOR) -->
 
-<div class="editor-section">
-
-<form action="{% url 'submission' %}" method="post">
+<form id="submission_form" method="post">
     {% csrf_token %}
 
     <input type="hidden" name="language_id" id="language_id_input">
     <input type="hidden" name="source_code" id="source_code_input">
+    <input type="hidden" name="stdin" id="stdin_input">
+    <input type="hidden" name="stdout" id="stdout_input">
 </form>
 
-<button onclick="getDataFromJudge0IDE()" id="submit-btn">Submit</button>
-
-<iframe id="judge0-ide" src="https://ide.judge0.com?judge0.style=minimal" frameborder="0" width="100%" height="550px"></iframe>
 
 
 
+<!-- </div> -->
+
+<div class="iframe-container">
+    <iframe id="judge0-ide" src="https://ide.judge0.com?judge0.style=minimal" frameborder="0" width="100%" height="550px"></iframe>
+    <button onclick="getDataFromJudge0IDE()" id="submit-btn" class="submit-btn">
+        <!-- <span class="icon"></span> -->
+        Submit Code
+    </button>
 </div>
 
-</div>
 
- <pre id="judge0-ide-data-viewer" style="padding: 1rem; background-color: #191717;"></pre>
+ <!-- <pre id="judge0-ide-data-viewer" style="padding: 1rem; background-color: #191717;"></pre> -->
 
 
 
 <script>
-let iframeDataViewer = document.getElementById("judge0-ide-data-viewer");
-        let judge0IDE = document.getElementById("judge0-ide");
+    let iframeDataViewer = document.getElementById("judge0-ide-data-viewer");
+    let judge0IDE = document.getElementById("judge0-ide");
+    let user_source_code = `{{ source_code|escapejs }}`;
+    let user_language_id = `{{ language_id|escapejs }}`;
+    let user_stdin = `{{ stdin|default:"0"|escapejs }}`;
+    let user_stdout = `{{ stdout|default:""|escapejs }}`;
 
-        // window.onmessage = function(e) {
-        //     if (!e.data) {
-        //         return;
-        //     }
+    console.log(user_source_code);
 
-        //     iframeDataViewer.innerHTML = JSON.stringify(e.data, null, 2);
-
-        //     // console.log(e.origin);
-        //     // console.log(e.source);
-        //     console.log(e.data.language_id);
-        //     console.log(e.data.source_code);
-
-        //     // if (e.data.event === "initialised") {
-        //     //     // Make sure to only post data after the IDE is initialised
-        //     //     // When setting the data, make sure to set the action to "set".
-        //     //     //
-        //     //     // The data you send will be used to populate the IDE.
-        //     //     // You don't have to send all the data, only the data you want to set.
-        //     //     //
-        //     //     // Make sure to get your API key at https://platform.sulu.sh/apis/judge0
-        //     //     // If you don't set your API key, the default API key will be used, which has limitations and should not be used in production.
-        //     //     // judge0IDE.contentWindow.postMessage({
-        //     //     //     action: "set",
-        //     //     //     api_key: "",
-        //     //     //     source_code: "Welcome!",
-        //     //     //     language_id: 43,
-        //     //     //     flavor: "CE",
-        //     //     //     stdin: "Hello, World!",
-        //     //     //     stdout: "",
-        //     //     //     compiler_options: "",
-        //     //     //     command_line_arguments: "",
-        //     //     // }, '*');
-        //     // }
-        // };
-
-        function getDataFromJudge0IDE() {
-            judge0IDE.contentWindow.postMessage({action: "get"}, '*');
-
-            window.onmessage = function(e) {
-                if (!e.data) {
-                    return;
-                }
-
-                console.log(e.data.language_id);
-                console.log(e.data.source_code);
-
-                document.getElementById("language_id_input").value = e.data.language_id;
-                document.getElementById("source_code_input").value = e.data.source_code;
-            }
+    window.onmessage = function(e) {
+        if (!e.data) {
+            return;
         }
+
+        if (e.data.event === "initialised") {
+            judge0IDE.contentWindow.postMessage({
+                action: "set",
+                api_key: "",
+                source_code: user_source_code,
+                language_id: user_language_id,
+                flavor: "CE",
+                stdin: user_stdin,
+                stdout: user_stdout,
+                compiler_options: "",
+                command_line_arguments: "",
+            }, '*');
+
+
+            
+        }
+    }
+
+
+    // window.onmessage = function(e) {
+    //     if (!e.data) {
+    //         return;
+    //     }
+
+    //     iframeDataViewer.innerHTML = JSON.stringify(e.data, null, 2);
+
+    //     // console.log(e.origin);
+    //     // console.log(e.source);
+    //     console.log(e.data.language_id);
+    //     console.log(e.data.source_code);
+
+    //     // if (e.data.event === "initialised") {
+    //     //     // Make sure to only post data after the IDE is initialised
+    //     //     // When setting the data, make sure to set the action to "set".
+    //     //     //
+    //     //     // The data you send will be used to populate the IDE.
+    //     //     // You don't have to send all the data, only the data you want to set.
+    //     //     //
+    //     //     // Make sure to get your API key at https://platform.sulu.sh/apis/judge0
+    //     //     // If you don't set your API key, the default API key will be used, which has limitations and should not be used in production.
+    //     //     // judge0IDE.contentWindow.postMessage({
+    //     //     //     action: "set",
+    //     //     //     api_key: "",
+    //     //     //     source_code: "Welcome!",
+    //     //     //     language_id: 43,
+    //     //     //     flavor: "CE",
+    //     //     //     stdin: "Hello, World!",
+    //     //     //     stdout: "",
+    //     //     //     compiler_options: "",
+    //     //     //     command_line_arguments: "",
+    //     //     // }, '*');
+    //     // }
+    // };
+
+
+
+
+    
+
+
+    function getDataFromJudge0IDE() {
+        judge0IDE.contentWindow.postMessage({action: "get"}, '*');
+
+        window.onmessage = function(e) {
+            if (!e.data) {
+                return;
+            }
+
+            // console.log(e.data);
+            // console.log(e.data.language_id);
+            // console.log(e.data.source_code);
+
+            document.getElementById("language_id_input").value = e.data.language_id;
+            document.getElementById("source_code_input").value = e.data.source_code;
+            document.getElementById("stdin_input").value = e.data.stdin;
+            document.getElementById("stdout_input").value = e.data.stdout;
+
+            document.getElementById("submission_form").submit();
+        }
+    }
+
+
 
 </script>
 

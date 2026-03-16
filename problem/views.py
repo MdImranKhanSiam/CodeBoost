@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from . models import Problem, TestCase
 
 
@@ -15,14 +16,43 @@ def problems(request):
     return render(request, 'problem/problems.html', context)
 
 
-
+@login_required(login_url='/accounts/google/login/')
 def problem_detail(request, id):
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
 
+    language_id = None #Use users preferred language
+    source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
+    stdin = None
+    stdout = None
+
+    if request.method == 'POST':
+        language_id = request.POST.get('language_id')
+        source_code = request.POST.get('source_code')
+        stdin = request.POST.get('stdin')
+        stdout = request.POST.get('stdout')
+
+        print('Got it')
+        print(language_id)
+        print(source_code)
+        print(stdin)
+        print(stdout)
+
+        # referer = request.META.get('HTTP_REFERER')
+
+        # if referer:
+        #     url_parts = list(urlparse(referer))
+        #     url_parts[4] = urlencode({'submission': 'progress'})
+        #     return redirect(urlunparse(url_parts))
+        
+
     context = {
         'problem': problem,
         'testcases': testcases,
+        'language_id': language_id,
+        'source_code': source_code,
+        'stdin': stdin,
+        'stdout': stdout
     }
 
     return render(request, 'problem/problem_detail.html', context)
@@ -30,7 +60,7 @@ def problem_detail(request, id):
 
 
 
-@login_required(login_url='login')
+@login_required(login_url='/accounts/google/login/')
 @permission_required('problem.add_problem', raise_exception=True)
 def create_problem(request):
     problem = None
