@@ -111,3 +111,34 @@
   cursor: pointer;
   user-select: none;
 }
+
+
+
+
+
+@media (max-width: 768px) {
+
+  * {
+        
+        box-sizing: content-box;
+    
+    }
+
+    .navbar {
+        width: 175%;
+    }
+
+  .problems-header h1 {
+    margin-right: 10px;
+  }
+  .problems-section {
+    padding: 15px 15px;
+    /* max-width: 1300px;
+    margin: auto; */
+  }
+
+  .problems-wrapper {
+    width: 213%;
+  }
+
+}
