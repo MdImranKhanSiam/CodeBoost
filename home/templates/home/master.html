@@ -60,7 +60,7 @@
                                     <img src="{{ request.user.userprofile.avatar }}">
                                 </div>
                                 <div class="menu-header">
-                                    <strong>@{{ request.user.username }}</strong>
+                                    <strong>{{ request.user.userprofile.display_name }}</strong>
                                     <small>View profile</small>
                                 </div>
                             </div>
@@ -145,7 +145,7 @@
               <img src="{{ request.user.userprofile.avatar }}"/>
             </div>
             <div class="menu-header">
-              <strong>{{ request.user.username }}</strong>
+              <strong>{{ request.user.userprofile.display_name }}</strong>
               <small>View profile</small>
             </div>
           </div>
