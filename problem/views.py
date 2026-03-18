@@ -1,9 +1,14 @@
+import requests
+import json
+import httpx
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
 from . models import Problem, TestCase
+
 
 
 def problems(request):
@@ -16,10 +21,100 @@ def problems(request):
     return render(request, 'problem/problems.html', context)
 
 
+# @login_required(login_url='/accounts/google/login/')
+# def problem_detail(request, id):
+#     problem = Problem.objects.get(id=id)
+#     testcases = problem.testcases.filter(is_hidden=False)
+#     all_testcases = problem.testcases.all()
+#     result = None
+
+
+#     language_id = None #Use users preferred language
+#     source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
+#     stdin = None
+#     stdout = None
+
+#     if request.method == 'POST':
+#         language_id = request.POST.get('language_id')
+#         source_code = request.POST.get('source_code')
+#         stdin = request.POST.get('stdin')
+#         stdout = request.POST.get('stdout')
+
+#         # print('Got it')
+#         # print(language_id)
+#         # print(source_code)
+#         # print(stdin)
+#         # print(stdout)
+
+#         url = f'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true'
+
+#         headers = {
+#             "Content-Type": "application/json"
+#         }
+
+#         for testcase in all_testcases:
+#             print(testcase.input_data)
+#             print(testcase.expected_output)
+
+#             payload = {
+#                 "source_code": source_code,
+#                 "language_id": language_id,
+#                 "stdin": testcase.input_data
+#             }
+
+#             response = requests.post(url, json=payload, headers=headers)
+
+#             data = response.json()
+
+#             if data['status']['description'] == 'Accepted':
+#                 current_output = data['stdout'].strip()
+#                 expected_output = testcase.expected_output.strip()
+
+#                 print(f'stdout: {current_output}')
+#                 print(f'expected: {expected_output}')
+                
+#                 if current_output == testcase.expected_output:
+#                     result = 'Accepted'
+#                 else:
+#                     result = 'Wrong Answer'
+#             else:
+#                 result = data['status']['description']
+
+#             print(result)
+        
+#         # referer = request.META.get('HTTP_REFERER')
+
+#         # if referer:
+#         #     url_parts = list(urlparse(referer))
+#         #     url_parts[4] = urlencode({'submission': 'progress'})
+#         #     return redirect(urlunparse(url_parts))
+        
+
+#     context = {
+#         'problem': problem,
+#         'testcases': testcases,
+#         'language_id': language_id,
+#         'source_code': source_code,
+#         'stdin': stdin,
+#         'stdout': stdout,
+#         'result': result,
+#     }
+
+#     return render(request, 'problem/problem_detail.html', context)
+
+
+
+
+
+
+
 @login_required(login_url='/accounts/google/login/')
-def problem_detail(request, id):
+async def problem_detail(request, id):
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
+    all_testcases = problem.testcases.all()
+    result = None
+
 
     language_id = None #Use users preferred language
     source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
@@ -32,12 +127,49 @@ def problem_detail(request, id):
         stdin = request.POST.get('stdin')
         stdout = request.POST.get('stdout')
 
-        print('Got it')
-        print(language_id)
-        print(source_code)
-        print(stdin)
-        print(stdout)
+        # print('Got it')
+        # print(language_id)
+        # print(source_code)
+        # print(stdin)
+        # print(stdout)
 
+        url = f'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true'
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient() as client:
+            for testcase in all_testcases:
+                print(testcase.input_data)
+                print(testcase.expected_output)
+
+                payload = {
+                    "source_code": source_code,
+                    "language_id": language_id,
+                    "stdin": testcase.input_data
+                }
+
+                response = await client.post(url, json=payload, headers=headers)
+
+                data = response.json()
+
+                if data['status']['description'] == 'Accepted':
+                    current_output = data['stdout'].strip()
+                    expected_output = testcase.expected_output.strip()
+
+                    print(f'stdout: {current_output}')
+                    print(f'expected: {expected_output}')
+                    
+                    if current_output == testcase.expected_output:
+                        result = 'Accepted'
+                    else:
+                        result = 'Wrong Answer'
+                else:
+                    result = data['status']['description']
+
+                print(result)
+            
         # referer = request.META.get('HTTP_REFERER')
 
         # if referer:
@@ -52,10 +184,21 @@ def problem_detail(request, id):
         'language_id': language_id,
         'source_code': source_code,
         'stdin': stdin,
-        'stdout': stdout
+        'stdout': stdout,
+        'result': result,
     }
 
     return render(request, 'problem/problem_detail.html', context)
+
+
+
+
+
+
+
+
+
+
 
 
 
