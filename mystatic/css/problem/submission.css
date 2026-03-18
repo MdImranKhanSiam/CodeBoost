@@ -1,0 +1,214 @@
+/* .container {
+    max-width: 1000px;
+    margin: 80px auto 20px; 
+    padding: 0 15px;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+.submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.submission-card {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 20px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #555;
+}
+
+.submission-body {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #666;
+    word-break: break-word;
+}
+
+
+.status {
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status.accepted { background-color: #28a745; }
+.status.wrong { background-color: #dc3545; }
+.status.pending { background-color: #ffc107; color: #212529; }
+.status.error { background-color: #6c757d; }
+
+
+.loading {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+
+@media (max-width: 600px) {
+    .submission-card {
+        padding: 12px 15px;
+    }
+    .submission-header {
+        flex-direction: column;
+        gap: 6px;
+    }
+} */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== Dark Theme Container & Title ===== */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto 20px;
+    padding: 0 15px;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* ===== Submissions List ===== */
+.submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.submission-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 25px;
+    border-radius: 12px;
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+.submission-body {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #cfcfcf;
+    word-break: break-word;
+}
+
+.submission-body pre {
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    color: #f1f1f1;
+}
+
+/* ===== Status Badges ===== */
+.status {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status.accepted { background-color: #28a745; color: #fff; }
+.status.wrong { background-color: #dc3545; color: #fff; }
+.status.pending { background-color: #ffc107; color: #212529; }
+.status.error { background-color: #6c757d; color: #fff; }
+
+/* ===== Loading ===== */
+.loading {
+    text-align: center;
+    padding: 30px;
+    color: #aaa;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 600px) {
+    .submission-card {
+        padding: 15px 12px;
+    }
+    .submission-header {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+
+
+

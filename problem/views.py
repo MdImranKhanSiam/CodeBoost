@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from . models import Problem, TestCase
+from django_ratelimit.decorators import ratelimit
+from . models import Problem, TestCase, Submission
+from . background_task import code_submission
+from . languages import LANGUAGES
 
 
 def problems(request):
@@ -16,10 +19,14 @@ def problems(request):
     return render(request, 'problem/problems.html', context)
 
 
+
 @login_required(login_url='/accounts/google/login/')
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def problem_detail(request, id):
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
+    
+    result = None
 
     language_id = None #Use users preferred language
     source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
@@ -32,30 +39,29 @@ def problem_detail(request, id):
         stdin = request.POST.get('stdin')
         stdout = request.POST.get('stdout')
 
-        print('Got it')
-        print(language_id)
-        print(source_code)
-        print(stdin)
-        print(stdout)
+        current_submission = Submission.objects.create(
+            user=request.user,
+            problem=problem,
+            code=source_code,
+            language=language_id
+        )
 
-        # referer = request.META.get('HTTP_REFERER')
+        code_submission.delay(current_submission.id)
 
-        # if referer:
-        #     url_parts = list(urlparse(referer))
-        #     url_parts[4] = urlencode({'submission': 'progress'})
-        #     return redirect(urlunparse(url_parts))
+        return redirect('submission')
         
-
     context = {
         'problem': problem,
         'testcases': testcases,
         'language_id': language_id,
         'source_code': source_code,
         'stdin': stdin,
-        'stdout': stdout
+        'stdout': stdout,
+        'result': result,
     }
 
     return render(request, 'problem/problem_detail.html', context)
+
 
 
 
@@ -124,5 +130,35 @@ def create_problem(request):
 
 
 
+
 def submission(request):
-    return HttpResponse('Submission')
+    context = {
+
+    }
+
+    return render(request, 'problem/submission.html', context)
+
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def submissions_api(request):
+    submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
+    data = []
+
+    for sub in submissions:
+        data.append({
+            "problem_title": sub.problem.title,
+            "status": sub.verdict,
+            "language": LANGUAGES[sub.language],
+            "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "execution_time": sub.execution_time,
+            "memory_used": sub.memory_used,
+            "total_testcases": sub.total_testcases,
+            "passed_testcases": sub.passed_testcases
+        })
+        
+    return JsonResponse({"submissions": data})
+
+
+

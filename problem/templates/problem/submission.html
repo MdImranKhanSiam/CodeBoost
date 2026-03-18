@@ -1,0 +1,76 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/submission.css' %}" />
+
+
+<div class="container">
+    <h2 class="page-title">Your Submissions</h2>
+
+    <div id="submissions-list" class="submissions-list">
+        <!-- Submissions will be dynamically loaded here -->
+        <div class="loading">Loading submissions...</div>
+    </div>
+</div>
+
+
+
+<script>
+// ================================
+// Live update submissions
+// ================================
+async function fetchSubmissions() {
+    try {
+        const response = await fetch("{% url 'submission-api' %}"); // Django view returns JSON
+        const data = await response.json();
+
+        const list = document.getElementById("submissions-list");
+        list.innerHTML = ""; // clear existing
+
+        if (data.submissions.length === 0) {
+            list.innerHTML = '<div class="loading">No submissions yet.</div>';
+            return;
+        }
+
+        data.submissions.forEach(sub => {
+            const card = document.createElement("div");
+            card.classList.add("submission-card");
+
+            // Determine status badge
+            
+            if (sub.status === "Pending") statusClass = "pending";
+            else if (sub.status === "Accepted") statusClass = "accepted";
+            else if (sub.status === "Wrong Answer") statusClass = "wrong";
+            else statusClass = "error";
+
+            card.innerHTML = `
+                <div class="submission-header">
+                    <span>Problem: ${sub.problem_title}</span>
+                    <span class="status ${statusClass}">${sub.status}</span>
+                </div>
+                <div class="submission-body">
+                    <strong>Language:</strong> ${sub.language}<br>
+                    <strong>Submitted at:</strong> ${sub.submitted_at}<br>
+                    <strong>Time:</strong> ${sub.execution_time} seconds<br>
+                    <strong>Memory:</strong> ${sub.memory_used} kb<br>
+                    <strong>Testcases:</strong> ${sub.total_testcases}<br>
+                    <strong>Passed:</strong> ${sub.passed_testcases}<br>
+                    
+                </div>
+            `;
+
+            list.appendChild(card);
+        });
+
+    } catch (err) {
+        console.error("Error fetching submissions:", err);
+    }
+}
+
+// Poll every 5 seconds
+fetchSubmissions(); // initial load
+setInterval(fetchSubmissions, 5000);
+</script>
+
+{% endblock %}
