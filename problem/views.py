@@ -6,8 +6,10 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-
-from . models import Problem, TestCase
+from django_ratelimit.decorators import ratelimit
+from . models import Problem, TestCase, Submission
+from . background_task import code_submission
+from . languages import LANGUAGES
 
 
 
@@ -19,6 +21,10 @@ def problems(request):
     }
 
     return render(request, 'problem/problems.html', context)
+
+
+
+
 
 
 # @login_required(login_url='/accounts/google/login/')
@@ -108,13 +114,14 @@ def problems(request):
 
 
 
+
+
 @login_required(login_url='/accounts/google/login/')
-async def problem_detail(request, id):
+def problem_detail(request, id):
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
-    all_testcases = problem.testcases.all()
+    
     result = None
-
 
     language_id = None #Use users preferred language
     source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
@@ -127,49 +134,17 @@ async def problem_detail(request, id):
         stdin = request.POST.get('stdin')
         stdout = request.POST.get('stdout')
 
-        # print('Got it')
-        # print(language_id)
-        # print(source_code)
-        # print(stdin)
-        # print(stdout)
+        current_submission = Submission.objects.create(
+            user=request.user,
+            problem=problem,
+            code=source_code,
+            language=language_id
+        )
 
-        url = f'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true'
+        code_submission.delay(current_submission.id)
 
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        async with httpx.AsyncClient() as client:
-            for testcase in all_testcases:
-                print(testcase.input_data)
-                print(testcase.expected_output)
-
-                payload = {
-                    "source_code": source_code,
-                    "language_id": language_id,
-                    "stdin": testcase.input_data
-                }
-
-                response = await client.post(url, json=payload, headers=headers)
-
-                data = response.json()
-
-                if data['status']['description'] == 'Accepted':
-                    current_output = data['stdout'].strip()
-                    expected_output = testcase.expected_output.strip()
-
-                    print(f'stdout: {current_output}')
-                    print(f'expected: {expected_output}')
-                    
-                    if current_output == testcase.expected_output:
-                        result = 'Accepted'
-                    else:
-                        result = 'Wrong Answer'
-                else:
-                    result = data['status']['description']
-
-                print(result)
-            
+        return redirect('submission')
+        
         # referer = request.META.get('HTTP_REFERER')
 
         # if referer:
@@ -189,8 +164,6 @@ async def problem_detail(request, id):
     }
 
     return render(request, 'problem/problem_detail.html', context)
-
-
 
 
 
@@ -267,5 +240,38 @@ def create_problem(request):
 
 
 
+
+# @ratelimit(key='ip', rate='10/m', block=True)
 def submission(request):
-    return HttpResponse('Submission')
+    context = {
+
+    }
+    return render(request, 'problem/submission.html', context)
+
+
+
+
+
+def submissions_api(request):
+    submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
+    data = []
+
+    for sub in submissions:
+        data.append({
+            "problem_title": sub.problem.title,
+            "status": sub.get_verdict_display(),
+            "language": LANGUAGES[sub.language],
+            "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+            # "stdout": sub.stdout,
+        })
+        
+    return JsonResponse({"submissions": data})
+
+
+
+
+
+
+   
+
+        

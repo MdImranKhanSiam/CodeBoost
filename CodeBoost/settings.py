@@ -85,10 +85,20 @@ ASGI_APPLICATION = 'CodeBoost.asgi.application'
 
 if Environment == 'Development':
     CHANNEL_LAYERS = {
+        # 'default': {
+        #     'BACKEND' : 'channels.layers.InMemoryChannelLayer'
+        # }
+
         'default': {
-            'BACKEND' : 'channels.layers.InMemoryChannelLayer'
-        }
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": ["redis://127.0.0.1:6379/1"],
+            },
+        },
     }
+
+    CELERY_BROKER_URL = f"{"redis://127.0.0.1:6379"}/0"
+    
 elif Environment == 'Production':
     REDIS_URL = os.environ.get("REDIS_URL")
 
@@ -96,10 +106,13 @@ elif Environment == 'Production':
         'default': {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [(REDIS_URL)],
+                "hosts": [(REDIS_URL)/1],
             },
         },
     }
+
+    CELERY_BROKER_URL = f"{REDIS_URL}/0"
+    
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
