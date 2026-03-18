@@ -20,23 +20,23 @@
 
     <section>
         <h2>Description</h2>
-        <p>{{ problem.statement|linebreaks }}</p>
+        <p>{{ problem.statement }}</p>
     </section>
 
     <section>
         <h2>Input</h2>
-        <p>{{ problem.problem_input|linebreaks }}</p>
+        <p>{{ problem.problem_input }}</p>
     </section>
 
     <section>
         <h2>Output</h2>
-        <p>{{ problem.problem_output|linebreaks }}</p>
+        <p>{{ problem.problem_output }}</p>
     </section>
 
     {% if problem.note %}
         <section>
             <h2>Note</h2>
-            <p>{{ problem.note|linebreaks }}</p>
+            <p>{{ problem.note }}</p>
         </section>
     {% endif %}
 

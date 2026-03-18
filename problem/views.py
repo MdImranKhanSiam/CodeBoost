@@ -1,6 +1,3 @@
-import requests
-import json
-import httpx
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
@@ -10,7 +7,6 @@ from django_ratelimit.decorators import ratelimit
 from . models import Problem, TestCase, Submission
 from . background_task import code_submission
 from . languages import LANGUAGES
-
 
 
 def problems(request):
@@ -24,99 +20,8 @@ def problems(request):
 
 
 
-
-
-
-# @login_required(login_url='/accounts/google/login/')
-# def problem_detail(request, id):
-#     problem = Problem.objects.get(id=id)
-#     testcases = problem.testcases.filter(is_hidden=False)
-#     all_testcases = problem.testcases.all()
-#     result = None
-
-
-#     language_id = None #Use users preferred language
-#     source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
-#     stdin = None
-#     stdout = None
-
-#     if request.method == 'POST':
-#         language_id = request.POST.get('language_id')
-#         source_code = request.POST.get('source_code')
-#         stdin = request.POST.get('stdin')
-#         stdout = request.POST.get('stdout')
-
-#         # print('Got it')
-#         # print(language_id)
-#         # print(source_code)
-#         # print(stdin)
-#         # print(stdout)
-
-#         url = f'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true'
-
-#         headers = {
-#             "Content-Type": "application/json"
-#         }
-
-#         for testcase in all_testcases:
-#             print(testcase.input_data)
-#             print(testcase.expected_output)
-
-#             payload = {
-#                 "source_code": source_code,
-#                 "language_id": language_id,
-#                 "stdin": testcase.input_data
-#             }
-
-#             response = requests.post(url, json=payload, headers=headers)
-
-#             data = response.json()
-
-#             if data['status']['description'] == 'Accepted':
-#                 current_output = data['stdout'].strip()
-#                 expected_output = testcase.expected_output.strip()
-
-#                 print(f'stdout: {current_output}')
-#                 print(f'expected: {expected_output}')
-                
-#                 if current_output == testcase.expected_output:
-#                     result = 'Accepted'
-#                 else:
-#                     result = 'Wrong Answer'
-#             else:
-#                 result = data['status']['description']
-
-#             print(result)
-        
-#         # referer = request.META.get('HTTP_REFERER')
-
-#         # if referer:
-#         #     url_parts = list(urlparse(referer))
-#         #     url_parts[4] = urlencode({'submission': 'progress'})
-#         #     return redirect(urlunparse(url_parts))
-        
-
-#     context = {
-#         'problem': problem,
-#         'testcases': testcases,
-#         'language_id': language_id,
-#         'source_code': source_code,
-#         'stdin': stdin,
-#         'stdout': stdout,
-#         'result': result,
-#     }
-
-#     return render(request, 'problem/problem_detail.html', context)
-
-
-
-
-
-
-
-
-
 @login_required(login_url='/accounts/google/login/')
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def problem_detail(request, id):
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
@@ -145,14 +50,6 @@ def problem_detail(request, id):
 
         return redirect('submission')
         
-        # referer = request.META.get('HTTP_REFERER')
-
-        # if referer:
-        #     url_parts = list(urlparse(referer))
-        #     url_parts[4] = urlencode({'submission': 'progress'})
-        #     return redirect(urlunparse(url_parts))
-        
-
     context = {
         'problem': problem,
         'testcases': testcases,
@@ -164,13 +61,6 @@ def problem_detail(request, id):
     }
 
     return render(request, 'problem/problem_detail.html', context)
-
-
-
-
-
-
-
 
 
 
@@ -241,17 +131,17 @@ def create_problem(request):
 
 
 
-# @ratelimit(key='ip', rate='10/m', block=True)
 def submission(request):
     context = {
 
     }
+
     return render(request, 'problem/submission.html', context)
 
 
 
 
-
+@login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
     submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
     data = []
@@ -259,19 +149,16 @@ def submissions_api(request):
     for sub in submissions:
         data.append({
             "problem_title": sub.problem.title,
-            "status": sub.get_verdict_display(),
+            "status": sub.verdict,
             "language": LANGUAGES[sub.language],
             "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
-            # "stdout": sub.stdout,
+            "execution_time": sub.execution_time,
+            "memory_used": sub.memory_used,
+            "total_testcases": sub.total_testcases,
+            "passed_testcases": sub.passed_testcases
         })
         
     return JsonResponse({"submissions": data})
 
 
 
-
-
-
-   
-
-        

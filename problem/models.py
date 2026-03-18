@@ -42,16 +42,16 @@ class TestCase(models.Model):
 
 
 class Submission(models.Model):
-    VERDICT_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('RUNNING', 'Running'),
-        ('AC', 'Accepted'),
-        ('WA', 'Wrong Answer'),
-        ('TLE', 'Time Limit Exceeded'),
-        ('MLE', 'Memory Limit Exceeded'),
-        ('RE', 'Runtime Error'),
-        ('CE', 'Compilation Error'),
-    ]
+    # VERDICT_CHOICES = [
+    #     ('PENDING', 'Pending'),
+    #     ('RUNNING', 'Running'),
+    #     ('AC', 'Accepted'),
+    #     ('WA', 'Wrong Answer'),
+    #     ('TLE', 'Time Limit Exceeded'),
+    #     ('MLE', 'Memory Limit Exceeded'),
+    #     ('RE', 'Runtime Error'),
+    #     ('CE', 'Compilation Error'),
+    # ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
@@ -59,9 +59,10 @@ class Submission(models.Model):
     language = models.CharField(max_length=50)
     total_testcases = models.IntegerField(default=0)
     passed_testcases = models.IntegerField(default=0)
-    verdict = models.CharField(max_length=55, choices=VERDICT_CHOICES, default='PENDING')
-    execution_time = models.FloatField(null=True, blank=True)
-    memory_used = models.IntegerField(null=True, blank=True)
+    # verdict = models.CharField(max_length=55, choices=VERDICT_CHOICES, default='PENDING')
+    verdict = models.CharField(max_length=60, default='Pending')
+    execution_time = models.FloatField(null=True, blank=True, default=0)
+    memory_used = models.IntegerField(null=True, blank=True, default=0)
     submitted_at = models.DateTimeField(auto_now_add=True)
     is_public = models.BooleanField(default=True)
 

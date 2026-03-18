@@ -52,6 +52,10 @@ async function fetchSubmissions() {
                 <div class="submission-body">
                     <strong>Language:</strong> ${sub.language}<br>
                     <strong>Submitted at:</strong> ${sub.submitted_at}<br>
+                    <strong>Time:</strong> ${sub.execution_time} seconds<br>
+                    <strong>Memory:</strong> ${sub.memory_used} kb<br>
+                    <strong>Testcases:</strong> ${sub.total_testcases}<br>
+                    <strong>Passed:</strong> ${sub.passed_testcases}<br>
                     
                 </div>
             `;
