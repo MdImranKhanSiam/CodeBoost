@@ -114,6 +114,10 @@ elif Environment == 'Production':
     CELERY_BROKER_URL = f"{REDIS_URL}/0"
     
 
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
