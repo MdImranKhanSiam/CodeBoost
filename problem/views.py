@@ -142,18 +142,22 @@ def submission(request):
 
 
 
+def get_language(language_id):
+    if language_id in LANGUAGES:
+        return LANGUAGES[language_id]
+    
+    url = f'https://ce.judge0.com/languages/{language_id}'
+    response = requests.get(url)
+    language = response.json()
+    LANGUAGES[language_id] = language
+
+    return LANGUAGES[language_id]
+
+
+
 @login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
     submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
-    
-    # url = f'https://ce.judge0.com/languages/all'
-
-    # response = requests.get(url)
-
-    # language = response.json()
-
-    # print(language)
-
     
     data = []
 
@@ -161,7 +165,7 @@ def submissions_api(request):
         data.append({
             "problem_title": sub.problem.title,
             "status": sub.verdict,
-            "language": LANGUAGES[sub.language],
+            "language": get_language(sub.language),
             "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
             "execution_time": sub.execution_time,
             "memory_used": sub.memory_used,
