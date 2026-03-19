@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
@@ -144,6 +145,16 @@ def submission(request):
 @login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
     submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
+    
+    # url = f'https://ce.judge0.com/languages/all'
+
+    # response = requests.get(url)
+
+    # language = response.json()
+
+    # print(language)
+
+    
     data = []
 
     for sub in submissions:
