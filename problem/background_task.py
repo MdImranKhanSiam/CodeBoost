@@ -23,7 +23,7 @@ def code_submission(submission_id):
     memory_used = 0
     result = None
 
-    url = f'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true'
+    url = f'http://127.0.0.1:2358/submissions/?base64_encoded=false&wait=true'
 
     headers = {
         "Content-Type": "application/json"

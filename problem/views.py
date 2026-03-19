@@ -7,7 +7,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from django_ratelimit.decorators import ratelimit
 from . models import Problem, TestCase, Submission
 from . background_task import code_submission
-from . languages import LANGUAGES
+from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 
 def problems(request):
@@ -24,21 +24,16 @@ def problems(request):
 @login_required(login_url='/accounts/google/login/')
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def problem_detail(request, id):
+    username = request.user.userprofile.display_name
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
-    
-    result = None
 
-    language_id = None #Use users preferred language
-    source_code = f'Welcome {request.user.userprofile.display_name}\nWrite your code here'
-    stdin = None
-    stdout = None
+    language_id = '71'
+    language_name = LANGUAGES[language_id]
 
     if request.method == 'POST':
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
-        stdin = request.POST.get('stdin')
-        stdout = request.POST.get('stdout')
 
         current_submission = Submission.objects.create(
             user=request.user,
@@ -55,16 +50,22 @@ def problem_detail(request, id):
         'problem': problem,
         'testcases': testcases,
         'language_id': language_id,
-        'source_code': source_code,
-        'stdin': stdin,
-        'stdout': stdout,
-        'result': result,
+        'language_name': language_name,
     }
 
     return render(request, 'problem/problem_detail.html', context)
 
 
 
+@login_required(login_url='/accounts/google/login/')
+def language_snippet(request):
+    language_id = request.GET.get('language_id')
+    user_name = request.user.userprofile.display_name
+    snippet = LANGUAGE_SNIPPETS[language_id].format(name=user_name)
+
+    return JsonResponse({
+        'snippet': snippet,
+    })
 
 
 @login_required(login_url='/accounts/google/login/')
@@ -131,7 +132,7 @@ def create_problem(request):
 
 
 
-
+@login_required(login_url='/accounts/google/login/')
 def submission(request):
     context = {
 
@@ -140,18 +141,6 @@ def submission(request):
     return render(request, 'problem/submission.html', context)
 
 
-
-
-def get_language(language_id):
-    if language_id in LANGUAGES:
-        return LANGUAGES[language_id]
-    
-    url = f'https://ce.judge0.com/languages/{language_id}'
-    response = requests.get(url)
-    language = response.json()
-    LANGUAGES[language_id] = language
-
-    return LANGUAGES[language_id]
 
 
 
@@ -165,7 +154,7 @@ def submissions_api(request):
         data.append({
             "problem_title": sub.problem.title,
             "status": sub.verdict,
-            "language": get_language(sub.language),
+            "language": LANGUAGES[sub.language],
             "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
             "execution_time": sub.execution_time,
             "memory_used": sub.memory_used,

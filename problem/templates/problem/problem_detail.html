@@ -75,132 +75,208 @@
 </div>
 
 
+<div class="code_editor_container">
 
-
-<form id="submission_form" method="post">
+<form method="post">
     {% csrf_token %}
 
-    <input type="hidden" name="language_id" id="language_id_input">
-    <input type="hidden" name="source_code" id="source_code_input">
-    <input type="hidden" name="stdin" id="stdin_input">
-    <input type="hidden" name="stdout" id="stdout_input">
+    <div class="topbar">
+    <div style="font-weight:600">Submit Solution</div>
+
+    <div class="language-select">
+        <div class="language-btn" onclick="toggleDropdown()">
+        <span id="selectedLang"></span>
+        ▼
+        </div>
+
+        <div class="language-dropdown" id="dropdown">
+        <div onclick="selectLang('Assembly (NASM 2.14.02)',45)">Assembly (NASM 2.14.02)</div>
+        <div onclick="selectLang('Bash (5.0.0)',46)">Bash (5.0.0)</div>
+        <div onclick="selectLang('Basic (FBC 1.07.1)',47)">Basic (FBC 1.07.1)</div>
+        <div onclick="selectLang('C (Clang 7.0.1)',75)">C (Clang 7.0.1)</div>
+        <div onclick="selectLang('C++ (Clang 7.0.1)',76)">C++ (Clang 7.0.1)</div>
+        <div onclick="selectLang('C (GCC 7.4.0)',48)">C (GCC 7.4.0)</div>
+        <div onclick="selectLang('C++ (GCC 7.4.0)',52)">C++ (GCC 7.4.0)</div>
+        <div onclick="selectLang('C (GCC 8.3.0)',49)">C (GCC 8.3.0)</div>
+        <div onclick="selectLang('C++ (GCC 8.3.0)',53)">C++ (GCC 8.3.0)</div>
+        <div onclick="selectLang('C (GCC 9.2.0)',50)">C (GCC 9.2.0)</div>
+        <div onclick="selectLang('C++ (GCC 9.2.0)',54)">C++ (GCC 9.2.0)</div>
+        <div onclick="selectLang('Clojure (1.10.1)',86)">Clojure (1.10.1)</div>
+        <div onclick="selectLang('C# (Mono 6.6.0.161)',51)">C# (Mono 6.6.0.161)</div>
+        <div onclick="selectLang('COBOL (GnuCOBOL 2.2)',77)">COBOL (GnuCOBOL 2.2)</div>
+        <div onclick="selectLang('Common Lisp (SBCL 2.0.0)',55)">Common Lisp (SBCL 2.0.0)</div>
+        <div onclick="selectLang('D (DMD 2.089.1)',56)">D (DMD 2.089.1)</div>
+        <div onclick="selectLang('Elixir (1.9.4)',57)">Elixir (1.9.4)</div>
+        <div onclick="selectLang('Erlang (OTP 22.2)',58)">Erlang (OTP 22.2)</div>
+        <div onclick="selectLang('Executable',44)">Executable</div>
+        <div onclick="selectLang('F# (.NET Core SDK 3.1.202)',87)">F# (.NET Core SDK 3.1.202)</div>
+        <div onclick="selectLang('Fortran (GFortran 9.2.0)',59)">Fortran (GFortran 9.2.0)</div>
+        <div onclick="selectLang('Go (1.13.5)',60)">Go (1.13.5)</div>
+        <div onclick="selectLang('Groovy (3.0.3)',88)">Groovy (3.0.3)</div>
+        <div onclick="selectLang('Haskell (GHC 8.8.1)',61)">Haskell (GHC 8.8.1)</div>
+        <div onclick="selectLang('Java (OpenJDK 13.0.1)',62)">Java (OpenJDK 13.0.1)</div>
+        <div onclick="selectLang('JavaScript (Node.js 12.14.0)',63)">JavaScript (Node.js 12.14.0)</div>
+        <div onclick="selectLang('Kotlin (1.3.70)',78)">Kotlin (1.3.70)</div>
+        <div onclick="selectLang('Lua (5.3.5)',64)">Lua (5.3.5)</div>
+        <div onclick="selectLang('Multi-file program',89)">Multi-file program</div>
+        <div onclick="selectLang('Objective-C (Clang 7.0.1)',79)">Objective-C (Clang 7.0.1)</div>
+        <div onclick="selectLang('OCaml (4.09.0)',65)">OCaml (4.09.0)</div>
+        <div onclick="selectLang('Octave (5.1.0)',66)">Octave (5.1.0)</div>
+        <div onclick="selectLang('Pascal (FPC 3.0.4)',67)">Pascal (FPC 3.0.4)</div>
+        <div onclick="selectLang('Perl (5.28.1)',85)">Perl (5.28.1)</div>
+        <div onclick="selectLang('PHP (7.4.1)',68)">PHP (7.4.1)</div>
+        <div onclick="selectLang('Plain Text',43)">Plain Text</div>
+        <div onclick="selectLang('Prolog (GNU Prolog 1.4.5)',69)">Prolog (GNU Prolog 1.4.5)</div>
+        <div onclick="selectLang('Python (2.7.17)',70)">Python (2.7.17)</div>
+        <div onclick="selectLang('Python (3.8.1)',71)">Python (3.8.1)</div>
+        <div onclick="selectLang('R (4.0.0)',80)">R (4.0.0)</div>
+        <div onclick="selectLang('Ruby (2.7.0)',72)">Ruby (2.7.0)</div>
+        <div onclick="selectLang('Rust (1.40.0)',73)">Rust (1.40.0)</div>
+        <div onclick="selectLang('Scala (2.13.2)',81)">Scala (2.13.2)</div>
+        <div onclick="selectLang('SQL (SQLite 3.27.2)',82)">SQL (SQLite 3.27.2)</div>
+        <div onclick="selectLang('Swift (5.2.3)',83)">Swift (5.2.3)</div>
+        <div onclick="selectLang('TypeScript (3.7.4)',74)">TypeScript (3.7.4)</div>
+        <div onclick="selectLang('Visual Basic.Net (vbnc 0.0.0.5943)',84)">Visual Basic.Net (vbnc 0.0.0.5943)</div>
+        </div>
+    </div>
+    </div>
+
+    <input type="hidden" name="language_id" id="language_id">
+
+    <div class="code-editor">
+    <div class="editor-header">
+        <span>main.py</span>
+        <span id="status">Ready</span>
+    </div>
+
+    <textarea class="code-area" name="source_code" id="code" spellcheck="false"></textarea>
+    </div>
+
+    <div class="actions">
+    <button class="code-submit-btn" type="submit" onclick="setStatus()">Submit Code</button>
+    </div>
+
 </form>
 
-
-
-
-<div class="iframe-container">
-    <iframe id="judge0-ide" src="https://ide.judge0.com?judge0.style=minimal" frameborder="0" width="100%" height="550px"></iframe>
-    
-    <button onclick="getDataFromJudge0IDE()" id="submit-btn" class="submit-btn">
-        <!-- <span class="icon"></span> -->
-        Submit Code
-    </button>
 </div>
 
 
- <!-- <pre id="judge0-ide-data-viewer" style="padding: 1rem; background-color: #191717;"></pre> -->
+
+
+
+
+
 
 
 
 <script>
-    let iframeDataViewer = document.getElementById("judge0-ide-data-viewer");
-    let judge0IDE = document.getElementById("judge0-ide");
-    let user_source_code = `{{ source_code|escapejs }}`;
-    let user_language_id = `{{ language_id|escapejs }}`;
-    let user_stdin = `{{ stdin|default:"0"|escapejs }}`;
-    let user_stdout = `{{ stdout|default:""|escapejs }}`;
 
-    console.log(user_source_code);
+const defaultName = "{{ language_name }}";
+const defaultId = "{{ language_id }}";
 
-    window.onmessage = function(e) {
-        if (!e.data) {
-            return;
-        }
-
-        if (e.data.event === "initialised") {
-            judge0IDE.contentWindow.postMessage({
-                action: "set",
-                api_key: "",
-                source_code: user_source_code,
-                language_id: user_language_id,
-                flavor: "CE",
-                stdin: user_stdin,
-                stdout: user_stdout,
-                compiler_options: "",
-                command_line_arguments: "",
-            }, '*');
-
-
-            
-        }
-    }
-
-
-    // window.onmessage = function(e) {
-    //     if (!e.data) {
-    //         return;
-    //     }
-
-    //     iframeDataViewer.innerHTML = JSON.stringify(e.data, null, 2);
-
-    //     // console.log(e.origin);
-    //     // console.log(e.source);
-    //     console.log(e.data.language_id);
-    //     console.log(e.data.source_code);
-
-    //     // if (e.data.event === "initialised") {
-    //     //     // Make sure to only post data after the IDE is initialised
-    //     //     // When setting the data, make sure to set the action to "set".
-    //     //     //
-    //     //     // The data you send will be used to populate the IDE.
-    //     //     // You don't have to send all the data, only the data you want to set.
-    //     //     //
-    //     //     // Make sure to get your API key at https://platform.sulu.sh/apis/judge0
-    //     //     // If you don't set your API key, the default API key will be used, which has limitations and should not be used in production.
-    //     //     // judge0IDE.contentWindow.postMessage({
-    //     //     //     action: "set",
-    //     //     //     api_key: "",
-    //     //     //     source_code: "Welcome!",
-    //     //     //     language_id: 43,
-    //     //     //     flavor: "CE",
-    //     //     //     stdin: "Hello, World!",
-    //     //     //     stdout: "",
-    //     //     //     compiler_options: "",
-    //     //     //     command_line_arguments: "",
-    //     //     // }, '*');
-    //     // }
-    // };
-
-
-
-
+const fileMap = {
+  "Assembly": "main.asm",
+  "Bash": "script.sh",
+  "Basic": "main.bas",
+  "C": "main.c",
+  "C++": "main.cpp",
+  "Clojure": "main.clj",
+  "C#": "main.cs",
+  "COBOL": "main.cob",
+  "Common Lisp": "main.lisp",
+  "D": "main.d",
+  "Elixir": "main.ex",
+  "Erlang": "main.erl",
+  "Executable": "main.out",
+  "F#": "main.fs",
+  "Fortran": "main.f90",
+  "Go": "main.go",
+  "Groovy": "main.groovy",
+  "Haskell": "main.hs",
+  "Java": "Main.java",
+  "JavaScript": "main.js",
+  "Kotlin": "Main.kt",
+  "Lua": "main.lua",
+  "Objective-C": "main.m",
+  "OCaml": "main.ml",
+  "Octave": "main.m",
+  "Pascal": "main.pas",
+  "Perl": "main.pl",
+  "PHP": "main.php",
+  "Plain Text": "main.txt",
+  "Prolog": "main.pl",
+  "Python": "main.py",
+  "R": "main.r",
+  "Ruby": "main.rb",
+  "Rust": "main.rs",
+  "Scala": "Main.scala",
+  "SQL": "main.sql",
+  "Swift": "main.swift",
+  "TypeScript": "main.ts",
+  "Visual Basic.Net": "main.vb",
+  "Multi-file program": "project"
+};
     
 
-
-    function getDataFromJudge0IDE() {
-        judge0IDE.contentWindow.postMessage({action: "get"}, '*');
-
-        window.onmessage = function(e) {
-            if (!e.data) {
-                return;
-            }
-
-            // console.log(e.data);
-            // console.log(e.data.language_id);
-            // console.log(e.data.source_code);
-
-            document.getElementById("language_id_input").value = e.data.language_id;
-            document.getElementById("source_code_input").value = e.data.source_code;
-            document.getElementById("stdin_input").value = e.data.stdin;
-            document.getElementById("stdout_input").value = e.data.stdout;
-
-            document.getElementById("submission_form").submit();
-        }
-    }
+function toggleDropdown(){
+  const d = document.getElementById('dropdown');
+  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
 
 
+const code_snippet = document.getElementById('code');
 
+
+function selectLang(name, id){
+  document.getElementById('selectedLang').innerText = name;
+  document.getElementById('language_id').value = id;
+  document.getElementById('dropdown').style.display = 'none';
+
+  const baseLang = name.split('(')[0].trim();
+
+  const fileName = fileMap[baseLang] || "main.txt";
+
+  document.querySelector('.editor-header span').innerText = fileName;
+
+  fetch(`/problems/language_snippet/?language_id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            code_snippet.placeholder = data.snippet;
+        })
+        .catch(err => console.error(err));
+
+
+}
+
+function setStatus(){
+  document.getElementById('status').innerText = 'Submitting...';
+}
+
+
+document.getElementById('code').addEventListener('keydown', function(e){
+  if(e.key === 'Tab'){
+    e.preventDefault();
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+
+    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+    this.selectionStart = this.selectionEnd = start + 4;
+  }
+});
+
+
+window.addEventListener('click', function(e){
+  if(!e.target.closest('.language-select')){
+    document.getElementById('dropdown').style.display = 'none';
+  }
+});
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  selectLang(defaultName,defaultId)
+});
+
+           
 </script>
 
 
