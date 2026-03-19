@@ -106,7 +106,7 @@ elif Environment == 'Production':
         'default': {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [(REDIS_URL)/1],
+                "hosts": [f"{REDIS_URL}/1"],
             },
         },
     }
