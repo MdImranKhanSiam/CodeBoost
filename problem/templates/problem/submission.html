@@ -46,7 +46,7 @@ async function fetchSubmissions() {
 
             card.innerHTML = `
                 <div class="submission-header">
-                    <span>Problem: ${sub.problem_title}</span>
+                    <span onclick="window.location.href='/problems/problem_detail/${sub.problem_id}/'">Problem: ${sub.problem_title}</span>
                     <span class="status ${statusClass}">${sub.status}</span>
                 </div>
                 <div class="submission-body">

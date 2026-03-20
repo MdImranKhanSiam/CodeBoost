@@ -152,6 +152,7 @@ def submissions_api(request):
     for sub in submissions:
         data.append({
             "problem_title": sub.problem.title,
+            "problem_id": sub.problem.id,
             "status": sub.verdict,
             "language": LANGUAGES[sub.language],
             "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
