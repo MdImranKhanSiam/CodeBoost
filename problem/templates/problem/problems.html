@@ -4,101 +4,105 @@
 
 <link rel="stylesheet" href="{% static 'css/problem/problems.css' %}" />
 
+
 <section class="problems-section">
 
-  <div class="problems-header">
+<div class="problems-header">
+  <h1>Problems</h1>
 
-    <h1>Problems</h1>
-  
+  {% if request.user.is_authenticated and perms.problem.add_problem %}
+    <a href="{% url 'create-problem' %}">+ Create Problem</a>
+  {% endif %}
 
-    {% if request.user.is_authenticated and perms.problem.add_problem %}
-      <a href="{% url 'create-problem' %}">+ Create Problem</a>
-    {% endif %}
-    
-    <div class="controls">
-      <input type="text" id="searchInput" placeholder="Search problems..." />
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search problems..." />
 
-      <select id="difficultyFilter">
-        <option value="">All Difficulty</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-        <option value="challenging">Challenging</option>
-      </select>
+    <select id="difficultyFilter">
+      <option value="">All Difficulty</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+      <option value="challenging">Challenging</option>
+    </select>
+  </div>
+</div>
 
-      <select id="tagFilter">
-        <option value="">All Categories</option>
-        <option value="dp">Dynamic Programming</option>
-        <option value="graph">Graph</option>
-        <option value="math">Math</option>
-        <option value="string">String</option>
-      </select>
-    </div>
+<div class="problems-wrapper" id="problemsContainer">
+
+  <div class="problem-row header">
+    <div>ID</div>
+    <div>Title</div>
+    <div>Difficulty</div>
+    <div>Solved</div>
   </div>
 
-  <div class="problems-wrapper">
+</div>
 
-    <!-- Table Header -->
-    <div class="problem-row header">
-      <div>ID</div>
-      <div>Title</div>
-      <div onclick="sortByDifficulty()" class="sortable">
-        Difficulty ↑↓
-      </div>
-      <!-- <div>Tag</div> -->
-      <div>Solved</div>
-    </div>
-
-    {% for problem in problems %}
-      
-      <div onclick="window.location.href = `/problems/problem_detail/{{ problem.id }}/`" class="problem-row" 
-          data-id="{{ problem.id }}"
-          data-difficulty="{{ problem.difficulty }}"
-          data-tag="">
-
-        <div class="id">{{ problem.id }}</div>
-        <div class="title">{{ problem.title }}</div>
-        <div class="difficulty easy">{{ problem.difficulty }}</div>
-        <!-- <div class="tag"></div> -->
-        <div class="status"></div>
-      </div>
-    
-    {% endfor %}
-
-   </div>
 </section>
 
 <script>
-const rows = document.querySelectorAll(".problem-row:not(.header)");
+const problems = [
+  {% for problem in problems %}
+  {
+    id: {{ problem.id }},
+    title: "{{ problem.title|escapejs }}",
+    difficulty: "{{ problem.difficulty }}",
+    solved: {{ problem.solved|yesno:"true,false" }}
+  },
+  {% endfor %}
+];
 
-rows.forEach(row => {
-  const id = row.dataset.id;
-  const statusCell = row.querySelector(".status");
+const container = document.getElementById('problemsContainer');
+const searchInput = document.getElementById('searchInput');
+const difficultyFilter = document.getElementById('difficultyFilter');
 
-  if (localStorage.getItem("solved_" + id)) {
-    row.classList.add("solved");
-    statusCell.innerHTML = "✔";
-  } else {
-    statusCell.innerHTML = "•";
-  }
+function renderProblems(list){
+  container.innerHTML = `
+    <div class="problem-row header">
+      <div>ID</div>
+      <div>Title</div>
+      <div>Difficulty</div>
+      <div>Solved</div>
+    </div>
+  `;
 
-  row.addEventListener("click", () => {
-    localStorage.setItem("solved_" + id, true);
-    row.classList.add("solved");
-    statusCell.innerHTML = "✔";
+  list.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'problem-row';
+    row.onclick = () => {
+      window.location.href = `/problems/problem_detail/${p.id}/`;
+    };
+
+    row.innerHTML = `
+      <div>${p.id}</div>
+      <div>${p.title}</div>
+      <div class="difficulty ${p.difficulty}">${p.difficulty}</div>
+      <div class="status ${p.solved ? 'solved' : ''}">
+        ${p.solved ? '✔ Solved' : ''}
+      </div>
+    `;
+
+    container.appendChild(row);
   });
-});
-
-function sortByDifficulty() {
-  const wrapper = document.querySelector(".problems-wrapper");
-  const rowsArray = Array.from(rows);
-
-  rowsArray.sort((a, b) =>
-    a.dataset.difficulty - b.dataset.difficulty
-  );
-
-  rowsArray.forEach(row => wrapper.appendChild(row));
 }
+
+function filterProblems(){
+  const search = searchInput.value.toLowerCase();
+  const difficulty = difficultyFilter.value;
+
+  const filtered = problems.filter(p => {
+    const matchSearch = p.title.toLowerCase().includes(search);
+    const matchDifficulty = difficulty ? p.difficulty === difficulty : true;
+    return matchSearch && matchDifficulty;
+  });
+
+  renderProblems(filtered);
+}
+
+searchInput.addEventListener('input', filterProblems);
+difficultyFilter.addEventListener('change', filterProblems);
+
+renderProblems(problems);
 </script>
 
 {% endblock %}

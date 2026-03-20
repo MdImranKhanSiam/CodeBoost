@@ -23,7 +23,7 @@ def code_submission(submission_id):
     memory_used = 0.0
     final_verdict = 'Error'
 
-    url = f'http://127.0.0.1:2358/submissions/?base64_encoded=false&wait=true'
+    url = f'http://192.168.95.128:2358/submissions/?base64_encoded=false&wait=true'
 
     headers = {
         "Content-Type": "application/json"
@@ -36,18 +36,18 @@ def code_submission(submission_id):
             "source_code": source_code,
             "language_id": language_id,
             "stdin": testcase.input_data,
-            # "cpu_time_limit": problem.time_limit,
-            # "memory_limit": problem.memory_limit * 1024,
+            "cpu_time_limit": problem.time_limit,
+            "memory_limit": problem.memory_limit * 1000,
         }
 
         # print(payload)
 
-        # try:
-        response = requests.post(url, json=payload, headers=headers)
-        data = response.json()
-        # except Exception:
-        #     final_verdict = 'Internal Error'
-        #     break
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            data = response.json()
+        except Exception:
+            final_verdict = 'Internal Error'
+            break
 
         # print(data)
 
@@ -99,6 +99,15 @@ def code_submission(submission_id):
 
 
 
+
+
+
+# To Run Celery:
+# celery -A CodeBoost worker --loglevel=info --pool=threads
+
+
+# To Run Redis Locally On Docker Windows:
+# docker run -d --name redis-server -p 6379:6379 redis
 
 
 
