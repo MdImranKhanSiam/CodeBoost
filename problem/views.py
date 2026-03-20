@@ -19,9 +19,8 @@ def problems(request):
     return render(request, 'problem/problems.html', context)
 
 
-
+@ratelimit(key='user', rate='6/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
-@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def problem_detail(request, id):
     username = request.user.userprofile.display_name
     problem = Problem.objects.get(id=id)
