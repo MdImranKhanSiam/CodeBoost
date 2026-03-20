@@ -86,6 +86,9 @@ def code_submission(submission_id):
         execution_time = max(execution_time, time)
         memory_used = max(memory_used, memory)
 
+    if final_verdict == 'Accepted':
+        if passed_testcases < total_testcases:
+            final_verdict = 'Wrong Answer'
 
     submission.total_testcases = total_testcases
     submission.passed_testcases = passed_testcases
