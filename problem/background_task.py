@@ -60,19 +60,8 @@ def code_submission(submission_id):
         current_output = data['stdout']
         expected_output = testcase.expected_output
 
-        # print('\n')
-        # print(f'Current Output: {repr(current_output)}')
-        # print(f'Expected Output: {repr(expected_output)}')
-
         current_output = normalize_line_endings(current_output)
         expected_output = normalize_line_endings(expected_output)
-
-        # print('After Normalizing')
-
-        # print('\n')
-        # print(f'Current Output: {repr(current_output)}')
-        # print(f'Expected Output: {repr(expected_output)}')
-
             
         if current_output == expected_output:
             final_verdict = 'Accepted'
@@ -95,28 +84,4 @@ def code_submission(submission_id):
     submission.execution_time = execution_time
     submission.memory_used = memory_used
     submission.verdict = final_verdict
-    submission.save()
-
-
-
-
-
-
-
-
-
-# To Run Celery:
-# celery -A CodeBoost worker --loglevel=info --pool=threads
-
-
-# To Run Redis Locally On Docker Windows:
-# docker run -d --name redis-server -p 6379:6379 redis
-
-
-
-
-
-
-
-
-            
+    submission.save()       
