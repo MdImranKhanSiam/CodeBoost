@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
@@ -168,8 +168,7 @@ def submissions_api(request):
 
 @login_required(login_url='/accounts/google/login/')
 def submission_details(request, id):
-    submission = Submission.objects.get(id=id)
-
+    submission = get_object_or_404(Submission, id=id, user=request.user)
 
     context = {
         'problem_id': submission.problem.id,
