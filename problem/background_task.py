@@ -10,7 +10,7 @@ def normalize_line_endings(code):
 
 
 
-@shared_task
+@shared_task(ignore_result=True)
 def code_submission(submission_id):
     submission = Submission.objects.get(id=submission_id)
     source_code = submission.code
@@ -21,7 +21,8 @@ def code_submission(submission_id):
     passed_testcases = 0
     execution_time = 0.0
     memory_used = 0.0
-    final_verdict = 'Error'
+    final_verdict = 'Invalid'
+    testcase_details = []
 
     url = f'http://192.168.95.128:2358/submissions/?base64_encoded=false&wait=true'
 
@@ -30,12 +31,16 @@ def code_submission(submission_id):
     }
 
     for testcase in all_testcases:
-        total_testcases += 1
-        
+        given_input = testcase.input_data
+        given_input = normalize_line_endings(given_input)
+
+        expected_output = testcase.expected_output
+        expected_output = normalize_line_endings(expected_output)
+
         payload = {
             "source_code": source_code,
             "language_id": language_id,
-            "stdin": testcase.input_data,
+            "stdin": given_input,
             "cpu_time_limit": problem.time_limit,
             "memory_limit": problem.memory_limit * 1000,
         }
@@ -51,29 +56,56 @@ def code_submission(submission_id):
 
         # print(data)
 
+        total_testcases += 1
+
         status = data.get('status', {}).get('description')
 
+        time = float(data.get('time') or 0)
+        memory = float(data.get('memory') or 0)
+
+        execution_time = max(execution_time, time)
+        memory_used = max(memory_used, memory)
+
+
         if status != 'Accepted':
-            final_verdict = status or 'Error'
+            final_verdict = status or 'Invalid'
+
+            testcase_details.append(
+                {
+                    "id": testcase.id,
+                    "input": given_input,
+                    "expected_output": expected_output,
+                    "status": final_verdict,
+                    "time": time,
+                    "memory": memory,
+                }
+            )
+
             break
 
         current_output = data['stdout']
-        expected_output = testcase.expected_output
-
         current_output = normalize_line_endings(current_output)
-        expected_output = normalize_line_endings(expected_output)
+        
             
         if current_output == expected_output:
             final_verdict = 'Accepted'
             passed_testcases += 1
         else:
             final_verdict = 'Wrong Answer'
-            
-        time = float(data.get('time') or 0)
-        memory = float(data.get('memory') or 0)
 
-        execution_time = max(execution_time, time)
-        memory_used = max(memory_used, memory)
+        testcase_details.append(
+            {
+                "id": testcase.id,
+                "input": given_input,
+                "expected_output": expected_output,
+                "output": current_output,
+                "status": final_verdict,
+                "time": time,
+                "memory": memory,
+            }
+        )
+            
+        
 
     if final_verdict == 'Accepted':
         if passed_testcases < total_testcases:
@@ -81,7 +113,14 @@ def code_submission(submission_id):
 
     submission.total_testcases = total_testcases
     submission.passed_testcases = passed_testcases
+    submission.testcase_details = testcase_details
     submission.execution_time = execution_time
     submission.memory_used = memory_used
     submission.verdict = final_verdict
     submission.save()       
+
+
+
+
+
+# celery -A CodeBoost worker --loglevel=info --pool=threads

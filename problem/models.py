@@ -59,6 +59,7 @@ class Submission(models.Model):
     language = models.CharField(max_length=50)
     total_testcases = models.IntegerField(default=0)
     passed_testcases = models.IntegerField(default=0)
+    testcase_details = models.JSONField(default=list)
     # verdict = models.CharField(max_length=55, choices=VERDICT_CHOICES, default='PENDING')
     verdict = models.CharField(max_length=60, default='Pending')
     execution_time = models.FloatField(null=True, blank=True, default=0)

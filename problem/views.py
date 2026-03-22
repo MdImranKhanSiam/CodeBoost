@@ -150,6 +150,7 @@ def submissions_api(request):
 
     for sub in submissions:
         data.append({
+            "submission_id": sub.id,
             "problem_title": sub.problem.title,
             "problem_id": sub.problem.id,
             "status": sub.verdict,
@@ -162,6 +163,28 @@ def submissions_api(request):
         })
         
     return JsonResponse({"submissions": data})
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def submission_details(request, id):
+    submission = Submission.objects.get(id=id)
+
+
+    context = {
+        'problem_id': submission.problem.id,
+        'problem_name': submission.problem.title,
+        'source_code': submission.code,
+        'language': LANGUAGES[submission.language],
+        'execution_time': submission.execution_time,
+        'memory_used': submission.memory_used,
+        'verdict': submission.verdict,
+        'testcase_details': submission.testcase_details,
+        'passed_testcases': submission.passed_testcases,
+        'total_testcases': submission.total_testcases,
+    }
+
+    return render(request, 'problem/submission_details.html', context)
 
 
 

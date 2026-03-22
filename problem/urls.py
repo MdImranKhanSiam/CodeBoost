@@ -7,6 +7,7 @@ urlpatterns = [
     path('problem_detail/<str:id>/', views.problem_detail, name='problem-detail'),
     path('submission/', views.submission, name='submission'),
     path('api/submission/', views.submissions_api, name='submission-api'),
+    path('submission_details/<str:id>/', views.submission_details, name='submission-details'),
     path('language_snippet/', views.language_snippet, name='language-snippet'),
 
 ]

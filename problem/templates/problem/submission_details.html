@@ -1,0 +1,134 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/submission_details.css' %}" />
+
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="submission-header">
+    <div class="submission-title">Submission Details</div>
+    <div class="verdict 
+    {% if verdict == 'Accepted' %}
+        AC
+    {% elif verdict == 'Wrong Answer' %}
+        WA
+    {% elif verdict == 'Time Limit Exceeded' %}
+        TLE
+    {% elif verdict == 'Runtime Error (NZEC)' %}
+        RE
+    {% else %}
+        default
+    {% endif %}
+    
+    ">
+      {{ verdict }}
+    </div>
+  </div>
+
+    <div class="problem-link" onclick="window.location.href='/problems/problem_detail/{{ problem_id }}/'">
+    <span class="label">Problem:</span>
+    <span class="name">{{ problem_name }}</span>
+    </div>
+
+  <!-- META -->
+  <div class="meta">
+    <div>Language: {{ language }}</div>
+    <div>Time: {{ execution_time }}s</div>
+    <div>Memory: {{ memory_used }} KB</div>
+    <div>Total Testcases: {{ total_testcases }}</div>
+    <div>Passed Testcases: {{ passed_testcases }}</div>
+  </div>
+
+  <!-- CODE -->
+  <div class="code-box">
+    <div class="code-header">
+      <span>Source Code</span>
+      <button class="copy-btn" onclick="copyCode()">Copy</button>
+    </div>
+    <pre>{{ source_code }}</pre>
+  </div>
+
+  <!-- TESTCASES -->
+  <div class="testcases">
+
+    {% for tc in testcase_details %}
+    <div class="testcase">
+
+      <div class="testcase-header" onclick="toggle(this)">
+        <di class="testcase-serial">Testcase #{{ forloop.counter }}</di>
+        <div class="tc-status 
+        {% if tc.status == 'Accepted' %}
+            AC
+        {% elif tc.status == 'Wrong Answer' %}
+            WA
+        {% elif tc.status == 'Time Limit Exceeded' %}
+            TLE
+        {% elif tc.status == 'Runtime Error (NZEC)' %}
+            RE
+        {% else %}
+            default
+        {% endif %}
+        ">{{ tc.status }}</div>
+      </div>
+
+      <div class="testcase-body">
+
+        <div class="block">
+          <div class="label">Input</div>
+          <div class="value">{{ tc.input }}</div>
+        </div>
+
+        <div class="block">
+          <div class="label">Expected Output</div>
+          <div class="value">{{ tc.expected_output }}</div>
+        </div>
+
+        <div class="block">
+          <div class="label">Your Output</div>
+          <div class="value">{{ tc.output }}</div>
+        </div>
+
+        <div class="block">
+          <div class="label">Time</div>
+          <div class="value">{{ tc.time }}s</div>
+        </div>
+
+        <div class="block">
+          <div class="label">Memory</div>
+          <div class="value">{{ tc.memory }} KB</div>
+        </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+<script>
+function toggle(el){
+  const body = el.nextElementSibling;
+  body.style.display = body.style.display === 'block' ? 'none' : 'block';
+}
+
+function copyCode(){
+  const code = document.querySelector('.code-box pre').innerText;
+
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.innerText = "Copied!";
+    
+    setTimeout(() => {
+      btn.innerText = "Copy";
+    }, 1500);
+  });
+}
+
+</script>
+
+{% endblock %}

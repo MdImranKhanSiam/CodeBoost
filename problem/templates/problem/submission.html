@@ -45,18 +45,17 @@ async function fetchSubmissions() {
             else statusClass = "error";
 
             card.innerHTML = `
-                <div class="submission-header">
-                    <span onclick="window.location.href='/problems/problem_detail/${sub.problem_id}/'">Problem: ${sub.problem_title}</span>
+                <div onclick="window.location.href='/problems/problem_detail/${sub.problem_id}/'" class="submission-header">
+                    <span>${sub.problem_title}</span>
                     <span class="status ${statusClass}">${sub.status}</span>
                 </div>
-                <div class="submission-body">
+                <div onclick="window.location.href='/problems/submission_details/${sub.submission_id}/'" class="submission-body">
                     <strong>Language:</strong> ${sub.language}<br>
                     <strong>Submitted at:</strong> ${sub.submitted_at}<br>
                     <strong>Time:</strong> ${sub.execution_time} seconds<br>
                     <strong>Memory:</strong> ${sub.memory_used} kb<br>
                     <strong>Testcases:</strong> ${sub.total_testcases}<br>
                     <strong>Passed:</strong> ${sub.passed_testcases}<br>
-                    
                 </div>
             `;
 
