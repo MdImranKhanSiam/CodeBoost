@@ -1,5 +1,4 @@
 from django.db import models
-from problem.models import Problem
 from django.contrib.auth.models import User
 
 
@@ -9,7 +8,7 @@ class Contest(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    problems = models.ManyToManyField(Problem, related_name="contests")
+    problems = models.ManyToManyField("problem.Problem", related_name="contests")
     # problem.contests.all() #To find all contest this problem instance belong to
     # problem.contest_set.all() #If no related name is set
 

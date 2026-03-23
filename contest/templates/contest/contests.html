@@ -1,0 +1,214 @@
+{% extends 'home/master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/contest/contests.css' %}" />
+
+<div class="contest-page">
+
+    <!-- HEADER -->
+    <div class="contest-header">
+        <h1>Contests</h1>
+        <button class="create-btn" onclick="window.location.href='/contests/create_contest/'">
+            + Create Contest
+        </button>
+    </div>
+
+    <!-- ACTIVE / UPCOMING -->
+    <div class="section">
+        <h2>🔥 Contests</h2>
+
+        <div class="contest-list">
+
+            {% for contest in contests %}
+            <div class="contest-card"
+                 data-start="{{ contest.start_time|date:'c' }}"
+                 data-end="{{ contest.end_time|date:'c' }}">
+
+                <!-- TOP -->
+                <div class="contest-top">
+                    <h3 class="contest-title">
+                        {{ contest.name }}
+                    </h3>
+
+                    <span class="contest-status">Loading...</span>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <p class="contest-desc">
+                    {{ contest.description|truncatechars:150 }}
+                </p>
+
+                <!-- INFO ROW -->
+                <div class="contest-info">
+                    <div>📅 Start: {{ contest.start_time }}</div>
+                    <div>⏱ End: {{ contest.end_time }}</div>
+                </div>
+
+                <!-- COUNTDOWN -->
+                <div class="contest-countdown">
+                    ⏳ <span class="countdown-text">Calculating...</span>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="contest-footer">
+
+                    <div class="left">
+                        👥 {{ contest.participants.count }} participants
+                    </div>
+
+                    <div class="middle">
+
+                        <!-- HOST -->
+                        <div class="host">
+                            👤 Host:
+                            {% if contest.created_by %}
+                                <span class="host-name">
+                                    {{ contest.created_by.userprofile.display_name }}
+                                </span>
+                            {% else %}
+                                <span class="host-name">Unknown</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- MODERATORS -->
+                        <div class="moderators">
+                            🛡 Moderators:
+                            {% if contest.moderators.all %}
+                                
+                                {% for mod in contest.moderators.all|slice:":3" %}
+                                    <span class="mod-name">
+                                        {{ mod.userprofile.display_name }}
+                                    </span>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+
+                                {% if contest.moderators.count > 3 %}
+                                    <span class="more-mods">
+                                        +{{ contest.moderators.count|add:"-3" }} more
+                                    </span>
+                                {% endif %}
+
+                            {% else %}
+                                <span class="mod-name">None</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div class="right">
+                        <button class="action-btn">Loading...</button>
+                    </div>
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- PAST -->
+    <div class="section">
+        <h2>📜 Past Contests</h2>
+
+        <div class="contest-list">
+
+            {% for contest in past_contests %}
+            <div class="contest-card past-card">
+
+                <div class="contest-top">
+                    <h3>{{ contest.name }}</h3>
+                    <span class="contest-status ended">Ended</span>
+                </div>
+
+                <div class="contest-info">
+                    <div>{{ contest.start_time }}</div>
+                    <div>{{ contest.end_time }}</div>
+                </div>
+
+                <div class="contest-footer">
+                    <div>👥 {{ contest.participants.count }}</div>
+
+                    <button class="view-btn">
+                        View Results
+                    </button>
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+</div>
+
+<!-- JS -->
+<script>
+function formatTime(diff) {
+    if (diff <= 0) return "00:00:00";
+
+    let h = Math.floor(diff / 3600);
+    let m = Math.floor((diff % 3600) / 60);
+    let s = diff % 60;
+
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+function updateContests() {
+    const now = new Date();
+
+    document.querySelectorAll('.contest-card').forEach(card => {
+
+        const start = new Date(card.dataset.start);
+        const end = new Date(card.dataset.end);
+
+        const statusEl = card.querySelector('.contest-status');
+        const countdownEl = card.querySelector('.countdown-text');
+        const btn = card.querySelector('.action-btn');
+
+        if (!start || !end) return;
+
+        if (now < start) {
+            // UPCOMING
+            statusEl.innerText = "Upcoming";
+            statusEl.style.background = "#2196f3";
+
+            let diff = Math.floor((start - now) / 1000);
+            countdownEl.innerText = "Starts in: " + formatTime(diff);
+
+            btn.innerText = "Register";
+            btn.onclick = () => alert("Register logic later");
+
+        } else if (now >= start && now <= end) {
+            // RUNNING
+            statusEl.innerText = "Running";
+            statusEl.style.background = "#4CAF50";
+
+            let diff = Math.floor((end - now) / 1000);
+            countdownEl.innerText = "Ends in: " + formatTime(diff);
+
+            btn.innerText = "Enter";
+            btn.style.background = "#ff5722";
+            btn.onclick = () => alert("Enter contest");
+
+        } else {
+            // ENDED
+            statusEl.innerText = "Ended";
+            statusEl.style.background = "#777";
+
+            countdownEl.innerText = "Contest finished";
+
+            btn.innerText = "View";
+            btn.onclick = () => alert("View contest");
+
+        }
+
+    });
+}
+
+// Run every second
+setInterval(updateContests, 1000);
+updateContests();
+</script>
+
+{% endblock %}

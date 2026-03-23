@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 
 class Problem(models.Model):
@@ -55,6 +56,7 @@ class Submission(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    contest = models.ForeignKey("contest.Contest", on_delete=models.CASCADE, null=True, blank=True)
     code = models.TextField()
     language = models.CharField(max_length=50)
     total_testcases = models.IntegerField(default=0)

@@ -1,0 +1,199 @@
+.contest-page {
+    padding: 30px;
+}
+
+/* HEADER */
+.contest-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.create-btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+/* LIST = STACKED */
+.contest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* LONG CARD */
+.contest-card {
+    background: var(--card-light);
+    padding: 20px 25px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.contest-card:hover {
+    transform: translateY(-3px);
+}
+
+/* TOP */
+.contest-top {
+    display: flex;
+    justify-content: space-between;
+}
+
+.contest-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* STATUS */
+.contest-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+}
+
+/* DESC */
+.contest-desc {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* INFO ROW */
+.contest-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+/* COUNTDOWN */
+.contest-countdown {
+    font-size: 14px;
+    color: #ff9800;
+}
+
+/* FOOTER */
+.contest-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* BUTTON */
+.action-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    background: #673ab7;
+    color: white;
+    cursor: pointer;
+}
+
+/* PAST */
+.past-card {
+    opacity: 0.7;
+}
+
+.middle {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+}
+
+/* HOST */
+.host-name {
+    font-weight: 500;
+    color: #4CAF50;
+}
+
+/* MODERATORS */
+.moderators {
+    opacity: 0.85;
+}
+
+.mod-name {
+    color: #03a9f4;
+}
+
+.more-mods {
+    color: #aaa;
+    font-size: 12px;
+}
+
+
+/* ============================= */
+/* 📱 MOBILE RESPONSIVE FIXES */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+    .contest-page {
+        padding: 15px;
+    }
+
+    /* HEADER */
+    .contest-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .create-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* CARD */
+    .contest-card {
+        padding: 15px;
+    }
+
+    /* TITLE + STATUS */
+    .contest-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .contest-title {
+        font-size: 16px;
+    }
+
+    /* INFO STACK */
+    .contest-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    /* FOOTER STACK */
+    .contest-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .middle {
+        width: 100%;
+    }
+
+    /* BUTTON FULL WIDTH */
+    .action-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* MODERATORS TEXT WRAP */
+    .moderators {
+        word-wrap: break-word;
+    }
+
+}
