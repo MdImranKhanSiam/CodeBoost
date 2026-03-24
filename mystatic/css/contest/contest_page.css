@@ -1,0 +1,82 @@
+.contest-page {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    color: white;
+}
+
+.contest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contest-timer {
+    text-align: right;
+}
+
+#timer {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.contest-tabs {
+    display: flex;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.contest-tabs button {
+    padding: 10px 20px;
+    background: #1e293b;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.contest-tabs button.active {
+    background: #2563eb;
+}
+
+.tab {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab.active {
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+tr {
+    border-bottom: 1px solid #334155;
+}
+
+.problem-name {
+    cursor: pointer;
+    color: #60a5fa;
+}
+
+.status.solved { color: #22c55e; }
+.status.tried { color: #ef4444; }
+.status.none { color: gray; }
+
+.verdict.Accepted { color: #22c55e; }
+.verdict.Wrong { color: #ef4444; }
+
+@media (max-width: 600px) {
+    .contest-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

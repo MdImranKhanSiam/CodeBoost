@@ -1,0 +1,88 @@
+{% extends 'home/master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/contest/contest_registration.css' %}" />
+
+<div class="contest-register-container">
+
+    <div class="contest-card">
+     
+        <div class="contest-header">
+            <h2>{{ contest.name }}</h2>
+            <span class="badge upcoming">Upcoming</span>
+        </div>
+
+       
+        <p class="contest-description">{{ contest.description }}</p>
+
+       
+        <div class="contest-timings">
+            <div><i class="far fa-calendar-alt"></i> Start: {{ contest.start_time }}</div>
+            <div><i class="far fa-clock"></i> End: {{ contest.end_time }}</div>
+            {% if contest.registration_deadline %}
+            <div><i class="far fa-hourglass"></i> Registration Deadline: {{ contest.registration_deadline }}</div>
+            {% endif %}
+        </div>
+
+       
+
+      
+        <div class="contest-rules">
+            <h3>Rules</h3>
+            <ul>
+                <li>Plagiarism or copying from any source is strictly prohibited.</li>
+                <li>Use of AI tools (e.g., ChatGPT, Copilot) is not allowed.</li>
+                <li>Sharing, discussing, or exchanging solutions during the contest is prohibited.</li>
+                <li>Organizers can disqualify participants violating rules.</li>
+                <li>In case of ties, earlier submission time will be prioritized.</li>
+                <li>Organizers reserve the right to modify or remove the contest.</li>
+                <li>Respect other participants.</li>
+            </ul>
+        </div>
+
+    
+        <form method="POST" class="register-form">
+            {% csrf_token %}
+
+            <div class="agree-box-wrapper">
+                <label class="agree-card">
+                    <input name="agree" type="checkbox" id="agree-checkbox" required>
+
+                    <div class="agree-ui">
+                        <div class="check-box"></div>
+
+                        <div class="agree-text">
+                            <h4>I agree to the contest rules</h4>
+                            <p>Please read all rules carefully before registering</p>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" id="register-btn" class="register-btn disabled" disabled>
+                Register
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+    const agreeCheckbox = document.getElementById('agree-checkbox');
+    const registerBtn = document.getElementById('register-btn');
+   
+    agreeCheckbox.addEventListener('change', () => {
+        if(agreeCheckbox.checked){
+            registerBtn.disabled = false;
+            registerBtn.classList.remove('disabled');
+        } else {
+            registerBtn.disabled = true;
+            registerBtn.classList.add('disabled');
+        }
+    });
+</script>
+
+{% endblock %}

@@ -9,6 +9,7 @@ from . background_task import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 
+
 def problems(request):
     problems = Problem.objects.all()
     
@@ -17,6 +18,9 @@ def problems(request):
     }
 
     return render(request, 'problem/problems.html', context)
+
+
+
 
 
 @ratelimit(key='user', rate='6/m', method='POST', block=True)
@@ -66,8 +70,9 @@ def language_snippet(request):
     })
 
 
-@login_required(login_url='/accounts/google/login/')
+
 @permission_required('problem.add_problem', raise_exception=True)
+@login_required(login_url='/accounts/google/login/')
 def create_problem(request):
     problem = None
 

@@ -1,0 +1,176 @@
+{% extends 'home/master.html' %}
+{% load static %}
+
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/contest/contest_page.css' %}">
+
+<div class="contest-page">
+
+    <!-- HEADER -->
+    <div class="contest-header">
+        <div>
+            <h2>{{ contest.name }}</h2>
+            <p>{{ contest.description }}</p>
+        </div>
+
+        <div class="contest-timer">
+            <span id="timer"></span>
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="contest-tabs">
+        <button onclick="showTab('problems')" class="active">Problems</button>
+        <button onclick="showTab('standings')">Standings</button>
+        <button onclick="showTab('submissions')">Submissions</button>
+    </div>
+
+    <!-- PROBLEMS -->
+    <div id="problems" class="tab active">
+        <table class="problem-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Problem</th>
+                    <th>Solved</th>
+                    <th>Attempts</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for p in problems %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="problem-name">{{ p.title }}</td>
+
+                    <td>{{ p.solved }}</td>
+                    <td>{{ p.attempted }}</td>
+
+                    <td>
+                        {% if user_status.p.id == "solved" %}
+                            <span class="status solved">✔</span>
+                        {% elif user_status.p.id == "tried" %}
+                            <span class="status tried">✖</span>
+                        {% else %}
+                            <span class="status none">•</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+
+        </table>
+    </div>
+
+    <!-- STANDINGS -->
+    <div id="standings" class="tab">
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Solved</th>
+                    <th>Penalty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in standings %}
+                <tr>
+                    <td>{{ s.rank }}</td>
+                    <td>{{ s.user }}</td>
+                    <td>{{ s.solved }}</td>
+                    <td>{{ s.penalty }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SUBMISSIONS -->
+    <div id="submissions" class="tab">
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Problem</th>
+                    <th>Verdict</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>{{ sub.user }}</td>
+                    <td>{{ sub.problem }}</td>
+                    <td class="verdict {{ sub.verdict }}">{{ sub.verdict }}</td>
+                    <td>{{ sub.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+const startTime = new Date("{{ contest.start_time|date:'c' }}");
+const endTime = new Date("{{ contest.end_time|date:'c' }}");
+</script>
+
+<script>
+
+// =====================
+// TAB SWITCH
+// =====================
+function showTab(tabId) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+
+    document.querySelectorAll(".contest-tabs button").forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
+}
+
+// =====================
+// TIMER
+// =====================
+function updateTimer() {
+    const now = new Date();
+    let text = "";
+    let status = "";
+
+    if (now < startTime) {
+        text = "Starts in: " + formatTime(startTime - now);
+        status = "Not Started";
+    } 
+    else if (now < endTime) {
+        text = "Ends in: " + formatTime(endTime - now);
+        status = "Running";
+    } 
+    else {
+        text = "Contest Ended";
+        status = "Ended";
+    }
+
+    document.getElementById("timer").innerText = text;
+    document.getElementById("status").innerText = status;
+}
+
+function formatTime(ms) {
+    let total = Math.floor(ms / 1000);
+    let h = Math.floor(total / 3600);
+    let m = Math.floor((total % 3600) / 60);
+    let s = total % 60;
+    return `${h}h ${m}m ${s}s`;
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+
+</script>
+
+
+{% endblock %}

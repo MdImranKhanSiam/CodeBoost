@@ -9,21 +9,28 @@
     <!-- HEADER -->
     <div class="contest-header">
         <h1>Contests</h1>
-        <button class="create-btn" onclick="window.location.href='/contests/create_contest/'">
-            + Create Contest
-        </button>
+
+        {% if request.user.is_authenticated and perms.contest.add_contest %}
+            <button class="create-btn" onclick="window.location.href='/contests/create_contest/'">
+                + Create Contest
+            </button>
+        {% endif %}
+
     </div>
 
     <!-- ACTIVE / UPCOMING -->
     <div class="section">
-        <h2>🔥 Contests</h2>
 
         <div class="contest-list">
 
             {% for contest in contests %}
             <div class="contest-card"
                  data-start="{{ contest.start_time|date:'c' }}"
-                 data-end="{{ contest.end_time|date:'c' }}">
+                 data-end="{{ contest.end_time|date:'c' }}"
+                 data-registration="{{ contest.registration_deadline|date:'c' }}"
+                 data-contest_id="{{ contest.id }}"
+                 data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
+                 >
 
                 <!-- TOP -->
                 <div class="contest-top">
@@ -48,6 +55,10 @@
                 <!-- COUNTDOWN -->
                 <div class="contest-countdown">
                     ⏳ <span class="countdown-text">Calculating...</span>
+                </div>
+
+                <div class="registration-timer">
+                    📝 <span class="reg-text">Checking...</span>
                 </div>
 
                 <!-- FOOTER -->
@@ -96,6 +107,7 @@
                     </div>
 
                     <div class="right">
+                        <button class="register-btn">Loading...</button>
                         <button class="action-btn">Loading...</button>
                     </div>
 
@@ -106,44 +118,21 @@
 
         </div>
     </div>
-
-    <!-- PAST -->
-    <div class="section">
-        <h2>📜 Past Contests</h2>
-
-        <div class="contest-list">
-
-            {% for contest in past_contests %}
-            <div class="contest-card past-card">
-
-                <div class="contest-top">
-                    <h3>{{ contest.name }}</h3>
-                    <span class="contest-status ended">Ended</span>
-                </div>
-
-                <div class="contest-info">
-                    <div>{{ contest.start_time }}</div>
-                    <div>{{ contest.end_time }}</div>
-                </div>
-
-                <div class="contest-footer">
-                    <div>👥 {{ contest.participants.count }}</div>
-
-                    <button class="view-btn">
-                        View Results
-                    </button>
-                </div>
-
-            </div>
-            {% endfor %}
-
-        </div>
-    </div>
-
 </div>
 
 <!-- JS -->
 <script>
+
+
+
+function contestPage(contestId) {
+    window.location.href = `/contests/contest_page/${contestId}/`;
+}
+
+function contestRegistration(contestId) {
+    window.location.href = `/contests/contest_registration/${contestId}/`;
+}
+
 function formatTime(diff) {
     if (diff <= 0) return "00:00:00";
 
@@ -161,10 +150,17 @@ function updateContests() {
 
         const start = new Date(card.dataset.start);
         const end = new Date(card.dataset.end);
+        const currentContestId = card.dataset.contest_id;
+        const joined = card.dataset.joined === "true";
+        const regDeadlineStr = card.dataset.registration;
+        const regEl = card.querySelector('.reg-text');
+        const regContainer = card.querySelector('.registration-timer');
 
+        const regDeadline = new Date(regDeadlineStr);
         const statusEl = card.querySelector('.contest-status');
         const countdownEl = card.querySelector('.countdown-text');
         const btn = card.querySelector('.action-btn');
+        const registerBtn = card.querySelector('.register-btn');
 
         if (!start || !end) return;
 
@@ -175,9 +171,10 @@ function updateContests() {
 
             let diff = Math.floor((start - now) / 1000);
             countdownEl.innerText = "Starts in: " + formatTime(diff);
-
-            btn.innerText = "Register";
-            btn.onclick = () => alert("Register logic later");
+            btn.classList.remove("enter-btn", "view-btn");
+            btn.classList.add("locked-btn");
+            btn.innerText = "Locked";
+            btn.onclick = () => alert("Contest hasn't started yet");
 
         } else if (now >= start && now <= end) {
             // RUNNING
@@ -186,21 +183,66 @@ function updateContests() {
 
             let diff = Math.floor((end - now) / 1000);
             countdownEl.innerText = "Ends in: " + formatTime(diff);
-
+            btn.classList.remove("locked-btn", "view-btn");
+            btn.classList.add("enter-btn");
             btn.innerText = "Enter";
-            btn.style.background = "#ff5722";
-            btn.onclick = () => alert("Enter contest");
+            
+            btn.onclick = () => {
+                contestPage(currentContestId);
+            };
 
         } else {
-            // ENDED
             statusEl.innerText = "Ended";
             statusEl.style.background = "#777";
 
             countdownEl.innerText = "Contest finished";
-
+            btn.classList.remove("enter-btn", "locked-btn");
+            btn.classList.add("view-btn");
             btn.innerText = "View";
-            btn.onclick = () => alert("View contest");
+            btn.onclick = () => {
+                contestPage(currentContestId);
+            };
 
+        }
+
+        if (regDeadlineStr) {
+            let regDiff = Math.floor((regDeadline - now) / 1000);
+
+            if (regDiff <= 0) {
+                regEl.innerText = "🔒 Registration Closed";
+                regContainer.style.color = "#64748b";
+            } else {
+                regEl.innerText = "Registration closes in: " + formatTime(regDiff);
+
+                if (regDiff < 600) {
+                    regContainer.style.color = "#f59e0b";
+                } else {
+                    regContainer.style.color = "#22c55e";
+                }
+            }
+        } else {
+            regContainer.style.display = "none";
+        }
+
+        
+        
+        if (joined) {
+            registerBtn.textContent = "Registered ✔";
+            registerBtn.classList.add("registered");
+            registerBtn.disabled = true;
+        }
+        else if (now <= regDeadline) {
+            registerBtn.textContent = "Register";
+            registerBtn.disabled = false;
+
+            registerBtn.onclick = () => {
+                contestRegistration(currentContestId);
+            };
+        }
+        else {
+            registerBtn.textContent = "Registration Closed";
+            registerBtn.classList.add("disabled");
+            registerBtn.disabled = true;
         }
 
     });
@@ -209,6 +251,7 @@ function updateContests() {
 // Run every second
 setInterval(updateContests, 1000);
 updateContests();
+
 </script>
 
 {% endblock %}

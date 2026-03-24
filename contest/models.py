@@ -7,6 +7,7 @@ class Contest(models.Model):
     description = models.TextField(blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    registration_deadline = models.DateTimeField(null=True, blank=True)
 
     problems = models.ManyToManyField("problem.Problem", related_name="contests")
     # problem.contests.all() #To find all contest this problem instance belong to

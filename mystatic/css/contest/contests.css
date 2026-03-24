@@ -79,6 +79,12 @@
     color: #ff9800;
 }
 
+
+.registration-timer {
+    font-size: 14px;
+    color: #cbd5f5;
+}
+
 /* FOOTER */
 .contest-footer {
     display: flex;
@@ -87,15 +93,102 @@
     margin-top: 10px;
 }
 
-/* BUTTON */
-.action-btn {
-    padding: 8px 16px;
-    border-radius: 10px;
+.right {
+    display: flex;
+    gap: 10px;
+}
+
+
+
+/* REGISTER BUTTON */
+.register-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
     border: none;
-    background: #673ab7;
+    background: #22c55e;
     color: white;
     cursor: pointer;
+    transition: 0.3s ease;
 }
+
+.register-btn:hover {
+    background: #16a34a;
+}
+
+.register-btn.registered {
+    background: #2563eb;
+    cursor: not-allowed;
+}
+
+.register-btn.disabled {
+    background: #64748b;
+    cursor: not-allowed;
+}
+
+
+
+/* ENTER BUTTON */
+.enter-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #3b82f6;
+    background: transparent;
+    color: #3b82f6;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.enter-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+
+/* VIEW BUTTON */
+.view-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 2px solid #f59e0b; /* amber/orange border */
+    background: transparent;
+    color: #f59e0b;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.view-btn:hover {
+    background: #f59e0b;  /* fill with amber on hover */
+    color: white;
+    transform: translateY(-2px); /* subtle lift effect */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* subtle shadow */
+}
+
+
+
+
+.locked-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 2px solid #94a3b8; 
+    background: transparent;    
+    color: #94a3b8;            
+    cursor: not-allowed;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+
+.locked-btn::before {
+    content: "🔒 ";
+}
+
+
+.locked-btn:hover {
+    background: transparent;
+    color: #94a3b8;
+}
+
+
 
 /* PAST */
 .past-card {
