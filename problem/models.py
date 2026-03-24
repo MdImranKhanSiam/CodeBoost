@@ -84,3 +84,7 @@ class Submission(models.Model):
             models.Index(fields=['problem']),
             # Submission.objects.filter(problem=problem)
         ]
+
+
+    def __str__(self):
+        return f'{self.user.username} {self.language}'
