@@ -11,7 +11,7 @@ from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 
 def problems(request):
-    problems = Problem.objects.all()
+    problems = Problem.objects.filter(is_public=True)
     
     context = {
         'problems': problems,

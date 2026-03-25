@@ -33,6 +33,17 @@ def create_contest(request):
     problems = Problem.objects.all()
     all_users = User.objects.all()
 
+    if request.method == 'POST':
+        received_form = ContestForm(request.POST)
+
+        if received_form.is_valid():
+            contest_creation_form = received_form.save(commit=False)
+            contest_creation_form.created_by = request.user
+            contest_creation_form.save()
+
+            return redirect('contest-page', contest_creation_form.id)
+
+
     context = {
         'contest_form' :contest_form,
         'problems': problems,
@@ -70,10 +81,36 @@ def contest_registration(request, id):
 
 
 
-
+@login_required(login_url='/accounts/google/login/')
 def contest_page(request, id):
-    context = {
+    now = timezone.now()
+    user = request.user
+    is_admin = None
 
+    contest = get_object_or_404(Contest, id=id)
+
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        is_admin = True
+
+        context = {
+            'contest': contest,
+            'is_admin': is_admin,
+        }
+        
+        return render(request, 'contest/contest_page.html', context)
+
+    is_admin = False
+
+    if now < contest.start_time:
+        return HttpResponse("The contest hasn't started yet!", status=403)
+
+    if user not in contest.participants.all():
+        return HttpResponse('You are not a participant of this contest')
+
+    
+    context = {
+        'contest': contest,
+        'is_admin': is_admin,
     }
 
     return render(request, 'contest/contest_page.html', context)

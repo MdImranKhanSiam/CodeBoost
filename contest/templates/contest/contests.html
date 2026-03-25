@@ -30,6 +30,7 @@
                  data-registration="{{ contest.registration_deadline|date:'c' }}"
                  data-contest_id="{{ contest.id }}"
                  data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
+                 data-admin="{% if request.user.is_staff or request.user == contest.created_by or request.user in contest.moderators.all %}true{% else %}false{% endif %}"
                  >
 
                 <!-- TOP -->
@@ -152,6 +153,7 @@ function updateContests() {
         const end = new Date(card.dataset.end);
         const currentContestId = card.dataset.contest_id;
         const joined = card.dataset.joined === "true";
+        const isAdmin = card.dataset.admin === "true";
         const regDeadlineStr = card.dataset.registration;
         const regEl = card.querySelector('.reg-text');
         const regContainer = card.querySelector('.registration-timer');
@@ -243,6 +245,16 @@ function updateContests() {
             registerBtn.textContent = "Registration Closed";
             registerBtn.classList.add("disabled");
             registerBtn.disabled = true;
+        }
+
+        if (isAdmin) {
+            console.log('This is admin mf');
+            btn.classList.remove("view-btn", "locked-btn");
+            btn.classList.add("enter-btn");
+            btn.innerText = "Admin Access";
+            btn.onclick = () => {
+                contestPage(currentContestId);
+            };
         }
 
     });

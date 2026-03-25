@@ -9,6 +9,10 @@ class ContestForm(forms.ModelForm):
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
     )
 
+    registration_deadline = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
     class Meta:
         model = Contest
-        fields = ("name", "description", "start_time", "end_time")
+        fields = ("name", "description", "start_time", "end_time", "registration_deadline",)
