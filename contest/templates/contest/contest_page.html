@@ -23,8 +23,10 @@
     <!-- NAV -->
     <div class="contest-tabs">
         <button onclick="showTab('problems')" class="active">Problems</button>
+        <button onclick="showTab('your_submissions')">Your Submissions</button>
         <button onclick="showTab('standings')">Standings</button>
-        <button onclick="showTab('submissions')">Submissions</button>
+        <button onclick="showTab('all_submissions')">All Submissions</button>
+        
     </div>
 
     <!-- PROBLEMS -->
@@ -90,12 +92,36 @@
         </table>
     </div>
 
-    <!-- SUBMISSIONS -->
-    <div id="submissions" class="tab">
+    <!-- All SUBMISSIONS -->
+    <div id="all_submissions" class="tab">
         <table class="submission-table">
             <thead>
                 <tr>
                     <th>User</th>
+                    <th>Problem</th>
+                    <th>Verdict</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>{{ sub.user }}</td>
+                    <td>{{ sub.problem }}</td>
+                    <td class="verdict {{ sub.verdict }}">{{ sub.verdict }}</td>
+                    <td>{{ sub.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Your SUBMISSIONS -->
+    <div id="your_submissions" class="tab">
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>Solution</th>
                     <th>Problem</th>
                     <th>Verdict</th>
                     <th>Time</th>
