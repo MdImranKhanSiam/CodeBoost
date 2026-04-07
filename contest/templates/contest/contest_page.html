@@ -5,7 +5,42 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/contest/contest_page.css' %}">
 
+
+<div class="modal" id="addModeratorsModal">
+    <div class="modal-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="selector">
+                <h3>Add Moderators</h3>
+                <input type="text" id="userSearch" placeholder="Search users...">
+                <div class="dropdown" id="userDropdown"></div>
+                <div class="selected" id="selectedUsers"></div>
+            </div>
+
+            <input type="hidden" name="users" id="usersInput">
+
+            <button type="submit" class="submit-btn">Add Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="addProblemsModal">
+    <div class="modal-content">
+        <h3>Add Problems</h3>
+    </div>
+</div>
+
+
+
 <div class="contest-page">
+
+    <div class="contest-admin-section">
+        <button id="addModeratorsBtn">+ Add Moderators</button>
+        <button id="addProblemsBtn">+ Add Existing Problems</button>
+        <button id="createProblemsBtn">+ Create New Problem</button>
+    </div>
+    <br><br>
 
     <!-- HEADER -->
     <div class="contest-header">
@@ -195,6 +230,88 @@ function formatTime(ms) {
 
 setInterval(updateTimer, 1000);
 updateTimer();
+
+const addModeratorsModal = document.getElementById("addModeratorsModal");
+const addProblemsModal = document.getElementById("addProblemsModal");
+
+const addModeratorsBtn = document.getElementById("addModeratorsBtn");
+const addProblemsBtn = document.getElementById("addProblemsBtn");
+
+addModeratorsBtn.onclick = () => {
+    addModeratorsModal.classList.add("active");
+};
+
+addModeratorsModal.onclick = (e) => {
+    if (e.target === addModeratorsModal) addModeratorsModal.classList.remove("active");
+};
+
+
+addProblemsBtn.onclick = () => {
+    addProblemsModal.classList.add("active");
+};
+
+addProblemsModal.onclick = (e) => {
+    if (e.target === addProblemsModal) addProblemsModal.classList.remove("active");
+};
+
+const isAdmin = {{ is_admin|yesno:"true,false" }};
+
+if (isAdmin) {
+    let problems = [];
+    let users = [];
+
+    {% for problem in unincluded_problems %}
+        problems.push(
+            {
+                id: {{ problem.id }},
+                title: {{ problem.title }},
+            }
+        );
+    {% endfor %}
+
+    {% for user in non_moderator_users %}
+        users.push(
+            {
+                id: {{ user.id }},
+                display_name: {{ user.userprofile.display_name|escapejs }},
+                avatar: "{{ user.userprofile.avatar }}",
+            }
+        );
+    {% endfor %}
+
+    let selectedProblems = [];
+    let selectedUsers = [];
+
+    function initSearch({
+        inputId,
+        dropdownId,
+        selectedBoxId,
+        data,
+        selectedArray,
+        labelKey,
+        hasAvatar = false
+    }) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+        const selectedBox = document.getElementById(selectedBoxId);
+
+        input.addEventListener("")
+    }
+
+    initSearch({
+        inputId: "userSearch",
+        dropdownId: "userDropdown",
+        selectedBoxId: "selectedUsers",
+        data: users,
+        selectedArray: selectedUsers,
+        labelKey: "display_name",
+        hasAvatar: true,
+    });
+
+}
+
+
+
 
 </script>
 

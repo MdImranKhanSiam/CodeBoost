@@ -81,6 +81,7 @@ def contest_registration(request, id):
 
 
 
+
 @login_required(login_url='/accounts/google/login/')
 def contest_page(request, id):
     now = timezone.now()
@@ -88,6 +89,18 @@ def contest_page(request, id):
     is_admin = None
 
     contest = get_object_or_404(Contest, id=id)
+    problems = contest.problems.all()
+    contest_form = ContestForm()
+    
+    unincluded_problems = Problem.objects.filter(is_public=True).exclude(
+        id__in=contest.problems.all()
+    )
+    
+    non_moderator_users = User.objects.filter(is_staff=False).exclude(
+        id__in=contest.moderators.all()
+    ).exclude(
+        id=contest.created_by.id
+    )
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
         is_admin = True
@@ -95,6 +108,9 @@ def contest_page(request, id):
         context = {
             'contest': contest,
             'is_admin': is_admin,
+            'problems': problems,
+            'unincluded_problems': unincluded_problems,
+            'non_moderator_users': non_moderator_users,
         }
         
         return render(request, 'contest/contest_page.html', context)
@@ -111,6 +127,7 @@ def contest_page(request, id):
     context = {
         'contest': contest,
         'is_admin': is_admin,
+        'problems': problems,
     }
 
     return render(request, 'contest/contest_page.html', context)
