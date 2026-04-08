@@ -7,7 +7,14 @@
 
 <div class="create-problem-container">
 
-<form method="POST">
+<form
+    {% if problem_type == "public" %}
+        action="{% url 'create-problem' %}"
+    {% elif problem_type == "contest" %}
+        action="{% url 'create-contest-problem' contest.id %}"
+    {% endif %}
+
+    method="POST">
 
     {% csrf_token %}
 

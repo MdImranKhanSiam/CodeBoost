@@ -1,8 +1,10 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required, login_required
-from problem.models import Problem
+from django.db import transaction
+from problem.models import Problem, TestCase
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 from . models import Contest
@@ -89,21 +91,36 @@ def contest_page(request, id):
     is_admin = None
 
     contest = get_object_or_404(Contest, id=id)
-    problems = contest.problems.all()
     contest_form = ContestForm()
     
-    unincluded_problems = Problem.objects.filter(is_public=True).exclude(
-        id__in=contest.problems.all()
-    )
-    
-    non_moderator_users = User.objects.filter(is_staff=False).exclude(
-        id__in=contest.moderators.all()
-    ).exclude(
-        id=contest.created_by.id
-    )
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
         is_admin = True
+
+        unincluded_problems = Problem.objects.filter(is_public=True).exclude(
+            id__in=contest.problems.all()
+        )
+        
+        non_moderator_users = User.objects.filter(is_staff=False).exclude(
+            id__in=contest.moderators.all()
+        ).exclude(
+            id=contest.created_by.id
+        )
+
+        if request.method == "POST":
+            if request.POST.get("users"):
+                selected_users_json = request.POST.get("users")
+                selected_users_ids = json.loads(selected_users_json)
+                selected_users = User.objects.filter(id__in=selected_users_ids)
+                contest.moderators.add(*selected_users)
+
+            if request.POST.get("problems"):
+                selected_problems_json = request.POST.get("problems")
+                selected_problems_ids = json.loads(selected_problems_json)
+                selected_problems = Problem.objects.filter(id__in=selected_problems_ids)
+                contest.problems.add(*selected_problems)
+
+        problems = contest.problems.all()
 
         context = {
             'contest': contest,
@@ -120,9 +137,10 @@ def contest_page(request, id):
     if now < contest.start_time:
         return HttpResponse("The contest hasn't started yet!", status=403)
 
-    if user not in contest.participants.all():
+    if now >= contest.start_time and now <= contest.end_time and user not in contest.participants.all():
         return HttpResponse('You are not a participant of this contest')
 
+    problems = contest.problems.all()
     
     context = {
         'contest': contest,
@@ -131,3 +149,70 @@ def contest_page(request, id):
     }
 
     return render(request, 'contest/contest_page.html', context)
+
+
+
+def create_contest_problem(request, contest_id):
+    contest = get_object_or_404(Contest, id=contest_id)
+    problem_type = 'contest'
+    problem = None
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        statement = request.POST.get('statement')
+        problem_input = request.POST.get('problem_input')
+        problem_output = request.POST.get('problem_output')
+        note = request.POST.get('note')
+        difficulty = request.POST.get('difficulty')
+        time_limit = request.POST.get('time_limit')
+        memory_limit = request.POST.get('memory_limit')
+
+        testcase_inputs = request.POST.getlist('testcase_input[]')
+        testcase_outputs = request.POST.getlist('testcase_output[]')
+        testcases_hidden = request.POST.getlist('testcase_hidden[]')
+
+        # All actions are discarded if the creation of either the problem or the testcase object fails.
+        with transaction.atomic():
+            problem = Problem.objects.create(
+                title=title,
+                statement=statement,
+                problem_input=problem_input,
+                problem_output=problem_output,
+                note=note,
+                difficulty=difficulty,
+                time_limit=time_limit,
+                memory_limit=memory_limit,
+                created_by=request.user,
+                is_public=False
+            )
+
+            testcases = []
+
+            for i in range(len(testcase_inputs)):
+                hidden = False
+
+                if str(i) in testcases_hidden:
+                    hidden = True
+
+                testcase = TestCase(
+                    problem=problem,
+                    input_data=testcase_inputs[i],
+                    expected_output=testcase_outputs[i],
+                    is_hidden=hidden
+                )
+
+                testcases.append(testcase)
+
+            TestCase.objects.bulk_create(testcases)
+
+        if problem:
+            contest.problems.add(problem)
+            return redirect('contest-page', contest.id)
+    
+
+    context = {
+        'problem_type': problem_type,
+        'contest': contest,
+    }
+
+    return render(request, 'problem/create_problem.html', context)

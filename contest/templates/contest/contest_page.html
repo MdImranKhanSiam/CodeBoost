@@ -5,9 +5,17 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/contest/contest_page.css' %}">
 
+<div class="search-modal" id="editContestModal">
+    <div class="search-modal-content">
+        <h3>Edit Contest</h3>
+        <button id="addModeratorsBtn">+ Add Moderators</button>
+        <button id="addProblemsBtn">+ Add Problems</button>
+        <button id="createProblemsBtn" onclick="window.location.href='{% url 'create-contest-problem' contest.id %}'">+ Create New Problem</button>
+    </div>
+</div>
 
-<div class="modal" id="addModeratorsModal">
-    <div class="modal-content">
+<div class="search-modal" id="addModeratorsModal">
+    <div class="search-modal-content">
         <form method="post">
             {% csrf_token %}
 
@@ -25,22 +33,38 @@
     </div>
 </div>
 
-<div class="modal" id="addProblemsModal">
-    <div class="modal-content">
-        <h3>Add Problems</h3>
+<div class="search-modal" id="addProblemsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="selector">
+                <h3>Add Problems</h3>
+                <input type="text" id="problemSearch" placeholder="Search problems...">
+                <div class="dropdown" id="problemDropdown"></div>
+                <div class="selected" id="selectedProblems"></div>
+            </div>
+
+            <input type="hidden" name="problems" id="problemsInput">
+
+            <button type="submit" class="submit-btn">Add Problems</button>
+        </form>
     </div>
 </div>
 
 
 
+
 <div class="contest-page">
 
-    <div class="contest-admin-section">
-        <button id="addModeratorsBtn">+ Add Moderators</button>
-        <button id="addProblemsBtn">+ Add Existing Problems</button>
-        <button id="createProblemsBtn">+ Create New Problem</button>
-    </div>
-    <br><br>
+    {% if is_admin %}
+        <div class="contest-admin-section">
+            <button id="editContestBtn">Edit Contest</button>
+        </div>
+        <br><br>
+    {% endif %}
+
+    
 
     <!-- HEADER -->
     <div class="contest-header">
@@ -79,7 +103,7 @@
             
             <tbody>
                 {% for p in problems %}
-                <tr>
+                <tr onclick="window.location.href='{% url 'problem-detail' p.id %}'">
                     <td>{{ forloop.counter }}</td>
                     <td class="problem-name">{{ p.title }}</td>
 
@@ -180,9 +204,7 @@
 <script>
 const startTime = new Date("{{ contest.start_time|date:'c' }}");
 const endTime = new Date("{{ contest.end_time|date:'c' }}");
-</script>
 
-<script>
 
 // =====================
 // TAB SWITCH
@@ -231,32 +253,46 @@ function formatTime(ms) {
 setInterval(updateTimer, 1000);
 updateTimer();
 
-const addModeratorsModal = document.getElementById("addModeratorsModal");
-const addProblemsModal = document.getElementById("addProblemsModal");
 
-const addModeratorsBtn = document.getElementById("addModeratorsBtn");
-const addProblemsBtn = document.getElementById("addProblemsBtn");
-
-addModeratorsBtn.onclick = () => {
-    addModeratorsModal.classList.add("active");
-};
-
-addModeratorsModal.onclick = (e) => {
-    if (e.target === addModeratorsModal) addModeratorsModal.classList.remove("active");
-};
-
-
-addProblemsBtn.onclick = () => {
-    addProblemsModal.classList.add("active");
-};
-
-addProblemsModal.onclick = (e) => {
-    if (e.target === addProblemsModal) addProblemsModal.classList.remove("active");
-};
 
 const isAdmin = {{ is_admin|yesno:"true,false" }};
 
 if (isAdmin) {
+    const editContestModal = document.getElementById("editContestModal");
+    const addModeratorsModal = document.getElementById("addModeratorsModal");
+    const addProblemsModal = document.getElementById("addProblemsModal");
+
+    const editContestBtn = document.getElementById("editContestBtn");
+    const addModeratorsBtn = document.getElementById("addModeratorsBtn");
+    const addProblemsBtn = document.getElementById("addProblemsBtn");
+
+    editContestBtn.onclick = () => {
+        editContestModal.classList.add("active");
+    };
+
+    editContestModal.onclick = (e) => {
+        if (e.target === editContestModal) editContestModal.classList.remove("active");
+    };
+
+
+    addModeratorsBtn.onclick = () => {
+        addModeratorsModal.classList.add("active");
+    };
+
+    addModeratorsModal.onclick = (e) => {
+        if (e.target === addModeratorsModal) addModeratorsModal.classList.remove("active");
+    };
+
+
+    addProblemsBtn.onclick = () => {
+        addProblemsModal.classList.add("active");
+    };
+
+    addProblemsModal.onclick = (e) => {
+        if (e.target === addProblemsModal) addProblemsModal.classList.remove("active");
+    };
+
+
     let problems = [];
     let users = [];
 
@@ -264,7 +300,7 @@ if (isAdmin) {
         problems.push(
             {
                 id: {{ problem.id }},
-                title: {{ problem.title }},
+                title: "{{ problem.title|escapejs }}",
             }
         );
     {% endfor %}
@@ -273,7 +309,7 @@ if (isAdmin) {
         users.push(
             {
                 id: {{ user.id }},
-                display_name: {{ user.userprofile.display_name|escapejs }},
+                display_name: "{{ user.userprofile.display_name|escapejs }}",
                 avatar: "{{ user.userprofile.avatar }}",
             }
         );
@@ -295,7 +331,80 @@ if (isAdmin) {
         const dropdown = document.getElementById(dropdownId);
         const selectedBox = document.getElementById(selectedBoxId);
 
-        input.addEventListener("")
+        input.addEventListener("input", function() {
+            const value = input.value.toLowerCase();
+            dropdown.innerHTML = "";
+
+            if (!value) return;
+
+            const filtered = data.filter(item => (item[labelKey] || "").toLowerCase().includes(value));
+
+            filtered.forEach(item => {
+                if (selectedArray.includes(item.id)) return;
+
+                const option = document.createElement("div");
+                option.className = "dropdown-item";
+
+                if (hasAvatar) {
+                    option.innerHTML = `
+                    <img src="${item.avatar}" class="avatar">
+                    <span>${item[labelKey]}</span>
+                `; 
+                } else {
+                    option.textContent = item[labelKey];
+                }
+
+                option.onclick = () => {
+                    selectedArray.push(item.id);
+                    renderSelected(selectedBox, selectedArray, data, labelKey, hasAvatar);
+                    dropdown.innerHTML = "";
+                    input.value = "";
+                    updateHiddenInputs();
+                };
+
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
+    function renderSelected(container, selectedArray, data, labelKey, hasAvatar) {
+        container.innerHTML = "";
+
+        selectedArray.forEach(id => {
+            const item = data.find(eachIndex => eachIndex.id === id);
+            if (!item) return;
+
+            const tag = document.createElement("div");
+            tag.className = "tag";
+
+            if (hasAvatar) {
+                tag.innerHTML = `
+                    <img src="${item.avatar}" class="avatar small">
+                    <span>${item[labelKey]}</span>
+                    <span class="remove-btn">✖</span>
+                `;
+            } else {
+                tag.innerHTML = `
+                    <span>${item[labelKey]}</span>
+                    <span class="remove-btn">✖</span>
+                `;
+            }
+
+            tag.querySelector(".remove-btn").onclick = () => {
+                const index = selectedArray.indexOf(id);
+                if (index > -1) selectedArray.splice(index, 1);
+                renderSelected(container, selectedArray, data, labelKey, hasAvatar);
+                updateHiddenInputs();
+            };
+
+            container.appendChild(tag);
+
+        });
+    }
+
+    function updateHiddenInputs() {
+        document.getElementById("usersInput").value = JSON.stringify(selectedUsers);
+        document.getElementById("problemsInput").value = JSON.stringify(selectedProblems);
     }
 
     initSearch({
@@ -306,6 +415,15 @@ if (isAdmin) {
         selectedArray: selectedUsers,
         labelKey: "display_name",
         hasAvatar: true,
+    });
+
+    initSearch({
+        inputId: "problemSearch",
+        dropdownId: "problemDropdown",
+        selectedBoxId: "selectedProblems",
+        data: problems,
+        selectedArray: selectedProblems,
+        labelKey: "title",
     });
 
 }
