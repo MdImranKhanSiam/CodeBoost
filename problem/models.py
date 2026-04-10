@@ -21,7 +21,7 @@ class Problem(models.Model):
     difficulty = models.CharField(max_length=55, choices=DIFFICULTY_LEVEL, default='easy')
     time_limit = models.FloatField(default=1.0)
     memory_limit = models.FloatField(default=512)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_public = models.BooleanField(default=True)
 
