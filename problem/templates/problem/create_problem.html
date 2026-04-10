@@ -7,7 +7,7 @@
 
 <div class="create-problem-container">
 
-<form
+<form id="createProblemForm"
     {% if problem_type == "public" %}
         action="{% url 'create-problem' %}"
     {% elif problem_type == "contest" %}
@@ -59,35 +59,17 @@
     <label for="memory_limit">Memory Limit</label>
     <input type="number" name="memory_limit" value="512">
 
-
     <div class="divider"></div>
 
     <h3 class="section-title">Test Cases</h3>
 
-    <div id="testcases-container">
+    <input type="hidden" name="testcases" id="testcasesInput">
 
-    <div class="testcase">
-
-    <textarea name="testcase_input[]" placeholder="Input" required></textarea>
-
-    <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
-
-    <label>
-    <input type="checkbox" name="testcase_hidden[]" value="0" checked>
-        Hidden Test Case
-    </label>
-
-    </div>
-
-    </div>
-
+    <div id="testcases-container"></div>
 
     <button type="button" class="btn btn-add" onclick="addTestcase()">
         Add Test Case
-    </button>
-
-
-    <br>
+    </button><br>
 
     <button type="submit" class="btn btn-submit">
         Create Problem
@@ -98,9 +80,7 @@
 </div>
 
 <script>
-    let testCaseIndex = 1;
-
-    function addTestcase(){
+function addTestcase(){
 
     const container = document.getElementById("testcases-container")
 
@@ -108,12 +88,12 @@
     div.classList.add("testcase")
 
     div.innerHTML = `
-        <textarea name="testcase_input[]" placeholder="Input" required></textarea>
+        <textarea class="testcase_input" placeholder="Input" required></textarea>
 
-        <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
+        <textarea class="testcase_output" placeholder="Expected Output" required></textarea>
 
         <label>
-            <input type="checkbox" name="testcase_hidden[]" value="${testCaseIndex}" checked>
+            <input class="hidden_testcase" type="checkbox" checked>
             Hidden Test Case
         </label>
 
@@ -124,10 +104,53 @@
     `
 
     container.appendChild(div)
-
-    testCaseIndex++;
 }
+
+function collectTestcases() {
+    const blocks = document.querySelectorAll(".testcase");
+
+    let storeTestcases = [];
+
+    blocks.forEach( block => {
+        const testcase_input = block.querySelector(".testcase_input").value;
+        const testcase_output = block.querySelector(".testcase_output").value;
+        const hidden_testcase = block.querySelector(".hidden_testcase").checked;
+    
+        storeTestcases.push({
+            testcase_input: testcase_input,
+            testcase_output: testcase_output,
+            hidden_testcase: hidden_testcase,
+        });
+    });
+
+    return storeTestcases;
+}
+
+
+
+addTestcase();
+
+document.getElementById("createProblemForm").addEventListener("submit", function () {
+    const collectedTestcases = collectTestcases();
+
+    // Convert the entire list into a string
+    document.getElementById("testcasesInput").value = JSON.stringify(collectedTestcases);
+
+    // console.log(document.getElementById("testcasesInput").value);
+    
+});
+
+
 </script>
 
 
 {% endblock %}
+
+
+
+
+
+
+
+
+

@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
@@ -87,10 +88,6 @@ def create_problem(request):
         time_limit = request.POST.get('time_limit')
         memory_limit = request.POST.get('memory_limit')
 
-        testcase_inputs = request.POST.getlist('testcase_input[]')
-        testcase_outputs = request.POST.getlist('testcase_output[]')
-        testcases_hidden = request.POST.getlist('testcase_hidden[]')
-
         # All actions are discarded if the creation of either the problem or the testcase object fails.
         with transaction.atomic():
             problem = Problem.objects.create(
@@ -105,24 +102,21 @@ def create_problem(request):
                 created_by=request.user
             )
 
-            testcases = []
+            testcases = json.loads(request.POST.get('testcases'))
 
-            for i in range(len(testcase_inputs)):
-                hidden = False
+            testcase_objects = []
 
-                if str(i) in testcases_hidden:
-                    hidden = True
-
-                testcase = TestCase(
+            for testcase in testcases:
+                testcase_object = TestCase(
                     problem=problem,
-                    input_data=testcase_inputs[i],
-                    expected_output=testcase_outputs[i],
-                    is_hidden=hidden
+                    input_data=testcase['testcase_input'],
+                    expected_output=testcase['testcase_output'],
+                    is_hidden=testcase['hidden_testcase']
                 )
 
-                testcases.append(testcase)
+                testcase_objects.append(testcase_object)
 
-            TestCase.objects.bulk_create(testcases)
+            TestCase.objects.bulk_create(testcase_objects)
 
         if problem:
             return redirect('problem-detail', problem.id)

@@ -1,56 +1,133 @@
-<div id="judge0-site-navigation" class="ui top fixed borderless menu judge0-showNavigation inverted">
-        <a id="judge0-header" href="https://judge0.com" target="_blank" class="header item judge0-showLogo judge0-style-hidden">
-            <img id="judge0-logo" src="./images/icon_var2_rounded_512.png">
-        </a>
-        <div class="ui simple dropdown item judge0-showFileMenu judge0-style-hidden">
-            <span class="text">File</span>
-            <i class="dropdown icon"></i>
-            <div class="menu judge0-file-menu">
-                <div id="judge0-open-file-btn" class="item">
-                    <span class="description">Ctrl+O</span>
-                    <span class="text"><i class="file icon"></i>Open File...</span>
-                    <input type="file" id="open-file-input" style="display: none;">
-                </div>
-                <div id="judge0-save-btn" class="item">
-                    <span class="description">Ctrl+S</span>
-                    <span class="text"><i class="save icon"></i>Save</span>
-                </div>
-            </div>
-        </div>
-        <div class="ui simple dropdown item judge0-showHelpMenu judge0-style-hidden">
-            <span class="text">Help</span>
-            <i class="dropdown icon"></i>
-            <div class="menu judge0-file-menu">
-                <a href="https://github.com/judge0/ide" class="link text item" target="_blank"><i class="external square alternate icon"></i>GitHub Repository</a>
-                <a href="/embed" class="link text item" target="_blank"><i class="external square alternate icon"></i>Embed Guide</a>
-                <a href="https://platform.sulu.sh/apis/judge0" class="link text item" target="_blank"><i class="external square alternate icon"></i>HTTP API Documentation</a>
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/create_problem.css' %}" />
 
 
+<div class="create-problem-container">
+
+<form
+    {% if problem_type == "public" %}
+        action="{% url 'create-problem' %}"
+    {% elif problem_type == "contest" %}
+        action="{% url 'create-contest-problem' contest.id %}"
+    {% endif %}
+
+    method="POST">
+
+    {% csrf_token %}
+
+    <h2>Create Problem</h2>
+
+    <div class="rules">
+        <h3>
+            Standard:
+        </h3>
+        <br>
+
+        <p>
+            * For testcases, every space & newline counts
+        </p>
+        
+
+    </div>
+
+    <br><br>
+
+    <input type="text" name="title" placeholder="Problem Title" required>
+
+    <textarea name="statement" placeholder="Problem Statement" required></textarea>
+
+    <textarea name="problem_input" placeholder="Input Description" required></textarea>
+
+    <textarea name="problem_output" placeholder="Output Description" required></textarea>
+
+    <textarea name="note" placeholder="Note (optional)"></textarea>
+
+    <label for="difficulty">Difficulty:</label>
+    <select name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="challenging">Challenging</option>
+    </select>
+
+    <label for="time_limit">Time Limit</label>
+    <input type="number" name="time_limit" value="1">
+
+    <label for="memory_limit">Memory Limit</label>
+    <input type="number" name="memory_limit" value="512">
 
 
-    <div class="item judge0-showRunButton">
-            <button id="run-btn" class="ui primary labeled icon button" data-content="Ctrl+↵" data-variation="inverted very wide">
-                <i class="play icon"></i>
-                Run Code
-            </button>
-        </div>
+    <div class="divider"></div>
+
+    <h3 class="section-title">Test Cases</h3>
+
+    <div id="testcases-container">
+
+    <div class="testcase">
+
+    <textarea name="testcase_input[]" placeholder="Input" required></textarea>
+
+    <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
+
+    <label>
+    <input type="checkbox" name="testcase_hidden[]" value="0" checked>
+        Hidden Test Case
+    </label>
+
+    </div>
+
+    </div>
 
 
+    <button type="button" class="btn btn-add" onclick="addTestcase()">
+        Add Test Case
+    </button>
 
 
+    <br>
+
+    <button type="submit" class="btn btn-submit">
+        Create Problem
+    </button>
+
+</form>
+
+</div>
+
+<script>
+    let testCaseIndex = 1;
+
+    function addTestcase(){
+
+    const container = document.getElementById("testcases-container")
+
+    const div = document.createElement("div")
+    div.classList.add("testcase")
+
+    div.innerHTML = `
+        <textarea name="testcase_input[]" placeholder="Input" required></textarea>
+
+        <textarea name="testcase_output[]" placeholder="Expected Output" required></textarea>
+
+        <label>
+            <input type="checkbox" name="testcase_hidden[]" value="${testCaseIndex}" checked>
+            Hidden Test Case
+        </label>
+
+        <button type="button" class="btn btn-remove"
+        onclick="this.parentElement.remove()">
+        Remove
+        </button>
+    `
+
+    container.appendChild(div)
+
+    testCaseIndex++;
+}
+</script>
 
 
-
-
-        const codeSubmitBtn = document.querySelector(".item.judge0-showRunButton");
-            const getIt = document.getElementById("judge0-site-navigation");
-            
-            console.log(codeSubmitBtn);
-            console.log(getIt);
-
-            codeSubmitBtn.innerHTML = `
-                <button onclick="getDataFromJudge0IDE()" id="submit-btn" class="ui primary labeled icon button" data-content="Ctrl+↵" data-variation="inverted very wide">
-                    <i class="play icon"></i>
-                    Submit Code
-                </button>
-            `;
+{% endblock %}
