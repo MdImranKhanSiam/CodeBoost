@@ -35,15 +35,31 @@
 
     <br><br>
 
-    <input type="text" name="title" placeholder="Problem Title" required>
+    <div class="form-group">
+        <input class="form-input" type="text" name="title" id="title" placeholder=" " required>
+        <label class="form-label" for="title">Problem Title</label>
+    </div>
 
-    <textarea name="statement" placeholder="Problem Statement" required></textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="statement" id="statement" placeholder=" " required></textarea>
+        <label for="statement" class="form-label">Problem Statement</label>
+    </div>
 
-    <textarea name="problem_input" placeholder="Input Description" required></textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="problem_input" id="inputDescription" placeholder=" " required></textarea>
+        <label for="inputDescription" class="form-label">Input Description</label>
+    </div>
 
-    <textarea name="problem_output" placeholder="Output Description" required></textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="problem_output" id="outputDescription" placeholder=" " required></textarea>
+        <label for="outputDescription" class="form-label">Output Description</label>
+    </div>
 
-    <textarea name="note" placeholder="Note (optional)"></textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="note" id="note" placeholder=" "></textarea>
+        <label for="note" class="form-label">Note (optional)</label>
+    </div>
+    
 
     <label for="difficulty">Difficulty:</label>
     <select name="difficulty">
@@ -53,11 +69,17 @@
         <option value="challenging">Challenging</option>
     </select>
 
-    <label for="time_limit">Time Limit</label>
-    <input type="number" name="time_limit" value="1">
 
-    <label for="memory_limit">Memory Limit</label>
-    <input type="number" name="memory_limit" value="512">
+    <div class="form-group">
+        <input class="form-input" type="number" name="time_limit" id="time_limit" placeholder=" " value="1">
+        <label class="form-label" for="time_limit">Time Limit</label>
+    </div>
+
+    <div class="form-group">
+        <input class="form-input" type="number" name="memory_limit" id="memory_limit" placeholder=" " value="512">
+        <label class="form-label" for="memory_limit">Memory Limit</label>
+    </div>
+
 
     <div class="divider"></div>
 
@@ -80,27 +102,42 @@
 </div>
 
 <script>
-function addTestcase(){
 
+let testcaseCounter = 0;
+
+function addTestcase(){
     const container = document.getElementById("testcases-container")
+
+    const inputId = `testcaseInput-${testcaseCounter++}`;
+    const outputId = `testcaseOutput-${testcaseCounter++}`;
 
     const div = document.createElement("div")
     div.classList.add("testcase")
 
     div.innerHTML = `
-        <textarea class="testcase_input" placeholder="Input" required></textarea>
 
-        <textarea class="testcase_output" placeholder="Expected Output" required></textarea>
+        <div class="form-group">
+            <textarea class="form-input form-textarea testcase_input" id="${inputId}" placeholder=" " required></textarea>
+            <label for="${inputId}" class="form-label">Input</label>
+        </div>
 
-        <label>
-            <input class="hidden_testcase" type="checkbox" checked>
-            Hidden Test Case
-        </label>
+        <div class="form-group">
+            <textarea class="form-input form-textarea testcase_output" id="${outputId}" placeholder=" " required></textarea>
+            <label for="${outputId}" class="form-label">Expected Output</label>
+        </div>
 
-        <button type="button" class="btn btn-remove"
-        onclick="this.parentElement.remove()">
-        Remove
-        </button>
+        <div class="testcase-footer">
+            <label class="toggle">
+                <input class="hidden_testcase" type="checkbox" checked>
+                <span class="slider"></span>
+                <span class="toggle-text">Hidden Test Case</span>
+            </label>
+
+            <button type="button" class="btn btn-remove"
+                onclick="this.parentElement.parentElement.remove()">
+                Remove
+            </button>
+        </div>
     `
 
     container.appendChild(div)
