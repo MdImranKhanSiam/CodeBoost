@@ -152,67 +152,66 @@ def contest_page(request, id):
 
 
 
+@login_required(login_url='/accounts/google/login/')
 def create_contest_problem(request, contest_id):
+    user = request.user
     contest = get_object_or_404(Contest, id=contest_id)
-    problem_type = 'contest'
-    problem = None
 
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        statement = request.POST.get('statement')
-        problem_input = request.POST.get('problem_input')
-        problem_output = request.POST.get('problem_output')
-        note = request.POST.get('note')
-        difficulty = request.POST.get('difficulty')
-        time_limit = request.POST.get('time_limit')
-        memory_limit = request.POST.get('memory_limit')
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        problem_type = 'contest'
+        problem = None
 
-        testcase_inputs = request.POST.getlist('testcase_input[]')
-        testcase_outputs = request.POST.getlist('testcase_output[]')
-        testcases_hidden = request.POST.getlist('testcase_hidden[]')
+        if request.method == 'POST':
+            title = request.POST.get('title')
+            statement = request.POST.get('statement')
+            problem_input = request.POST.get('problem_input')
+            problem_output = request.POST.get('problem_output')
+            note = request.POST.get('note')
+            difficulty = request.POST.get('difficulty')
+            time_limit = request.POST.get('time_limit')
+            memory_limit = request.POST.get('memory_limit')
 
-        # All actions are discarded if the creation of either the problem or the testcase object fails.
-        with transaction.atomic():
-            problem = Problem.objects.create(
-                title=title,
-                statement=statement,
-                problem_input=problem_input,
-                problem_output=problem_output,
-                note=note,
-                difficulty=difficulty,
-                time_limit=time_limit,
-                memory_limit=memory_limit,
-                created_by=request.user,
-                is_public=False
-            )
-
-            testcases = []
-
-            for i in range(len(testcase_inputs)):
-                hidden = False
-
-                if str(i) in testcases_hidden:
-                    hidden = True
-
-                testcase = TestCase(
-                    problem=problem,
-                    input_data=testcase_inputs[i],
-                    expected_output=testcase_outputs[i],
-                    is_hidden=hidden
+            # All actions are discarded if the creation of either the problem or the testcase object fails.
+            with transaction.atomic():
+                problem = Problem.objects.create(
+                    title=title,
+                    statement=statement,
+                    problem_input=problem_input,
+                    problem_output=problem_output,
+                    note=note,
+                    difficulty=difficulty,
+                    time_limit=time_limit,
+                    memory_limit=memory_limit,
+                    created_by=request.user,
+                    is_public=False
                 )
 
-                testcases.append(testcase)
+                testcases = json.loads(request.POST.get('testcases'))
 
-            TestCase.objects.bulk_create(testcases)
+                testcase_objects = []
 
-        if problem:
-            contest.problems.add(problem)
-            return redirect('contest-page', contest.id)
-    
+                for testcase in testcases:
+                    testcase_object = TestCase(
+                        problem=problem,
+                        input_data=testcase['testcase_input'],
+                        expected_output=testcase['testcase_output'],
+                        is_hidden=testcase['hidden_testcase']
+                    )
 
-    context = {
-        'problem_type': problem_type,
-        'contest': contest,
-    }
+                    testcase_objects.append(testcase_object)
 
-    return render(request, 'problem/create_problem.html', context)
+                TestCase.objects.bulk_create(testcase_objects)
+
+            if problem:
+                contest.problems.add(problem)
+                return redirect('contest-page', contest.id)
+        
+
+        context = {
+            'problem_type': problem_type,
+            'contest': contest,
+        }
+
+        return render(request, 'problem/create_problem.html', context)
+    else:
+        return HttpResponse('Permission denied')

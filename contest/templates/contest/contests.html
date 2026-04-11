@@ -4,122 +4,123 @@
 
 <link rel="stylesheet" href="{% static 'css/contest/contests.css' %}" />
 
-<div class="contest-page">
+<section class="contests-section">
 
     <!-- HEADER -->
-    <div class="contest-header">
+    <div class="contests-header">
         <h1>Contests</h1>
 
         {% if request.user.is_authenticated and perms.contest.add_contest %}
-            <button class="create-btn" onclick="window.location.href='/contests/create_contest/'">
-                + Create Contest
+            <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
+                <span class="icon">+</span>
+                <span class="text">Create Contest</span>
             </button>
         {% endif %}
 
     </div>
 
+    <br>
     <!-- ACTIVE / UPCOMING -->
-    <div class="section">
+    
+    <div class="contest-list">
 
-        <div class="contest-list">
+        {% for contest in contests %}
+        <div class="contest-card"
+                data-start="{{ contest.start_time|date:'c' }}"
+                data-end="{{ contest.end_time|date:'c' }}"
+                data-registration="{{ contest.registration_deadline|date:'c' }}"
+                data-contest_id="{{ contest.id }}"
+                data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
+                data-admin="{% if request.user.is_staff or request.user == contest.created_by or request.user in contest.moderators.all %}true{% else %}false{% endif %}"
+                >
 
-            {% for contest in contests %}
-            <div class="contest-card"
-                 data-start="{{ contest.start_time|date:'c' }}"
-                 data-end="{{ contest.end_time|date:'c' }}"
-                 data-registration="{{ contest.registration_deadline|date:'c' }}"
-                 data-contest_id="{{ contest.id }}"
-                 data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
-                 data-admin="{% if request.user.is_staff or request.user == contest.created_by or request.user in contest.moderators.all %}true{% else %}false{% endif %}"
-                 >
+            <!-- TOP -->
+            <div class="contest-top">
+                <h3 class="contest-title">
+                    {{ contest.name }}
+                </h3>
 
-                <!-- TOP -->
-                <div class="contest-top">
-                    <h3 class="contest-title">
-                        {{ contest.name }}
-                    </h3>
+                <span class="contest-status">Loading...</span>
+            </div>
 
-                    <span class="contest-status">Loading...</span>
+            <!-- DESCRIPTION -->
+            <!-- <p class="contest-desc">
+                {{ contest.description|truncatechars:150 }}
+            </p> -->
+
+            <!-- INFO ROW -->
+            <div class="contest-info">
+                <div>📅 Start: {{ contest.start_time }}</div>
+                <div>⏱ End: {{ contest.end_time }}</div>
+            </div>
+
+            <!-- COUNTDOWN -->
+            <div class="contest-countdown">
+                ⏳ <span class="countdown-text">Calculating...</span>
+            </div>
+
+            <div class="registration-timer">
+                📝 <span class="reg-text">Checking...</span>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="contest-footer">
+
+                <div class="left">
+                    👥 {{ contest.participants.count }} participants
                 </div>
 
-                <!-- DESCRIPTION -->
-                <p class="contest-desc">
-                    {{ contest.description|truncatechars:150 }}
-                </p>
+                <div class="middle">
 
-                <!-- INFO ROW -->
-                <div class="contest-info">
-                    <div>📅 Start: {{ contest.start_time }}</div>
-                    <div>⏱ End: {{ contest.end_time }}</div>
-                </div>
-
-                <!-- COUNTDOWN -->
-                <div class="contest-countdown">
-                    ⏳ <span class="countdown-text">Calculating...</span>
-                </div>
-
-                <div class="registration-timer">
-                    📝 <span class="reg-text">Checking...</span>
-                </div>
-
-                <!-- FOOTER -->
-                <div class="contest-footer">
-
-                    <div class="left">
-                        👥 {{ contest.participants.count }} participants
+                    <!-- HOST -->
+                    <div class="host">
+                        👤 Host:
+                        {% if contest.created_by %}
+                            <span class="host-name">
+                                {{ contest.created_by.userprofile.display_name }}
+                            </span>
+                        {% else %}
+                            <span class="host-name">Unknown</span>
+                        {% endif %}
                     </div>
 
-                    <div class="middle">
+                    <!-- MODERATORS -->
+                    <div class="moderators">
+                        🛡 Moderators:
+                        {% if contest.moderators.all %}
+                            
+                            {% for mod in contest.moderators.all|slice:":3" %}
+                                <span class="mod-name">
+                                    {{ mod.userprofile.display_name }}
+                                </span>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
 
-                        <!-- HOST -->
-                        <div class="host">
-                            👤 Host:
-                            {% if contest.created_by %}
-                                <span class="host-name">
-                                    {{ contest.created_by.userprofile.display_name }}
+                            {% if contest.moderators.count > 3 %}
+                                <span class="more-mods">
+                                    +{{ contest.moderators.count|add:"-3" }} more
                                 </span>
-                            {% else %}
-                                <span class="host-name">Unknown</span>
                             {% endif %}
-                        </div>
 
-                        <!-- MODERATORS -->
-                        <div class="moderators">
-                            🛡 Moderators:
-                            {% if contest.moderators.all %}
-                                
-                                {% for mod in contest.moderators.all|slice:":3" %}
-                                    <span class="mod-name">
-                                        {{ mod.userprofile.display_name }}
-                                    </span>{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-
-                                {% if contest.moderators.count > 3 %}
-                                    <span class="more-mods">
-                                        +{{ contest.moderators.count|add:"-3" }} more
-                                    </span>
-                                {% endif %}
-
-                            {% else %}
-                                <span class="mod-name">None</span>
-                            {% endif %}
-                        </div>
-
+                        {% else %}
+                            <span class="mod-name">None</span>
+                        {% endif %}
                     </div>
 
-                    <div class="right">
-                        <button class="register-btn">Loading...</button>
-                        <button class="action-btn">Loading...</button>
-                    </div>
+                </div>
 
+                <div class="right">
+                    <button class="register-btn">Loading...</button>
+                    <button class="action-btn">Loading...</button>
                 </div>
 
             </div>
-            {% endfor %}
 
         </div>
+        {% endfor %}
+
     </div>
-</div>
+    
+</section>
 
 <!-- JS -->
 <script>

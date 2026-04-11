@@ -11,8 +11,13 @@
   <h1>Problems</h1>
 
   {% if request.user.is_authenticated and perms.problem.add_problem %}
-    <a href="{% url 'create-problem' %}">+ Create Problem</a>
+    <button class="create-problem-btn" onclick="window.location.href='{% url 'create-problem' %}'">
+        <span class="icon">+</span>
+        <span class="text">Create Problem</span>
+    </button>
   {% endif %}
+
+
 
   <div class="controls">
     <input type="text" id="searchInput" placeholder="Search problems..." />
@@ -103,6 +108,7 @@ searchInput.addEventListener('input', filterProblems);
 difficultyFilter.addEventListener('change', filterProblems);
 
 renderProblems(problems);
+
 </script>
 
 {% endblock %}
