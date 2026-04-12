@@ -1,0 +1,437 @@
+{% extends 'home/master.html' %}
+{% load static %}
+
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/contest/contest_page.css' %}">
+
+<div class="search-modal" id="editContestModal">
+    <div class="search-modal-content">
+        <h3>Edit Contest</h3>
+        <button id="addModeratorsBtn">+ Add Moderators</button>
+        <button id="addProblemsBtn">+ Add Problems</button>
+        <button id="createProblemsBtn" onclick="window.location.href='{% url 'create-contest-problem' contest.id %}'">+ Create New Problem</button>
+    </div>
+</div>
+
+<div class="search-modal" id="addModeratorsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="selector">
+                <h3>Add Moderators</h3>
+                <input type="text" id="userSearch" placeholder="Search users...">
+                <div class="dropdown" id="userDropdown"></div>
+                <div class="selected" id="selectedUsers"></div>
+            </div>
+
+            <input type="hidden" name="users" id="usersInput">
+
+            <button type="submit" class="submit-btn">Add Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="addProblemsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="selector">
+                <h3>Add Problems</h3>
+                <input type="text" id="problemSearch" placeholder="Search problems...">
+                <div class="dropdown" id="problemDropdown"></div>
+                <div class="selected" id="selectedProblems"></div>
+            </div>
+
+            <input type="hidden" name="problems" id="problemsInput">
+
+            <button type="submit" class="submit-btn">Add Problems</button>
+        </form>
+    </div>
+</div>
+
+
+
+
+<div class="contest-page">
+
+    {% if is_admin %}
+        <div class="contest-admin-section">
+            <button id="editContestBtn">Edit Contest</button>
+        </div>
+        <br><br>
+    {% endif %}
+
+    
+
+    <!-- HEADER -->
+    <div class="contest-header">
+        <div>
+            <h2>{{ contest.name }}</h2>
+            <p>{{ contest.description }}</p>
+        </div>
+
+        <div class="contest-timer">
+            <span id="timer"></span>
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="contest-tabs">
+        <button onclick="showTab('problems')" class="active">Problems</button>
+        <button onclick="showTab('your_submissions')">Your Submissions</button>
+        <button onclick="showTab('standings')">Standings</button>
+        <button onclick="showTab('all_submissions')">All Submissions</button>
+        
+    </div>
+
+    <!-- PROBLEMS -->
+    <div id="problems" class="tab active">
+        <table class="problem-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Problem</th>
+                    <th>Solved</th>
+                    <th>Attempts</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for p in problems %}
+                <tr onclick="window.location.href='{% url 'problem-detail' p.id %}'">
+                    <td>{{ forloop.counter }}</td>
+                    <td class="problem-name">{{ p.title }}</td>
+
+                    <td>{{ p.solved }}</td>
+                    <td>{{ p.attempted }}</td>
+
+                    <td>
+                        {% if user_status.p.id == "solved" %}
+                            <span class="status solved">✔</span>
+                        {% elif user_status.p.id == "tried" %}
+                            <span class="status tried">✖</span>
+                        {% else %}
+                            <span class="status none">•</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+
+        </table>
+    </div>
+
+    <!-- STANDINGS -->
+    <div id="standings" class="tab">
+        <table class="standings-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Solved</th>
+                    <th>Penalty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in standings %}
+                <tr>
+                    <td>{{ s.rank }}</td>
+                    <td>{{ s.user }}</td>
+                    <td>{{ s.solved }}</td>
+                    <td>{{ s.penalty }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- All SUBMISSIONS -->
+    <div id="all_submissions" class="tab">
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Problem</th>
+                    <th>Verdict</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>{{ sub.user }}</td>
+                    <td>{{ sub.problem }}</td>
+                    <td class="verdict {{ sub.verdict }}">{{ sub.verdict }}</td>
+                    <td>{{ sub.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Your SUBMISSIONS -->
+    <div id="your_submissions" class="tab">
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>Solution</th>
+                    <th>Problem</th>
+                    <th>Verdict</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>{{ sub.user }}</td>
+                    <td>{{ sub.problem }}</td>
+                    <td class="verdict {{ sub.verdict }}">{{ sub.verdict }}</td>
+                    <td>{{ sub.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+const startTime = new Date("{{ contest.start_time|date:'c' }}");
+const endTime = new Date("{{ contest.end_time|date:'c' }}");
+
+
+// =====================
+// TAB SWITCH
+// =====================
+function showTab(tabId) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+
+    document.querySelectorAll(".contest-tabs button").forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
+}
+
+// =====================
+// TIMER
+// =====================
+function updateTimer() {
+    const now = new Date();
+    let text = "";
+    let status = "";
+
+    if (now < startTime) {
+        text = "Starts in: " + formatTime(startTime - now);
+        status = "Not Started";
+    } 
+    else if (now < endTime) {
+        text = "Ends in: " + formatTime(endTime - now);
+        status = "Running";
+    } 
+    else {
+        text = "Contest Ended";
+        status = "Ended";
+    }
+
+    document.getElementById("timer").innerText = text;
+    document.getElementById("status").innerText = status;
+}
+
+function formatTime(ms) {
+    let total = Math.floor(ms / 1000);
+    let h = Math.floor(total / 3600);
+    let m = Math.floor((total % 3600) / 60);
+    let s = total % 60;
+    return `${h}h ${m}m ${s}s`;
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+
+
+
+const isAdmin = {{ is_admin|yesno:"true,false" }};
+
+if (isAdmin) {
+    const editContestModal = document.getElementById("editContestModal");
+    const addModeratorsModal = document.getElementById("addModeratorsModal");
+    const addProblemsModal = document.getElementById("addProblemsModal");
+
+    const editContestBtn = document.getElementById("editContestBtn");
+    const addModeratorsBtn = document.getElementById("addModeratorsBtn");
+    const addProblemsBtn = document.getElementById("addProblemsBtn");
+
+    editContestBtn.onclick = () => {
+        editContestModal.classList.add("active");
+    };
+
+    editContestModal.onclick = (e) => {
+        if (e.target === editContestModal) editContestModal.classList.remove("active");
+    };
+
+
+    addModeratorsBtn.onclick = () => {
+        addModeratorsModal.classList.add("active");
+    };
+
+    addModeratorsModal.onclick = (e) => {
+        if (e.target === addModeratorsModal) addModeratorsModal.classList.remove("active");
+    };
+
+
+    addProblemsBtn.onclick = () => {
+        addProblemsModal.classList.add("active");
+    };
+
+    addProblemsModal.onclick = (e) => {
+        if (e.target === addProblemsModal) addProblemsModal.classList.remove("active");
+    };
+
+
+    let problems = [];
+    let users = [];
+
+    {% for problem in unincluded_problems %}
+        problems.push(
+            {
+                id: {{ problem.id }},
+                title: "{{ problem.title|escapejs }}",
+            }
+        );
+    {% endfor %}
+
+    {% for user in non_moderator_users %}
+        users.push(
+            {
+                id: {{ user.id }},
+                display_name: "{{ user.userprofile.display_name|escapejs }}",
+                avatar: "{{ user.userprofile.avatar }}",
+            }
+        );
+    {% endfor %}
+
+    let selectedProblems = [];
+    let selectedUsers = [];
+
+    function initSearch({
+        inputId,
+        dropdownId,
+        selectedBoxId,
+        data,
+        selectedArray,
+        labelKey,
+        hasAvatar = false
+    }) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+        const selectedBox = document.getElementById(selectedBoxId);
+
+        input.addEventListener("input", function() {
+            const value = input.value.toLowerCase();
+            dropdown.innerHTML = "";
+
+            if (!value) return;
+
+            const filtered = data.filter(item => (item[labelKey] || "").toLowerCase().includes(value));
+
+            filtered.forEach(item => {
+                if (selectedArray.includes(item.id)) return;
+
+                const option = document.createElement("div");
+                option.className = "dropdown-item";
+
+                if (hasAvatar) {
+                    option.innerHTML = `
+                    <img src="${item.avatar}" class="avatar">
+                    <span>${item[labelKey]}</span>
+                `; 
+                } else {
+                    option.textContent = item[labelKey];
+                }
+
+                option.onclick = () => {
+                    selectedArray.push(item.id);
+                    renderSelected(selectedBox, selectedArray, data, labelKey, hasAvatar);
+                    dropdown.innerHTML = "";
+                    input.value = "";
+                    updateHiddenInputs();
+                };
+
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
+    function renderSelected(container, selectedArray, data, labelKey, hasAvatar) {
+        container.innerHTML = "";
+
+        selectedArray.forEach(id => {
+            const item = data.find(eachIndex => eachIndex.id === id);
+            if (!item) return;
+
+            const tag = document.createElement("div");
+            tag.className = "tag";
+
+            if (hasAvatar) {
+                tag.innerHTML = `
+                    <img src="${item.avatar}" class="avatar small">
+                    <span>${item[labelKey]}</span>
+                    <span class="remove-btn">✖</span>
+                `;
+            } else {
+                tag.innerHTML = `
+                    <span>${item[labelKey]}</span>
+                    <span class="remove-btn">✖</span>
+                `;
+            }
+
+            tag.querySelector(".remove-btn").onclick = () => {
+                const index = selectedArray.indexOf(id);
+                if (index > -1) selectedArray.splice(index, 1);
+                renderSelected(container, selectedArray, data, labelKey, hasAvatar);
+                updateHiddenInputs();
+            };
+
+            container.appendChild(tag);
+
+        });
+    }
+
+    function updateHiddenInputs() {
+        document.getElementById("usersInput").value = JSON.stringify(selectedUsers);
+        document.getElementById("problemsInput").value = JSON.stringify(selectedProblems);
+    }
+
+    initSearch({
+        inputId: "userSearch",
+        dropdownId: "userDropdown",
+        selectedBoxId: "selectedUsers",
+        data: users,
+        selectedArray: selectedUsers,
+        labelKey: "display_name",
+        hasAvatar: true,
+    });
+
+    initSearch({
+        inputId: "problemSearch",
+        dropdownId: "problemDropdown",
+        selectedBoxId: "selectedProblems",
+        data: problems,
+        selectedArray: selectedProblems,
+        labelKey: "title",
+    });
+
+}
+
+
+
+
+</script>
+
+
+{% endblock %}

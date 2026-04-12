@@ -1,3 +1,217 @@
-from django.shortcuts import render
+import json
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import permission_required, login_required
+from django.db import transaction
+from problem.models import Problem, TestCase
+from django.utils import timezone
+from django_ratelimit.decorators import ratelimit
+from . models import Contest
+from . forms import ContestForm
 
-# Create your views here.
+
+
+def contests(request):
+    now = timezone.now()
+
+    upcoming = list(Contest.objects.filter(start_time__gt=now).order_by("start_time"))
+    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now).order_by("end_time"))
+    ended = list(Contest.objects.filter(end_time__lt=now).order_by("-end_time"))
+    
+    contests = running + upcoming + ended
+
+    context = {
+        'contests': contests,
+    }
+
+    return render(request, 'contest/contests.html', context)
+
+
+@permission_required('contest.add_contest', raise_exception=True)
+@login_required(login_url='/accounts/google/login/')
+def create_contest(request):
+    contest_form = ContestForm()
+    problems = Problem.objects.all()
+    all_users = User.objects.all()
+
+    if request.method == 'POST':
+        received_form = ContestForm(request.POST)
+
+        if received_form.is_valid():
+            contest_creation_form = received_form.save(commit=False)
+            contest_creation_form.created_by = request.user
+            contest_creation_form.save()
+
+            return redirect('contest-page', contest_creation_form.id)
+
+
+    context = {
+        'contest_form' :contest_form,
+        'problems': problems,
+        'users': all_users,
+    }
+
+    return render(request, 'contest/create_contest.html', context)
+
+
+
+@ratelimit(key='user', rate='5/m', block=True)
+@login_required(login_url='/accounts/google/login/')
+def contest_registration(request, id):
+    now = timezone.now()
+
+    contest = get_object_or_404(Contest, id=id)
+
+    if request.user in contest.participants.all():
+        return HttpResponse('Already registered')
+
+    if contest.registration_deadline <= now:
+        return HttpResponse('The registration has closed')
+    
+    if request.method == "POST":
+        if request.POST.get("agree"):
+            contest.participants.add(request.user)
+
+            return redirect('contests')
+
+    context = {
+        'contest': contest,    
+    }
+
+    return render(request, 'contest/contest_registration.html', context)
+
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def contest_page(request, id):
+    now = timezone.now()
+    user = request.user
+    is_admin = None
+
+    contest = get_object_or_404(Contest, id=id)
+    contest_form = ContestForm()
+    
+
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        is_admin = True
+
+        unincluded_problems = Problem.objects.filter(is_public=True).exclude(
+            id__in=contest.problems.all()
+        )
+        
+        non_moderator_users = User.objects.filter(is_staff=False).exclude(
+            id__in=contest.moderators.all()
+        ).exclude(
+            id=contest.created_by.id
+        )
+
+        if request.method == "POST":
+            if request.POST.get("users"):
+                selected_users_json = request.POST.get("users")
+                selected_users_ids = json.loads(selected_users_json)
+                selected_users = User.objects.filter(id__in=selected_users_ids)
+                contest.moderators.add(*selected_users)
+
+            if request.POST.get("problems"):
+                selected_problems_json = request.POST.get("problems")
+                selected_problems_ids = json.loads(selected_problems_json)
+                selected_problems = Problem.objects.filter(id__in=selected_problems_ids)
+                contest.problems.add(*selected_problems)
+
+        problems = contest.problems.all()
+
+        context = {
+            'contest': contest,
+            'is_admin': is_admin,
+            'problems': problems,
+            'unincluded_problems': unincluded_problems,
+            'non_moderator_users': non_moderator_users,
+        }
+        
+        return render(request, 'contest/contest_page.html', context)
+
+    is_admin = False
+
+    if now < contest.start_time:
+        return HttpResponse("The contest hasn't started yet!", status=403)
+
+    if now >= contest.start_time and now <= contest.end_time and user not in contest.participants.all():
+        return HttpResponse('You are not a participant of this contest')
+
+    problems = contest.problems.all()
+    
+    context = {
+        'contest': contest,
+        'is_admin': is_admin,
+        'problems': problems,
+    }
+
+    return render(request, 'contest/contest_page.html', context)
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def create_contest_problem(request, contest_id):
+    user = request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        problem_type = 'contest'
+        problem = None
+
+        if request.method == 'POST':
+            title = request.POST.get('title')
+            statement = request.POST.get('statement')
+            problem_input = request.POST.get('problem_input')
+            problem_output = request.POST.get('problem_output')
+            note = request.POST.get('note')
+            difficulty = request.POST.get('difficulty')
+            time_limit = request.POST.get('time_limit')
+            memory_limit = request.POST.get('memory_limit')
+
+            # All actions are discarded if the creation of either the problem or the testcase object fails.
+            with transaction.atomic():
+                problem = Problem.objects.create(
+                    title=title,
+                    statement=statement,
+                    problem_input=problem_input,
+                    problem_output=problem_output,
+                    note=note,
+                    difficulty=difficulty,
+                    time_limit=time_limit,
+                    memory_limit=memory_limit,
+                    created_by=request.user,
+                    is_public=False
+                )
+
+                testcases = json.loads(request.POST.get('testcases'))
+
+                testcase_objects = []
+
+                for testcase in testcases:
+                    testcase_object = TestCase(
+                        problem=problem,
+                        input_data=testcase['testcase_input'],
+                        expected_output=testcase['testcase_output'],
+                        is_hidden=testcase['hidden_testcase']
+                    )
+
+                    testcase_objects.append(testcase_object)
+
+                TestCase.objects.bulk_create(testcase_objects)
+
+            if problem:
+                contest.problems.add(problem)
+                return redirect('contest-page', contest.id)
+        
+
+        context = {
+            'problem_type': problem_type,
+            'contest': contest,
+        }
+
+        return render(request, 'problem/create_problem.html', context)
+    else:
+        return HttpResponse('Permission denied')

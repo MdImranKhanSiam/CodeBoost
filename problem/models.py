@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 
 class Problem(models.Model):
@@ -20,8 +21,9 @@ class Problem(models.Model):
     difficulty = models.CharField(max_length=55, choices=DIFFICULTY_LEVEL, default='easy')
     time_limit = models.FloatField(default=1.0)
     memory_limit = models.FloatField(default=512)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=True)
 
     class Meta:
         indexes = [
@@ -55,6 +57,7 @@ class Submission(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
+    contest = models.ForeignKey("contest.Contest", on_delete=models.CASCADE, null=True, blank=True)
     code = models.TextField()
     language = models.CharField(max_length=50)
     total_testcases = models.IntegerField(default=0)
@@ -82,3 +85,7 @@ class Submission(models.Model):
             models.Index(fields=['problem']),
             # Submission.objects.filter(problem=problem)
         ]
+
+
+    def __str__(self):
+        return f'{self.user.username} {self.language}'

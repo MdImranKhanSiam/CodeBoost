@@ -1,0 +1,248 @@
+{% extends 'home/master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/contest/create_contest.css' %}">
+
+<div class="contest-container">
+    <form method="POST" id="contestForm">
+        {% csrf_token %}
+
+        <h2>Create Contest</h2>
+
+        <!-- Basic Fields -->
+        <div class="form-group">
+            <label>Name</label>
+            {{ contest_form.name }}
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            {{ contest_form.description }}
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label>Start Time</label>
+                {{ contest_form.start_time }}
+            </div>
+            <div>
+                <label>End Time</label>
+                {{ contest_form.end_time }}
+            </div>
+            <div>
+                <label>Registration Deadline</label>
+                {{ contest_form.registration_deadline }}
+            </div>
+        </div>
+
+       
+        <!-- <div class="selector">
+            <h3>Add Problems</h3>
+            <input type="text" id="problemSearch" placeholder="Search problems...">
+            <div class="dropdown" id="problemDropdown"></div>
+            <div class="selected" id="selectedProblems"></div>
+        </div> -->
+
+        <!-- <div class="selector">
+            <h3>Add Participants</h3>
+            <input type="text" id="userSearch" placeholder="Search users...">
+            <div class="dropdown" id="userDropdown"></div>
+            <div class="selected" id="selectedUsers"></div>
+        </div> -->
+
+        <!-- <div class="selector">
+            <h3>Add Moderators</h3>
+            <input type="text" id="modSearch" placeholder="Search moderators...">
+            <div class="dropdown" id="modDropdown"></div>
+            <div class="selected" id="selectedMods"></div>
+        </div> -->
+
+        <!-- Hidden Inputs -->
+        <!-- <input type="hidden" name="problems" id="problemsInput"> -->
+        <!-- <input type="hidden" name="participants" id="participantsInput"> -->
+        <!-- <input type="hidden" name="moderators" id="moderatorsInput"> -->
+
+        <button type="submit" class="submit-btn">Create Contest</button>
+    </form>
+</div>
+
+<script>
+
+// let problems = [];
+// let users = [];
+
+// Load problems
+// {% for p in problems %}
+//     problems.push({
+//         id: {{ p.id }},
+//         name: "{{ p.title|escapejs }}"
+//     });
+// {% endfor %}
+
+// Load users
+// {% for u in users %}
+// users.push({
+//     id: {{ u.id }},
+//     username: "{{ u.userprofile.display_name|escapejs }}",
+//     avatar: "{{ u.userprofile.avatar }}",
+// });
+// {% endfor %}
+
+
+
+// =====================
+// STATE
+// =====================
+// let selectedProblems = [];
+// let selectedUsers = [];
+// let selectedMods = [];
+
+// =====================
+// GENERIC SEARCH SYSTEM
+// =====================
+// function initSearch({
+//     inputId,
+//     dropdownId,
+//     selectedBoxId,
+//     data,
+//     selectedArray,
+//     labelKey,
+//     hasAvatar = false
+// }) {
+//     const input = document.getElementById(inputId);
+//     const dropdown = document.getElementById(dropdownId);
+//     const selectedBox = document.getElementById(selectedBoxId);
+
+//     input.addEventListener("input", function () {
+//         const value = input.value.toLowerCase();
+//         dropdown.innerHTML = "";
+
+//         if (!value) return;
+
+//         const filtered = data.filter(item =>
+//             (item[labelKey] || "").toLowerCase().includes(value)
+//         );
+
+//         filtered.forEach(item => {
+//             if (selectedArray.includes(item.id)) return;
+
+//             const option = document.createElement("div");
+//             option.className = "dropdown-item";
+
+//             if (hasAvatar) {
+//                 option.innerHTML = `
+//                     <img src="${item.avatar}" class="avatar">
+//                     <span>${item[labelKey]}</span>
+//                 `;
+//             } else {
+//                 option.textContent = item[labelKey];
+//             }
+
+//             option.onclick = () => {
+//                 selectedArray.push(item.id);
+//                 renderSelected(selectedBox, selectedArray, data, labelKey, hasAvatar);
+//                 dropdown.innerHTML = "";
+//                 input.value = "";
+//                 updateHiddenInputs();
+//             };
+
+//             dropdown.appendChild(option);
+//         });
+//     });
+
+//     document.addEventListener("click", (e) => {
+//         if (!input.contains(e.target)) {
+//             dropdown.innerHTML = "";
+//         }
+//     });
+// }
+
+// =====================
+// RENDER SELECTED TAGS
+// =====================
+// function renderSelected(container, selectedArray, data, labelKey, hasAvatar) {
+//     container.innerHTML = "";
+
+//     selectedArray.forEach(id => {
+//         const item = data.find(d => d.id === id);
+//         if (!item) return;
+
+//         const tag = document.createElement("div");
+//         tag.className = "tag";
+
+//         if (hasAvatar) {
+//             tag.innerHTML = `
+//                 <img src="${item.avatar}" class="avatar small">
+//                 <span>${item[labelKey]}</span>
+//                 <span class="remove-btn">✖</span>
+//             `;
+//         } else {
+//             tag.innerHTML = `
+//                 <span>${item[labelKey]}</span>
+//                 <span class="remove-btn">✖</span>
+//             `;
+//         }
+
+//         tag.querySelector(".remove-btn").onclick = () => {
+//             const index = selectedArray.indexOf(id);
+//             if (index > -1) selectedArray.splice(index, 1);
+//             renderSelected(container, selectedArray, data, labelKey, hasAvatar);
+//             updateHiddenInputs();
+//         };
+
+//         container.appendChild(tag);
+//     });
+// }
+
+// =====================
+// UPDATE HIDDEN INPUTS
+// =====================
+// function updateHiddenInputs() {
+//     document.getElementById("problemsInput").value = JSON.stringify(selectedProblems);
+//     document.getElementById("participantsInput").value = JSON.stringify(selectedUsers);
+//     document.getElementById("moderatorsInput").value = JSON.stringify(selectedMods);
+// }
+
+// =====================
+// INIT
+// =====================
+
+// Problems (no avatar)
+// initSearch({
+//     inputId: "problemSearch",
+//     dropdownId: "problemDropdown",
+//     selectedBoxId: "selectedProblems",
+//     data: problems,
+//     selectedArray: selectedProblems,
+//     labelKey: "name",
+//     hasAvatar: false
+// });
+
+// Participants (with avatar)
+// initSearch({
+//     inputId: "userSearch",
+//     dropdownId: "userDropdown",
+//     selectedBoxId: "selectedUsers",
+//     data: users,
+//     selectedArray: selectedUsers,
+//     labelKey: "username",
+//     hasAvatar: true
+// });
+
+// Moderators (with avatar)
+// initSearch({
+//     inputId: "modSearch",
+//     dropdownId: "modDropdown",
+//     selectedBoxId: "selectedMods",
+//     data: users,
+//     selectedArray: selectedMods,
+//     labelKey: "username",
+//     hasAvatar: true
+// });
+</script>
+
+
+
+
+{% endblock %}

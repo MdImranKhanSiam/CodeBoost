@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
@@ -9,14 +10,18 @@ from . background_task import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 
+
 def problems(request):
-    problems = Problem.objects.all()
+    problems = Problem.objects.filter(is_public=True)
     
     context = {
         'problems': problems,
     }
 
     return render(request, 'problem/problems.html', context)
+
+
+
 
 
 @ratelimit(key='user', rate='6/m', method='POST', block=True)
@@ -66,10 +71,71 @@ def language_snippet(request):
     })
 
 
-@login_required(login_url='/accounts/google/login/')
+
 @permission_required('problem.add_problem', raise_exception=True)
+@login_required(login_url='/accounts/google/login/')
 def create_problem(request):
+    problem_type = 'public'
     problem = None
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        statement = request.POST.get('statement')
+        problem_input = request.POST.get('problem_input')
+        problem_output = request.POST.get('problem_output')
+        note = request.POST.get('note')
+        difficulty = request.POST.get('difficulty')
+        time_limit = request.POST.get('time_limit')
+        memory_limit = request.POST.get('memory_limit')
+
+        # All actions are discarded if the creation of either the problem or the testcase object fails.
+        with transaction.atomic():
+            problem = Problem.objects.create(
+                title=title,
+                statement=statement,
+                problem_input=problem_input,
+                problem_output=problem_output,
+                note=note,
+                difficulty=difficulty,
+                time_limit=time_limit,
+                memory_limit=memory_limit,
+                created_by=request.user
+            )
+
+            testcases = json.loads(request.POST.get('testcases'))
+
+            testcase_objects = []
+
+            for testcase in testcases:
+                testcase_object = TestCase(
+                    problem=problem,
+                    input_data=testcase['testcase_input'],
+                    expected_output=testcase['testcase_output'],
+                    is_hidden=testcase['hidden_testcase']
+                )
+
+                testcase_objects.append(testcase_object)
+
+            TestCase.objects.bulk_create(testcase_objects)
+
+        if problem:
+            return redirect('problem-detail', problem.id)
+        
+
+    context = {
+        'problem_type': problem_type,
+    }
+
+    return render(request, 'problem/create_problem.html', context)
+
+
+@permission_required('problem.change_problem', raise_exception=True)
+@login_required(login_url='/accounts/google/login/')
+def edit_problem(request, problem_id):
+    problem_type = 'public'
+    problem = None
+    current_problem = Problem.objects.get(id=problem_id)
+    current_testcases = current_problem.testcases.all()
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -123,11 +189,12 @@ def create_problem(request):
         
 
     context = {
-
+        'problem_type': problem_type,
+        'current_problem': current_problem,
+        'current_testcases': current_testcases,
     }
 
-    return render(request, 'problem/create_problem.html', context)
-
+    return render(request, 'problem/edit_problem.html', context)
 
 
 @login_required(login_url='/accounts/google/login/')

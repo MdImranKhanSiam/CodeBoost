@@ -1,0 +1,312 @@
+.search-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.search-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.search-modal-content {
+    background: #111a2e;
+    padding: 40px;
+    border-radius: 20px;
+    width: 600px;
+}
+
+.search-modal-content h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.search-modal-content input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: #16223b;
+    color: #e6edf7;
+}
+
+.search-modal-content input:focus {
+    border: 1px solid #4f7cff;
+    box-shadow: 0 0 5px rgba(79, 124, 255, 0.5);
+}
+
+.search-modal-content button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: #1e40af;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-bottom: 10px;
+
+}
+
+.search-modal-content button:hover {
+    color: white;
+    background: #4f8cff;
+}
+
+
+.contest-admin-section button {
+    width: 150px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #1e40af;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-bottom: 10px;
+}
+
+.contest-admin-section button:hover {
+    color: white;
+    background: #4f8cff;
+}
+
+
+
+.contest-page {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    color: white;
+}
+
+.contest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contest-timer {
+    text-align: right;
+}
+
+#timer {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.contest-tabs {
+    display: flex;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.contest-tabs button {
+    padding: 10px 20px;
+    background: #1e293b;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.contest-tabs button.active {
+    background: #2563eb;
+}
+
+.tab {
+    display: none;
+    margin-top: 20px;
+}
+
+.tab.active {
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+tr {
+    border-bottom: 1px solid #334155;
+}
+
+.problem-name {
+    cursor: pointer;
+    color: #60a5fa;
+}
+
+.status.solved { color: #22c55e; }
+.status.tried { color: #ef4444; }
+.status.none { color: gray; }
+
+.verdict.Accepted { color: #22c55e; }
+.verdict.Wrong { color: #ef4444; }
+
+
+
+
+/* Search & Select */
+
+
+
+
+/* input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+    background: #1e293b; 
+    color: #e2e8f0;
+}
+
+
+
+input:focus, textarea:focus {
+    border-color: #3b82f6;
+    outline: none;
+} */
+
+.selector {
+    margin-top: 25px;
+}
+
+.selector h3 {
+    margin-bottom: 8px;
+}
+
+.dropdown {
+    background: #1e293b;
+    border-radius: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+
+.dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+    background: #4f8cff;
+    border-radius: 10px;
+}
+
+
+.dropdown div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown div:hover {
+    background: #334155;
+}
+
+.selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tag {
+    background: #3b82f6;
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.tag span {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.submit-btn {
+    margin-top: 30px;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.dropdown-item:hover {
+    background: #334155;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar.small {
+    width: 22px;
+    height: 22px;
+}
+
+.tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #2563eb;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.remove-btn {
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.remove-btn:hover {
+    opacity: 1;
+}
+/* Form Search & Select */
+
+
+
+@media (max-width: 600px) {
+    .contest-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+}

@@ -1,5 +1,4 @@
 from django.db import models
-from problem.models import Problem
 from django.contrib.auth.models import User
 
 
@@ -8,8 +7,9 @@ class Contest(models.Model):
     description = models.TextField(blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    registration_deadline = models.DateTimeField(null=True, blank=True)
 
-    problems = models.ManyToManyField(Problem, related_name="contests")
+    problems = models.ManyToManyField("problem.Problem", related_name="contests", null=True, blank=True)
     # problem.contests.all() #To find all contest this problem instance belong to
     # problem.contest_set.all() #If no related name is set
 
@@ -33,13 +33,13 @@ class Contest(models.Model):
     # All problems of this contest
     # problems = contest.problems.all()
 
-    participants = models.ManyToManyField(User,related_name="joined_contests", blank=True)
+    participants = models.ManyToManyField(User,related_name="joined_contests", null=True, blank=True)
     # user.joined_contests.all()
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="created_contests", null=True)
     # user.created_contests.all()
 
-    moderators = models.ManyToManyField(User, related_name="moderator_of_contests", blank=True)
+    moderators = models.ManyToManyField(User, related_name="moderator_of_contests", null=True, blank=True)
     # user.moderator_of_contests.all()
     
     created_at = models.DateTimeField(auto_now_add=True)
