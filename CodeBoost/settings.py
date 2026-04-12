@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'axes',
 ]
 
-SITE_ID = 4
+SITE_ID = os.getenv('SITE_ID')
 
 SOCIALACCOUNT_ADAPTER = "home.adapter.CustomSocialAccountAdapter"
 
