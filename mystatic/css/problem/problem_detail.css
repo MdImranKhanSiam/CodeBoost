@@ -75,6 +75,7 @@
 
 .problem-section p {
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
     font-weight: 400;
 }
 
@@ -104,6 +105,10 @@
 
 .example-io pre {
 
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    
     background: #000;
 
     padding: 10px;

@@ -7,7 +7,7 @@
 
 <div class="create-problem-container">
 
-<form
+<form id="createProblemForm"
     {% if problem_type == "public" %}
         action="{% url 'edit-problem' current_problem.id %}"
     {% elif problem_type == "contest" %}
@@ -35,15 +35,31 @@
 
     <br><br>
 
-    <input type="text" name="title" placeholder="Problem Title" value="{{ current_problem.title }}" required>
+    <div class="form-group">
+        <input class="form-input" type="text" name="title" id="title" placeholder=" " value="{{ current_problem.title }}" required>
+        <label class="form-label" for="title">Problem Title</label>
+    </div>
 
-    <textarea name="statement" placeholder="Problem Statement" required>{{ current_problem.statement }}</textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="statement" id="statement" placeholder=" " required>{{ current_problem.statement }}</textarea>
+        <label for="statement" class="form-label">Problem Statement</label>
+    </div>
 
-    <textarea name="problem_input" placeholder="Input Description" required>{{ current_problem.problem_input }}</textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="problem_input" id="inputDescription" placeholder=" " required>{{ current_problem.problem_input }}</textarea>
+        <label for="inputDescription" class="form-label">Input Description</label>
+    </div>
 
-    <textarea name="problem_output" placeholder="Output Description" required>{{ current_problem.problem_output }}</textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="problem_output" id="outputDescription" placeholder=" " required>{{ current_problem.problem_output }}</textarea>
+        <label for="outputDescription" class="form-label">Output Description</label>
+    </div>
 
-    <textarea name="note" placeholder="Note (optional)">{{ current_problem.note|default_if_none:'' }}</textarea>
+    <div class="form-group">
+        <textarea class="form-input form-textarea" name="note" id="note" placeholder=" ">{{ current_problem.note|default_if_none:'' }}</textarea>
+        <label for="note" class="form-label">Note (optional)</label>
+    </div>
+    
 
     <label for="difficulty">Difficulty:</label>
     <select name="difficulty">
@@ -53,28 +69,29 @@
         <option value="challenging" {% if current_problem.difficulty == "challenging" %}selected{% endif %}>Challenging</option>
     </select>
 
-    <label for="time_limit">Time Limit</label>
-    <input type="number" name="time_limit" value="{{ current_problem.time_limit }}">
 
-    <label for="memory_limit">Memory Limit</label>
-    <input type="number" name="memory_limit" value="{{ current_problem.memory_limit }}">
+    <div class="form-group">
+        <input class="form-input" type="number" name="time_limit" id="time_limit" placeholder=" " value="{{ current_problem.time_limit }}">
+        <label class="form-label" for="time_limit">Time Limit</label>
+    </div>
+
+    <div class="form-group">
+        <input class="form-input" type="number" name="memory_limit" id="memory_limit" placeholder=" " value="{{ current_problem.memory_limit }}">
+        <label class="form-label" for="memory_limit">Memory Limit</label>
+    </div>
 
 
     <div class="divider"></div>
 
     <h3 class="section-title">Test Cases</h3>
 
-    <div id="testcases-container">
+    <input type="hidden" name="testcases" id="testcasesInput">
 
-    </div>
-
+    <div id="testcases-container"></div>
 
     <button type="button" class="btn btn-add" onclick="addTestcase()">
         Add Test Case
-    </button>
-
-
-    <br>
+    </button><br>
 
     <button type="submit" class="btn btn-submit">
         Update Problem
@@ -85,62 +102,128 @@
 </div>
 
 <script>
-    let current_testcases_list = [];
 
-    {% for testcase in current_testcases %}
-        current_testcases_list.push(
-            {
-                input_data: "{{ testcase.input_data|escapejs }}",
-                expected_output: "{{ testcase.expected_output|escapejs }}",
-                is_hidden: {{ testcase.is_hidden|yesno:"true,false" }},
-            }
-        );
-    {% endfor %}
+let current_testcases_list = [];
 
-    let testCaseIndex = 0;
-
-    function addTestcase(tc = null) {
-        let input_data = "";
-        let expected_output = "";
-        let is_hidden = "checked";
-
-        if (tc) {
-            input_data = tc.input_data;
-            expected_output = tc.expected_output;
-            is_hidden = tc.is_hidden ? "checked" : "";
+{% for testcase in current_testcases %}
+    current_testcases_list.push(
+        {
+            input_data: "{{ testcase.input_data|escapejs }}",
+            expected_output: "{{ testcase.expected_output|escapejs }}",
+            is_hidden: {{ testcase.is_hidden|yesno:"true,false" }},
         }
+    );
+{% endfor %}
 
-        const container = document.getElementById("testcases-container")
+let testcaseCounter = 0;
 
-        const div = document.createElement("div")
-        div.classList.add("testcase")
+function addTestcase(tc = null){
+    let input_data = "";
+    let expected_output = "";
+    let is_hidden = "checked";
 
-        div.innerHTML = `
-            <textarea name="testcase_input[]" placeholder="Input" required>${input_data}</textarea>
+    if (tc) {
+        input_data = tc.input_data;
+        expected_output = tc.expected_output;
+        is_hidden = tc.is_hidden ? "checked" : "";
+    }
 
-            <textarea name="testcase_output[]" placeholder="Expected Output" required>${expected_output}</textarea>
+    const container = document.getElementById("testcases-container")
 
-            <label>
-                <input type="checkbox" name="testcase_hidden[]" value="${testCaseIndex}" ${is_hidden}>
-                Hidden Test Case
+    const inputId = `testcaseInput-${testcaseCounter++}`;
+    const outputId = `testcaseOutput-${testcaseCounter++}`;
+
+    const div = document.createElement("div")
+    div.classList.add("testcase")
+
+    div.innerHTML = `
+
+        <div class="form-group">
+            <textarea class="form-input form-textarea testcase_input" id="${inputId}" placeholder=" " required>${input_data}</textarea>
+            <label for="${inputId}" class="form-label">Input</label>
+        </div>
+
+        <div class="form-group">
+            <textarea class="form-input form-textarea testcase_output" id="${outputId}" placeholder=" " required>${expected_output}</textarea>
+            <label for="${outputId}" class="form-label">Expected Output</label>
+        </div>
+
+        <div class="testcase-footer">
+            <label class="toggle">
+                <input class="hidden_testcase" type="checkbox" ${is_hidden}>
+                <span class="slider"></span>
+                <span class="toggle-text">Hidden Test Case</span>
             </label>
 
             <button type="button" class="btn btn-remove"
-            onclick="this.parentElement.remove()">
-            Remove
+                onclick="this.parentElement.parentElement.remove()">
+                Remove
             </button>
-        `
+        </div>
+    `
 
-        container.appendChild(div)
+    container.appendChild(div)
+}
 
-        testCaseIndex++;
-    }
+function collectTestcases() {
+    const blocks = document.querySelectorAll(".testcase");
 
-    current_testcases_list.forEach(tc => {
-        addTestcase(tc);
+    let storeTestcases = [];
+
+    blocks.forEach( block => {
+        const testcase_input = block.querySelector(".testcase_input").value;
+        const testcase_output = block.querySelector(".testcase_output").value;
+        const hidden_testcase = block.querySelector(".hidden_testcase").checked;
+    
+        storeTestcases.push({
+            testcase_input: testcase_input,
+            testcase_output: testcase_output,
+            hidden_testcase: hidden_testcase,
+        });
     });
+
+    return storeTestcases;
+}
+
+
+
+document.getElementById("createProblemForm").addEventListener("submit", function () {
+    const collectedTestcases = collectTestcases();
+
+    // Convert the entire list into a string
+    document.getElementById("testcasesInput").value = JSON.stringify(collectedTestcases);
+
+    // console.log(document.getElementById("testcasesInput").value);
+    
+});
+
+
+current_testcases_list.forEach(tc => {
+    addTestcase(tc);
+});
+
+
+function autoResize(textarea) {
+    textarea.style.height = '0px'; // important trick
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.form-textarea').forEach(textarea => {
+        autoResize(textarea);
+    });
+});
 
 </script>
 
 
 {% endblock %}
+
+
+
+
+
+
+
+
+

@@ -85,7 +85,18 @@
 .form-textarea {
     min-height: 120px;
     resize: vertical;
+    overflow-y: auto;
 }
+
+.form-textarea::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-textarea::-webkit-scrollbar-thumb {
+    background: #4f8cff;
+    border-radius: 10px;
+}
+
 
 /* ===== Label ===== */
 .form-label {
