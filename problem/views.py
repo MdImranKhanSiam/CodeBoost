@@ -27,9 +27,21 @@ def problems(request):
 @ratelimit(key='user', rate='6/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problem_detail(request, id):
-    username = request.user.userprofile.display_name
+    user = request.user
+    username = user.userprofile.display_name
     problem = Problem.objects.get(id=id)
     testcases = problem.testcases.filter(is_hidden=False)
+
+    is_admin = False
+
+    if problem.is_public:
+        if user.has_perm('problem.change_problem'):
+            is_admin = True
+    elif not problem.is_public:
+        contest = problem.contests.first()
+
+        if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+            is_admin = True
 
     language_id = '71'
     language_name = LANGUAGES[language_id]
@@ -50,6 +62,7 @@ def problem_detail(request, id):
         return redirect('submission')
         
     context = {
+        'is_admin': is_admin,
         'problem': problem,
         'testcases': testcases,
         'language_id': language_id,
@@ -189,6 +202,23 @@ def edit_problem(request, problem_id):
     }
 
     return render(request, 'problem/edit_problem.html', context)
+
+
+@permission_required('problem.delete_problem', raise_exception=True)
+@login_required(login_url='/accounts/google/login/')
+def delete_problem(request, problem_id):
+    problem = Problem.objects.get(id=problem_id)
+
+    if request.method == 'POST':
+        problem.delete()
+
+        return redirect('problems')
+   
+    context = {
+        'item' : problem.title,
+    }
+
+    return render(request, 'home/delete.html', context)
 
 
 

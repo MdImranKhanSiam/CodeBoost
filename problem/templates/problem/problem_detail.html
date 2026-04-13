@@ -3,13 +3,43 @@
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
-
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
 <div id="floatingError" class="floating-error"></div>
 
+{% if is_admin %}
+    <div class="problem-settings-modal" id="problemSettingsModal">
+        <div class="problem-settings-modal-content">
+            <h3>Problem Settings</h3>
+            <button class="problem-settings-btn" id="editProblemBtn" onclick="window.location.href='{% url 'edit-problem' problem.id %}'">
+                <span class="icon">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </span>
+                <span class="text">Edit Problem</span>
+            </button>
+
+            <button class="problem-settings-btn" id="deleteProblemBtn" onclick="window.location.href='{% url 'delete-problem' problem.id %}?next={{ request.get_full_path }}'">
+                <span class="icon">
+                    <i class="fa-solid fa-trash"></i>
+                </span>
+                <span class="text">Delete Problem</span>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
 <!-- LEFT SIDE -->
 <div class="problem-section">
+    {% if is_admin %}
+        <button class="problem-settings-btn" id="problemSettingsBtn">
+            <span class="icon">
+                <i class="fa-solid fa-gear"></i>
+            </span>
+            <span class="text">Problem Settings</span>
+        </button>
+        <br><br>
+    {% endif %}
 
     <h1>{{ problem.title }}</h1>
 
@@ -145,16 +175,16 @@
     <input type="hidden" name="language_id" id="language_id">
 
     <div class="code-editor">
-    <div class="editor-header">
-        <span>main.py</span>
-        <span id="status">Ready</span>
-    </div>
+        <div class="editor-header">
+            <span>main.py</span>
+            <span id="status">Ready</span>
+        </div>
 
-    <textarea class="code-area" name="source_code" id="code" spellcheck="false"></textarea>
+        <textarea class="code-area" name="source_code" id="code" spellcheck="false"></textarea>
     </div>
 
     <div class="actions">
-    <button class="code-submit-btn" type="submit">Submit Code</button>
+        <button class="code-submit-btn" type="submit">Submit Code</button>
     </div>
 
 </form>
@@ -171,6 +201,24 @@
 
 
 <script>
+
+const isAdmin = {{ is_admin|yesno:"true,false" }};
+
+if (isAdmin) {
+    const problemSettingsModal = document.getElementById("problemSettingsModal");
+
+    const problemSettingsBtn = document.getElementById("problemSettingsBtn");
+
+    problemSettingsBtn.onclick = () => {
+        problemSettingsModal.classList.add("active");
+    };
+
+    problemSettingsModal.onclick = (e) => {
+        if (e.target === problemSettingsModal) problemSettingsModal.classList.remove("active");
+    };
+}
+
+
 
 // Back/Forward
 

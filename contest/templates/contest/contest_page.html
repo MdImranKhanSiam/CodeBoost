@@ -58,13 +58,16 @@
 <div class="contest-page">
 
     {% if is_admin %}
-        <div class="contest-admin-section">
-            <button id="editContestBtn">Edit Contest</button>
-        </div>
+        <button class="edit-contest-btn" id="editContestBtn">
+            <span class="icon">
+                <i class="fa-solid fa-gear"></i>
+            </span>
+            <span class="text">Edit Contest</span>
+        </button>
         <br><br>
     {% endif %}
 
-    
+
 
     <!-- HEADER -->
     <div class="contest-header">
