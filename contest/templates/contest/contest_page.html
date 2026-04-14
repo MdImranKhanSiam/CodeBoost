@@ -5,12 +5,37 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/contest/contest_page.css' %}">
 
-<div class="search-modal" id="editContestModal">
+<div class="search-modal" id="contestSettingsModal">
     <div class="search-modal-content">
-        <h3>Edit Contest</h3>
-        <button id="addModeratorsBtn">+ Add Moderators</button>
-        <button id="addProblemsBtn">+ Add Problems</button>
-        <button id="createProblemsBtn" onclick="window.location.href='{% url 'create-contest-problem' contest.id %}'">+ Create New Problem</button>
+        <h3>Contest Settings</h3>
+        
+        <button class="edit-contest-btn" id="editContestBtn">
+            <span class="icon">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </span>
+            <span class="text">Edit Contest</span>
+        </button>
+
+        <button class="edit-contest-btn" id="addModeratorsBtn">
+            <span class="icon">
+                <i class="fa-solid fa-user-plus"></i>
+            </span>
+            <span class="text">Add Moderators</span>
+        </button>
+
+        <button class="edit-contest-btn" id="addProblemsBtn">
+            <span class="icon">
+                <i class="fa-solid fa-circle-plus"></i>
+            </span>
+            <span class="text">Add Problems</span>
+        </button>
+
+        <button class="edit-contest-btn" id="createProblemsBtn" onclick="window.location.href='{% url 'create-contest-problem' contest.id %}'">
+            <span class="icon">
+                <i class="fa-solid fa-circle-plus"></i>
+            </span>
+            <span class="text">Create New Problem</span>
+        </button>
     </div>
 </div>
 
@@ -58,11 +83,11 @@
 <div class="contest-page">
 
     {% if is_admin %}
-        <button class="edit-contest-btn" id="editContestBtn">
+        <button class="edit-contest-btn" id="contestSettingsBtn">
             <span class="icon">
                 <i class="fa-solid fa-gear"></i>
             </span>
-            <span class="text">Edit Contest</span>
+            <span class="text">Contest Settings</span>
         </button>
         <br><br>
     {% endif %}
@@ -261,20 +286,20 @@ updateTimer();
 const isAdmin = {{ is_admin|yesno:"true,false" }};
 
 if (isAdmin) {
-    const editContestModal = document.getElementById("editContestModal");
+    const contestSettingsModal = document.getElementById("contestSettingsModal");
     const addModeratorsModal = document.getElementById("addModeratorsModal");
     const addProblemsModal = document.getElementById("addProblemsModal");
 
-    const editContestBtn = document.getElementById("editContestBtn");
+    const contestSettingsBtn = document.getElementById("contestSettingsBtn");
     const addModeratorsBtn = document.getElementById("addModeratorsBtn");
     const addProblemsBtn = document.getElementById("addProblemsBtn");
 
-    editContestBtn.onclick = () => {
-        editContestModal.classList.add("active");
+    contestSettingsBtn.onclick = () => {
+        contestSettingsModal.classList.add("active");
     };
 
-    editContestModal.onclick = (e) => {
-        if (e.target === editContestModal) editContestModal.classList.remove("active");
+    contestSettingsModal.onclick = (e) => {
+        if (e.target === contestSettingsModal) contestSettingsModal.classList.remove("active");
     };
 
 

@@ -18,7 +18,11 @@
 
     {% csrf_token %}
 
-    <h2>Create Problem</h2>
+    {% if problem_type == "public" %}
+        <h2>Create Problem</h2>
+    {% elif problem_type == "contest" %}
+        <h2>Create Contest Problem</h2>
+    {% endif %}
 
     <div class="rules">
         <h3>

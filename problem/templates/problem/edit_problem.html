@@ -11,14 +11,18 @@
     {% if problem_type == "public" %}
         action="{% url 'edit-problem' current_problem.id %}"
     {% elif problem_type == "contest" %}
-        action="{% url 'edit-contest-problem' contest.id %}"
+        action="{% url 'edit-contest-problem' current_problem.id %}"
     {% endif %}
 
     method="POST">
 
     {% csrf_token %}
 
-    <h2>Edit Problem</h2>
+    {% if problem_type == "public" %}
+        <h2>Edit Problem</h2>
+    {% elif problem_type == "contest" %}
+        <h2>Edit Contest Problem</h2>
+    {% endif %}
 
     <div class="rules">
         <h3>

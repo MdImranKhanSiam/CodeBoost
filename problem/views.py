@@ -147,7 +147,6 @@ def create_problem(request):
 @login_required(login_url='/accounts/google/login/')
 def edit_problem(request, problem_id):
     problem_type = 'public'
-    problem = None
     current_problem = Problem.objects.get(id=problem_id)
     current_testcases = current_problem.testcases.all()
 

@@ -12,14 +12,14 @@
     <div class="problem-settings-modal" id="problemSettingsModal">
         <div class="problem-settings-modal-content">
             <h3>Problem Settings</h3>
-            <button class="problem-settings-btn" id="editProblemBtn" onclick="window.location.href='{% url 'edit-problem' problem.id %}'">
+            <button class="problem-settings-btn" id="editProblemBtn" onclick="window.location.href='{% if problem.is_public %}{% url 'edit-problem' problem.id %}{% else %}{% url 'edit-contest-problem' problem.id %}{% endif %}'">
                 <span class="icon">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </span>
                 <span class="text">Edit Problem</span>
             </button>
 
-            <button class="problem-settings-btn" id="deleteProblemBtn" onclick="window.location.href='{% url 'delete-problem' problem.id %}?next={{ request.get_full_path }}'">
+            <button class="problem-settings-btn" id="deleteProblemBtn" onclick="window.location.href='{% if problem.is_public %}{% url 'delete-problem' problem.id %}{% else %}{% url 'delete-contest-problem' problem.id %}{% endif %}?next={{ request.get_full_path }}'">
                 <span class="icon">
                     <i class="fa-solid fa-trash"></i>
                 </span>

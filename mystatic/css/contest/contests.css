@@ -87,7 +87,7 @@
 
 
 .create-contest-btn:hover .icon {
-    transform: rotate(90deg) scale(1.2);
+    transform: rotate(360deg) scale(1.2);
 }
 
 

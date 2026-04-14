@@ -12,7 +12,9 @@
 
         {% if request.user.is_authenticated and perms.contest.add_contest %}
             <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
-                <span class="icon">+</span>
+                <span class="icon">
+                    <i class="fa-solid fa-trophy"></i>
+                </span>
                 <span class="text">Create Contest</span>
             </button>
         {% endif %}

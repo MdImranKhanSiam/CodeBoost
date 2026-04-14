@@ -215,3 +215,93 @@ def create_contest_problem(request, contest_id):
         return render(request, 'problem/create_problem.html', context)
     else:
         return HttpResponse('Permission denied')
+    
+
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def edit_contest_problem(request, problem_id):
+    user = request.user
+    current_problem = Problem.objects.get(id=problem_id)
+    current_testcases = current_problem.testcases.all()
+    contest = current_problem.contests.first()
+
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        problem_type = 'contest'
+        
+        if request.method == 'POST':
+            title = request.POST.get('title')
+            statement = request.POST.get('statement')
+            problem_input = request.POST.get('problem_input')
+            problem_output = request.POST.get('problem_output')
+            note = request.POST.get('note')
+            difficulty = request.POST.get('difficulty')
+            time_limit = request.POST.get('time_limit')
+            memory_limit = request.POST.get('memory_limit')
+
+            testcases = json.loads(request.POST.get('testcases'))
+
+            # All actions are discarded if the creation of either the problem or the testcase object fails.
+            with transaction.atomic():
+                current_problem.title=title
+                current_problem.statement=statement
+                current_problem.problem_input=problem_input
+                current_problem.problem_output=problem_output
+                current_problem.note=note
+                current_problem.difficulty=difficulty
+                current_problem.time_limit=time_limit
+                current_problem.memory_limit=memory_limit
+                current_problem.save()
+
+                current_problem.testcases.all().delete()
+
+                testcase_objects = []
+
+                for testcase in testcases:
+                    testcase_object = TestCase(
+                        problem=current_problem,
+                        input_data=testcase['testcase_input'],
+                        expected_output=testcase['testcase_output'],
+                        is_hidden=testcase['hidden_testcase']
+                    )
+
+                    testcase_objects.append(testcase_object)
+
+                TestCase.objects.bulk_create(testcase_objects)
+
+            if current_problem:
+                return redirect('problem-detail', current_problem.id)
+            
+
+        context = {
+            'problem_type': problem_type,
+            'current_problem': current_problem,
+            'current_testcases': current_testcases,
+        }
+
+        return render(request, 'problem/edit_problem.html', context)
+    else:
+        return HttpResponse('Permission denied')
+    
+
+
+@login_required(login_url='/accounts/google/login/')
+def delete_contest_problem(request, problem_id):
+    user = request.user
+    problem = Problem.objects.get(id=problem_id)
+    contest = problem.contests.first()
+
+    if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
+        if request.method == 'POST':
+            problem.delete()
+
+            return redirect('contest-page', contest.id)
+    
+        context = {
+            'item' : problem.title,
+        }
+
+        return render(request, 'home/delete.html', context)
+    else:
+        return HttpResponse('Permission denied')

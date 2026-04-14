@@ -47,20 +47,8 @@
 
 .search-modal-content button {
     width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    background: #1e40af;
-    color: #94a3b8;
-    font-size: 15px;
-    font-weight: 600;
-    transition: 0.3s;
     margin-bottom: 10px;
 
-}
-
-.search-modal-content button:hover {
-    color: white;
-    background: #4f8cff;
 }
 
 /* Modal */
@@ -130,7 +118,7 @@
 
 
 .edit-contest-btn:hover .icon {
-    transform: rotate(90deg) scale(1.2);
+    transform: rotate(360deg) scale(1.2);
 }
 
 

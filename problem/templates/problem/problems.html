@@ -12,7 +12,9 @@
 
   {% if request.user.is_authenticated and perms.problem.add_problem %}
     <button class="create-problem-btn" onclick="window.location.href='{% url 'create-problem' %}'">
-        <span class="icon">+</span>
+        <span class="icon">
+          <i class="fa-solid fa-circle-plus"></i>
+        </span>
         <span class="text">Create Problem</span>
     </button>
   {% endif %}
