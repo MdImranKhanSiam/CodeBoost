@@ -1,6 +1,18 @@
+import threading
+from django.conf import settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.core.mail import send_mail
 from . models import UserProfile, EmailTemplate
+
+
+
+def send_async_email(subject,message,sender,receiver):
+    threading.Thread(
+        target=send_mail,
+        args=(subject, message, sender, [receiver]),
+        kwargs={'fail_silently': True}
+    ).start()
+
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
@@ -25,15 +37,9 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             if welcome_email.is_active:
                 subject=welcome_email.subject
                 message=welcome_email.message
-                sender='CodeBoost <noreply@gmail.com>'
+                sender=settings.DEFAULT_FROM_EMAIL
                 receiver=user.email
 
-                send_mail(
-                    subject,
-                    message,
-                    sender,
-                    [receiver],
-                    fail_silently=False,
-                )
+                send_async_email(subject,message,sender,receiver)
 
         return user
