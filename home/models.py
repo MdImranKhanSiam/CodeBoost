@@ -11,6 +11,23 @@ class CodeSnippet(models.Model):
 
     def __str__(self):
         return self.title
+    
+class EmailTemplate(models.Model):
+    EMAIL_TYPES = [
+        ('welcome', 'Welcome Email'),
+        ('contest_starting', 'Contest Starting Email'),
+        ('contest_ended', 'Contest Ended Email'),
+    ]
+
+    email_type = models.CharField(max_length=50, choices=EMAIL_TYPES, unique=True)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.get_email_type_display()
 
 
 class UserProfile(models.Model):
