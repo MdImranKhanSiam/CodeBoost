@@ -36,7 +36,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
             if welcome_email.is_active:
                 subject=welcome_email.subject
-                message=welcome_email.message
+                message=f'Hi {profile.display_name},\n\n{welcome_email.message}'
                 sender=settings.DEFAULT_FROM_EMAIL
                 receiver=user.email
 
