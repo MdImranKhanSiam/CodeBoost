@@ -19,12 +19,29 @@
     {% csrf_token %}
 
     {% if problem_type == "public" %}
-        <h2>Edit Problem</h2>
+        <h2>
+            Edit Problem
+        </h2>
+        
     {% elif problem_type == "contest" %}
         <h2>Edit Contest Problem</h2>
     {% endif %}
 
     <div class="rules">
+        {% if problem_type == "public" %}
+            <h3>
+                Warning:
+            </h3>
+            <br>
+            <p>
+                * This is not a contest problem
+            </p>
+            <p>
+                * Changes will reflect on the original problem
+            </p>
+            <br>
+        {% endif %}
+
         <h3>
             Standard:
         </h3>
