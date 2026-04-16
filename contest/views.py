@@ -32,8 +32,6 @@ def contests(request):
 @login_required(login_url='/accounts/google/login/')
 def create_contest(request):
     contest_form = ContestForm()
-    problems = Problem.objects.all()
-    all_users = User.objects.all()
 
     if request.method == 'POST':
         received_form = ContestForm(request.POST)
@@ -48,11 +46,38 @@ def create_contest(request):
 
     context = {
         'contest_form' :contest_form,
-        'problems': problems,
-        'users': all_users,
     }
 
     return render(request, 'contest/create_contest.html', context)
+
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def edit_contest(request, contest_id):
+    user = request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+
+    if (user.is_staff or user.has_perm('contest.change_contest') or user == contest.created_by or user in contest.moderators.all()):
+        contest_form = ContestForm(instance=contest)
+
+        if request.method == 'POST':
+            received_form = ContestForm(request.POST, instance=contest)
+
+            if received_form.is_valid():
+                contest_update_form = received_form.save(commit=False)
+                contest_update_form.save()
+
+                return redirect('contest-page', contest_update_form.id)
+
+        context = {
+            'contest': contest,
+            'contest_form': contest_form,
+        }
+
+        return render(request, 'contest/edit_contest.html', context)
+    else:
+        return HttpResponse('Permission Denied')
 
 
 
@@ -91,8 +116,6 @@ def contest_page(request, id):
     is_admin = None
 
     contest = get_object_or_404(Contest, id=id)
-    contest_form = ContestForm()
-    
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
         is_admin = True
@@ -100,6 +123,8 @@ def contest_page(request, id):
         unincluded_problems = Problem.objects.filter(is_public=True).exclude(
             id__in=contest.problems.all()
         )
+
+        moderators = contest.moderators.all()
         
         non_moderator_users = User.objects.filter(is_staff=False).exclude(
             id__in=contest.moderators.all()
@@ -120,6 +145,10 @@ def contest_page(request, id):
                 selected_problems = Problem.objects.filter(id__in=selected_problems_ids)
                 contest.problems.add(*selected_problems)
 
+            if request.POST.get('active_moderators'):
+                active_moderators = json.loads(request.POST.get('active_moderators'))
+                contest.moderators.set(active_moderators)
+
         problems = contest.problems.all()
 
         context = {
@@ -127,6 +156,7 @@ def contest_page(request, id):
             'is_admin': is_admin,
             'problems': problems,
             'unincluded_problems': unincluded_problems,
+            'moderators': moderators,
             'non_moderator_users': non_moderator_users,
         }
         

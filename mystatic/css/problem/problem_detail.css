@@ -403,5 +403,9 @@
         height:60vh;
     }
 
+    .problem-settings-modal-content {
+        padding: 20px;
+        width: 350px;
+    }
 
 }

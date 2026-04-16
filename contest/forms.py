@@ -3,14 +3,27 @@ from .models import Contest
 
 class ContestForm(forms.ModelForm):
     start_time = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            attrs={'type': 'datetime-local'},
+            format='%Y-%m-%dT%H:%M'
+        )
     )
+
     end_time = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            attrs={'type': 'datetime-local'},
+            format='%Y-%m-%dT%H:%M'
+        )
     )
 
     registration_deadline = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            attrs={'type': 'datetime-local'},
+            format='%Y-%m-%dT%H:%M'
+        )
     )
 
     class Meta:

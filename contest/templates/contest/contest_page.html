@@ -9,7 +9,7 @@
     <div class="search-modal-content">
         <h3>Contest Settings</h3>
         
-        <button class="edit-contest-btn" id="editContestBtn">
+        <button class="edit-contest-btn" id="editContestBtn" onclick="window.location.href='{% url 'edit-contest' contest.id %}'">
             <span class="icon">
                 <i class="fa-solid fa-pen-to-square"></i>
             </span>
@@ -21,6 +21,13 @@
                 <i class="fa-solid fa-user-plus"></i>
             </span>
             <span class="text">Add Moderators</span>
+        </button>
+
+        <button class="edit-contest-btn" id="removeModeratorsBtn">
+            <span class="icon">
+                <i class="fa-solid fa-user-minus"></i>
+            </span>
+            <span class="text">Remove Moderators</span>
         </button>
 
         <button class="edit-contest-btn" id="addProblemsBtn">
@@ -54,6 +61,26 @@
             <input type="hidden" name="users" id="usersInput">
 
             <button type="submit" class="submit-btn">Add Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="removeModeratorsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h3>Remove Moderators</h3>
+            </div>
+                
+            <div class="moderator-scroll">
+                <div class="moderator-list" id="moderatorList"></div>
+            </div>
+
+            <input type="hidden" name="active_moderators" id="moderatorsInput">
+
+            <button type="submit" class="moderator-submit-btn">Update Moderators</button>
         </form>
     </div>
 </div>
@@ -288,10 +315,12 @@ const isAdmin = {{ is_admin|yesno:"true,false" }};
 if (isAdmin) {
     const contestSettingsModal = document.getElementById("contestSettingsModal");
     const addModeratorsModal = document.getElementById("addModeratorsModal");
+    const removeModeratorsModal = document.getElementById("removeModeratorsModal");
     const addProblemsModal = document.getElementById("addProblemsModal");
 
     const contestSettingsBtn = document.getElementById("contestSettingsBtn");
     const addModeratorsBtn = document.getElementById("addModeratorsBtn");
+    const removeModeratorsBtn = document.getElementById("removeModeratorsBtn");
     const addProblemsBtn = document.getElementById("addProblemsBtn");
 
     contestSettingsBtn.onclick = () => {
@@ -309,6 +338,14 @@ if (isAdmin) {
 
     addModeratorsModal.onclick = (e) => {
         if (e.target === addModeratorsModal) addModeratorsModal.classList.remove("active");
+    };
+
+    removeModeratorsBtn.onclick = () => {
+        removeModeratorsModal.classList.add("active");
+    };
+
+    removeModeratorsModal.onclick = (e) => {
+        if (e.target === removeModeratorsModal) removeModeratorsModal.classList.remove("active");
     };
 
 
@@ -454,7 +491,75 @@ if (isAdmin) {
         labelKey: "title",
     });
 
+
+    // Remove Moderators
+
+    let Moderators = [];
+
+    {% for moderator in moderators %}
+        Moderators.push(
+            {
+                id: {{ moderator.id }},
+                display_name: "{{ moderator.userprofile.display_name|escapejs }}",
+                avatar: "{{ moderator.userprofile.avatar }}",
+            }
+        );
+    {% endfor %}
+
+
+    let activeModerators = [];
+
+    activeModerators = Moderators.map(m => m.id);
+
+    console.log(Moderators)
+
+    const moderatorsList = document.getElementById("moderatorList");
+
+    function renderModerators() {
+        moderatorsList.innerHTML = "";
+
+        Moderators.forEach(mod => {
+            if (!activeModerators.includes(mod.id)) return;
+
+            const row = document.createElement("div");
+            row.className = "moderator-item";
+
+            row.innerHTML = `
+                <div class="moderator-info">
+                    <img class="moderator-avatar" src="${mod.avatar}" />
+                    <span class="moderator-name">${mod.display_name}</span>
+                </div>
+
+                <button type="button" class="moderator-remove-btn" onclick="removeModerator(${mod.id})">
+                    Remove
+                </button>
+            `;
+
+            moderatorsList.appendChild(row);
+        });
+    }
+
+    function updateHiddenInput() {
+        document.getElementById("moderatorsInput").value = JSON.stringify(activeModerators);
+    }
+
+    function removeModerator(id) {
+        activeModerators = activeModerators.filter(modId => modId !== id);
+        renderModerators();
+        updateHiddenInput();
+    }
+
+
+    renderModerators();
+    updateHiddenInput();
+
+
+    // Remove Moderators
+
 }
+
+
+
 
 
 

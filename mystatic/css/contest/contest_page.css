@@ -45,7 +45,7 @@
     box-shadow: 0 0 5px rgba(79, 124, 255, 0.5);
 }
 
-.search-modal-content button {
+.search-modal-content .submit-btn, .search-modal-content .edit-contest-btn {
     width: 100%;
     margin-bottom: 10px;
 
@@ -343,6 +343,119 @@ input:focus, textarea:focus {
 
 
 
+/* Remove Moderators */
+
+
+.selector h3 {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.moderator-scroll {
+    max-height: 320px;    
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-bottom: 15px;
+}
+
+.moderator-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.moderator-scroll::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+.moderator-item {
+    display: flex;
+    flex-direction: column;   
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    margin-bottom: 10px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    transition: 0.25s;
+}
+
+.moderator-item:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.moderator-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.moderator-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.moderator-name {
+    color: #e5e7eb;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+
+.moderator-remove-btn {
+    margin-top: 20px;
+    width: 40%;
+    text-align: center;
+
+    padding: 6px 0;
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.moderator-remove-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    transform: scale(1.03);
+}
+
+.moderator-submit-btn {
+    width: 100%;
+    padding: 12px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.moderator-submit-btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* Remove Moderators */
+
+
 @media (max-width: 600px) {
     .contest-header {
         flex-direction: column;
@@ -352,5 +465,10 @@ input:focus, textarea:focus {
     .form-row {
         flex-direction: column;
         gap: 20px;
+    }
+
+    .search-modal-content {
+        padding: 20px;
+        width: 350px;
     }
 }

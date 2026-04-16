@@ -1,0 +1,50 @@
+{% extends 'home/master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/contest/create_contest.css' %}">
+
+<div class="contest-container">
+    <form method="POST" id="contestForm">
+        {% csrf_token %}
+
+        <h2>Edit Contest</h2>
+
+        <!-- Basic Fields -->
+        <div class="form-group">
+            <label>Name</label>
+            {{ contest_form.name }}
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            {{ contest_form.description }}
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label>Start Time</label>
+                {{ contest_form.start_time }}
+            </div>
+            <div>
+                <label>End Time</label>
+                {{ contest_form.end_time }}
+            </div>
+            <div>
+                <label>Registration Deadline</label>
+                {{ contest_form.registration_deadline }}
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Update Contest</button>
+    </form>
+</div>
+
+<script>
+
+</script>
+
+
+
+
+{% endblock %}
