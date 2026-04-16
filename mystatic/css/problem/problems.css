@@ -350,13 +350,38 @@
 
 
 
-@media (max-width: 768px) {
 
-  .problem-row{
-    grid-template-columns:60px 1fr 100px 80px;
-    font-size:13px;
+@media (max-width: 768px) {
+ 
+  .problem-row {
+    grid-template-columns: 40px 1fr 100px 80px;
+    padding: 11px 14px;
+    align-items: start;
   }
 
+  .col-title {
+    font-size: 13px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .difficulty-badge,
+  .status-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+.col-difficulty,
+.col-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+}
+
+
+
 
 
