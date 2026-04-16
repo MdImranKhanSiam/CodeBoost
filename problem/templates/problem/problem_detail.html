@@ -44,7 +44,7 @@
     <h1>{{ problem.title }}</h1>
 
     <div class="problem-meta">
-        <span>{{ problem.difficulty }}</span>
+        <span>{{ problem.difficulty|capfirst }}</span>
         <span>Time Limit: {{ problem.time_limit }}s</span>
         <span>Memory: {{ problem.memory_limit }}MB</span>
     </div>
