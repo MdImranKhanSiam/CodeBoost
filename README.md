@@ -6,9 +6,7 @@ It provides a secure environment for multi-language code execution, automated te
 
 CodeBoost is designed to support high submission volumes, structured contest management, and extensible architecture for future scalability.
 
-🌐 **Live Website:** [https://codeboost.online](https://codeboost.online)
-
-[![Live Site](https://img.shields.io/badge/Visit-CodeBoost-blue?style=for-the-badge)](https://codeboost.online)
+🌐 [![Live Website](https://img.shields.io/badge/Live%20Website-CodeBoost-blue?style=flat)](https://codeboost.online)
 
 ---
 
