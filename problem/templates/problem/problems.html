@@ -20,7 +20,6 @@
   {% endif %}
 
 
-
   <div class="controls">
     <input type="text" id="searchInput" placeholder="Search problems..." />
 
@@ -54,10 +53,12 @@ const problems = [
     id: {{ problem.id }},
     title: "{{ problem.title|escapejs }}",
     difficulty: "{{ problem.difficulty }}",
-    solved: {{ problem.solved|yesno:"true,false" }}
+    solved: {% if problem.id in solved_ids %}true{% else %}false{% endif %}
   },
   {% endfor %}
 ];
+
+console.log(problems)
 
 const container = document.getElementById('problemsContainer');
 const searchInput = document.getElementById('searchInput');

@@ -13,9 +13,18 @@ from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 def problems(request):
     problems = Problem.objects.filter(is_public=True)
-    
+    solved_ids = set()
+    solved_count = None
+
+    if request.user.is_authenticated:
+        user = request.user
+        solved_ids = set(user.userprofile.solved_problems.values_list('id', flat=True))
+        solved_count = user.userprofile.solved_count
+
     context = {
         'problems': problems,
+        'solved_ids': solved_ids,
+        'solved_count': solved_count,
     }
 
     return render(request, 'problem/problems.html', context)

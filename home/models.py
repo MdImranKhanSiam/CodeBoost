@@ -48,6 +48,7 @@ class UserProfile(models.Model):
     social = models.URLField(blank=True, null=True)
 
     rating = models.IntegerField(default=1200, blank=True, null=True)
+    solved_problems = models.ManyToManyField('problem.Problem', blank=True, null=True, related_name='solved_by')
     solved_count = models.IntegerField(default=0, blank=True, null=True)
 
 

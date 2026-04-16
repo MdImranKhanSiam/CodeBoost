@@ -117,6 +117,13 @@ def code_submission(submission_id):
     submission.execution_time = execution_time
     submission.memory_used = memory_used
     submission.verdict = final_verdict
+
+    if final_verdict == 'Accepted':
+        users_profile = submission.user.userprofile
+        users_profile.solved_problems.add(submission.problem)
+        users_profile.solved_count=users_profile.solved_problems.count()
+        users_profile.save()
+
     submission.save()       
 
 
