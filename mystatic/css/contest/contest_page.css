@@ -471,4 +471,26 @@ input:focus, textarea:focus {
         padding: 20px;
         width: 350px;
     }
+
+    .contest-tabs {
+        display: flex;
+        margin-top: 20px;
+        gap: 5px;
+    }
+
+    .contest-tabs button {
+        padding: 5px 10px;
+        background: #1e293b;
+        border: none;
+        color: white;
+        font-size: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    th, td {
+    padding: 5px;
+    font-size: 14px;
+    text-align: left;
+}
 }

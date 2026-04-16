@@ -150,7 +150,7 @@ def contest_page(request, id):
                 contest.moderators.set(active_moderators)
 
         problems = contest.problems.all()
-
+        
         context = {
             'contest': contest,
             'is_admin': is_admin,

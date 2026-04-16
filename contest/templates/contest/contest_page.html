@@ -158,7 +158,7 @@
             
             <tbody>
                 {% for p in problems %}
-                <tr onclick="window.location.href='{% url 'problem-detail' p.id %}'">
+                <tr onclick="window.location.href='{% url 'problem-detail' p.id %}?type=contest'">
                     <td>{{ forloop.counter }}</td>
                     <td class="problem-name">{{ p.title }}</td>
 

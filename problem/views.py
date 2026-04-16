@@ -59,6 +59,10 @@ def problem_detail(request, id):
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
 
+        submission_type = request.GET.get('type')
+        if submission_type == 'contest':
+            print('yes')
+
         current_submission = Submission.objects.create(
             user=request.user,
             problem=problem,
