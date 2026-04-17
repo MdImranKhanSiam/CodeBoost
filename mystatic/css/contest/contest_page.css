@@ -456,6 +456,103 @@ input:focus, textarea:focus {
 /* Remove Moderators */
 
 
+
+/* ===== Submissions List ===== */
+.submissions-list {
+    height: calc(100vh - 350px);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+
+.submissions-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.submissions-list::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.submissions-list::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+.submission-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 25px;
+    border-radius: 12px;
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.submission-header:hover {
+    color: var(--text);
+}
+
+.submission-body {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: var(--muted);
+    word-break: break-word;
+    transition: 0.3s;
+}
+
+.submission-body:hover {
+    color: var(--text);
+}
+
+.submission-body pre {
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    color: #f1f1f1;
+}
+
+.status {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status.accepted { background-color: #28a745; color: #fff; }
+.status.wrong { background-color: #dc3545; color: #fff; }
+.status.pending { background-color: #ffc107; color: #212529; }
+.status.error { background-color: #6c757d; color: #fff; }
+
+
+.loading {
+    text-align: center;
+    padding: 30px;
+    color: #aaa;
+}
+
+/* ===== Submissions List ===== */
+
+
 @media (max-width: 600px) {
     .contest-header {
         flex-direction: column;
@@ -489,8 +586,16 @@ input:focus, textarea:focus {
     }
 
     th, td {
-    padding: 5px;
-    font-size: 14px;
-    text-align: left;
-}
+        padding: 5px;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .submission-card {
+        padding: 15px 12px;
+    }
+    .submission-header {
+        flex-direction: column;
+        gap: 6px;
+    }
 }

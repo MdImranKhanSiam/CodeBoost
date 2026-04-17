@@ -41,6 +41,17 @@
         <br><br>
     {% endif %}
 
+
+    {% if contest_id %}
+        <button class="problem-settings-btn" onclick="window.location.href='{% url 'contest-page' contest_id %}'">
+            <span class="icon">
+                <i class="fa-solid fa-eye"></i>
+            </span>
+            <span class="text">View Contest</span>
+        </button>
+        <br><br>
+    {% endif %}
+
     <h1>{{ problem.title }}</h1>
 
     <div class="problem-meta">

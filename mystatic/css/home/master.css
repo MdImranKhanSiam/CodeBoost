@@ -788,7 +788,71 @@ tr:hover {
 
 
 
+/* Universal Clickable Button Design */
+.universal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* center content */
 
+    width: 170px;   /* FIXED WIDTH */
+    height: 45px;   /* FIXED HEIGHT */
+
+    gap: 8px;
+
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6a5cff, #8f6bff);
+    color: #fff;
+
+    font-weight: 500;
+    font-size: 14px;
+
+    border: none;
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+
+.universal-btn .icon {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+
+.universal-btn:hover {
+    transform: translateY(-2px);
+}
+
+
+.universal-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+
+    transition: all 0.5s ease;
+}
+
+.universal-btn:hover::before {
+    left: 100%;
+}
+
+
+.universal-btn:hover .icon {
+    transform: rotate(360deg) scale(1.2);
+}
+/* Universal Clickable Button Design */
 
 
 
@@ -816,6 +880,10 @@ tr:hover {
 .mobile-only-navbar {
     display: none;
 }
+
+
+
+
 
 
 /* MOBILE RESPONSIVE */

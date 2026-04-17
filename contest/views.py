@@ -1,14 +1,17 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
-from problem.models import Problem, TestCase
+from problem.models import Problem, TestCase, Submission
+from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
+from problem.background_task import code_submission
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 from . models import Contest
 from . forms import ContestForm
+
 
 
 
@@ -182,6 +185,126 @@ def contest_page(request, id):
 
 
 
+
+@ratelimit(key='user', rate='6/m', method='POST', block=True)
+@login_required(login_url='/accounts/google/login/')
+def contest_problem_detail(request, contest_id, problem_id):
+    now = timezone.now()
+    user = request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+    problem = Problem.objects.get(id=problem_id)
+    
+    is_admin = False
+
+    if (user == contest.created_by or user in contest.moderators.all()):
+        if problem.is_public:
+            if user.has_perm('problem.change_problem'):
+                is_admin = True    
+        elif not problem.is_public:
+            is_admin = True
+
+    if not is_admin:
+        if now < contest.start_time:
+            return HttpResponse("The contest hasn't started yet!", status=403)
+
+        if now >= contest.start_time and now <= contest.end_time and user not in contest.participants.all():
+            return HttpResponse('You are not a participant of this contest', status=403)
+
+
+    testcases = problem.testcases.filter(is_hidden=False)
+
+    language_id = '71'
+    language_name = LANGUAGES[language_id]
+
+    if request.method == 'POST':
+        now = timezone.now()
+
+        language_id = request.POST.get('language_id')
+        source_code = request.POST.get('source_code')
+
+        current_submission = Submission.objects.create(
+            user=request.user,
+            problem=problem,
+            code=source_code,
+            language=language_id
+        )
+
+        if not is_admin and now >= contest.start_time and now <= contest.end_time and user in contest.participants.all():
+            current_submission.contest = contest
+            current_submission.save()
+
+        code_submission.delay(current_submission.id)
+
+        if is_admin:
+            return redirect('submission')
+        else:
+            return redirect('contest-page', id=contest_id)
+        
+    context = {
+        'is_admin': is_admin,
+        'problem': problem,
+        'contest_id': contest.id,
+        'testcases': testcases,
+        'language_id': language_id,
+        'language_name': language_name,
+    }
+
+    return render(request, 'problem/problem_detail.html', context)
+
+
+
+
+@login_required(login_url='/accounts/google/login/')
+def contest_submissions_api(request, contest_id):
+    user=request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+    submissions = Submission.objects.filter(user=user, contest=contest).order_by('-submitted_at')
+    
+    data = []
+
+    for sub in submissions:
+        data.append({
+            "submission_id": sub.id,
+            "problem_title": sub.problem.title,
+            "problem_id": sub.problem.id,
+            "contest_id": sub.contest.id,
+            "status": sub.verdict,
+            "language": LANGUAGES[sub.language],
+            "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "execution_time": sub.execution_time,
+            "memory_used": sub.memory_used,
+            "total_testcases": sub.total_testcases,
+            "passed_testcases": sub.passed_testcases
+        })
+        
+    return JsonResponse({"submissions": data})
+
+
+# Work Left
+@login_required(login_url='/accounts/google/login/')
+def contest_submission_details(request, contest_id, submission_id):
+    user=request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+    submission = get_object_or_404(Submission, id=submission_id, user=user, contest=contest)
+
+    context = {
+        'problem_id': submission.problem.id,
+        'problem_name': submission.problem.title,
+        'contest_id': contest.id,
+        'source_code': submission.code,
+        'language': LANGUAGES[submission.language],
+        'execution_time': submission.execution_time,
+        'memory_used': submission.memory_used,
+        'verdict': submission.verdict,
+        # 'testcase_details': submission.testcase_details,
+        'passed_testcases': submission.passed_testcases,
+        'total_testcases': submission.total_testcases,
+    }
+
+    return render(request, 'problem/submission_details.html', context)
+
+
+
 @login_required(login_url='/accounts/google/login/')
 def create_contest_problem(request, contest_id):
     user = request.user
@@ -254,6 +377,10 @@ def create_contest_problem(request, contest_id):
 def edit_contest_problem(request, problem_id):
     user = request.user
     current_problem = Problem.objects.get(id=problem_id)
+
+    if current_problem.is_public:
+        return HttpResponse('Permission Denied')
+
     current_testcases = current_problem.testcases.all()
     contest = current_problem.contests.first()
 
@@ -319,7 +446,10 @@ def edit_contest_problem(request, problem_id):
 @login_required(login_url='/accounts/google/login/')
 def delete_contest_problem(request, problem_id):
     user = request.user
-    problem = Problem.objects.get(id=problem_id)
+    problem = get_object_or_404(Problem, id=problem_id)
+    if problem.is_public:
+        return HttpResponse('Permission Denied')
+    
     contest = problem.contests.first()
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):

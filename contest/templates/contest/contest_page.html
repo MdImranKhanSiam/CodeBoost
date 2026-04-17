@@ -137,9 +137,9 @@
     <!-- NAV -->
     <div class="contest-tabs">
         <button onclick="showTab('problems')" class="active">Problems</button>
-        <button onclick="showTab('your_submissions')">Your Submissions</button>
+        <button onclick="viewSubmissions()">Your Submissions</button>
         <button onclick="showTab('standings')">Standings</button>
-        <button onclick="showTab('all_submissions')">All Submissions</button>
+        <!-- <button onclick="showTab('all_submissions')">All Submissions</button> -->
         
     </div>
 
@@ -158,7 +158,7 @@
             
             <tbody>
                 {% for p in problems %}
-                <tr onclick="window.location.href='{% url 'problem-detail' p.id %}?type=contest'">
+                <tr onclick="window.location.href='{% url 'contest-problem-detail' contest.id p.id %}'">
                     <td>{{ forloop.counter }}</td>
                     <td class="problem-name">{{ p.title }}</td>
 
@@ -207,7 +207,7 @@
     </div>
 
     <!-- All SUBMISSIONS -->
-    <div id="all_submissions" class="tab">
+    <!-- <div id="all_submissions" class="tab">
         <table class="submission-table">
             <thead>
                 <tr>
@@ -228,30 +228,18 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+    </div> -->
 
     <!-- Your SUBMISSIONS -->
     <div id="your_submissions" class="tab">
-        <table class="submission-table">
-            <thead>
-                <tr>
-                    <th>Solution</th>
-                    <th>Problem</th>
-                    <th>Verdict</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sub in submissions %}
-                <tr>
-                    <td>{{ sub.user }}</td>
-                    <td>{{ sub.problem }}</td>
-                    <td class="verdict {{ sub.verdict }}">{{ sub.verdict }}</td>
-                    <td>{{ sub.created_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <div class="container">
+            <div id="submissions-list" class="submissions-list">
+                <!-- Submissions will be dynamically loaded here -->
+                <div class="loading">Loading submissions...</div>
+            </div>
+        </div>
+            
     </div>
 
 </div>
@@ -560,8 +548,62 @@ if (isAdmin) {
 
 
 
+// ================================
+// Live update submissions
+// ================================
+async function fetchSubmissions() {
+    try {
+        const response = await fetch("{% url 'contest-submissions-api' contest.id %}");
+        const data = await response.json();
 
+        const list = document.getElementById("submissions-list");
+        list.innerHTML = "";
 
+        if (data.submissions.length === 0) {
+            list.innerHTML = '<div class="loading">No submissions yet.</div>';
+            return;
+        }
+
+        data.submissions.forEach(sub => {
+            const card = document.createElement("div");
+            card.classList.add("submission-card");
+            
+            if (sub.status === "Pending") statusClass = "pending";
+            else if (sub.status === "Accepted") statusClass = "accepted";
+            else if (sub.status === "Wrong Answer") statusClass = "wrong";
+            else statusClass = "error";
+
+            card.innerHTML = `
+                <div onclick="window.location.href='/contests/contest_problem_detail/${sub.contest_id}/${sub.problem_id}/'" class="submission-header">
+                    <span>${sub.problem_title}</span>
+                    <span class="status ${statusClass}">${sub.status}</span>
+                </div>
+                <div onclick="window.location.href='/contests/contest_submission_details/${sub.contest_id}/${sub.submission_id}/'" class="submission-body">
+                    <strong>Language:</strong> ${sub.language}<br>
+                    <strong>Submitted at:</strong> ${sub.submitted_at}<br>
+                    <strong>Time:</strong> ${sub.execution_time} seconds<br>
+                    <strong>Memory:</strong> ${sub.memory_used} kb<br>
+                    <strong>Testcases:</strong> ${sub.total_testcases}<br>
+                    <strong>Passed:</strong> ${sub.passed_testcases}<br>
+                </div>
+            `;
+
+            list.appendChild(card);
+        });
+
+    } catch (err) {
+        console.error("Error fetching submissions:", err);
+    }
+}
+
+function viewSubmissions() {
+    showTab('your_submissions')
+    fetchSubmissions();
+}
+
+// ================================
+// Live update submissions
+// ================================
 
 
 </script>

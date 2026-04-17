@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from django_ratelimit.decorators import ratelimit
+from django.utils import timezone
 from . models import Problem, TestCase, Submission
 from . background_task import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
@@ -35,22 +36,28 @@ def problems(request):
 
 @ratelimit(key='user', rate='6/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
-def problem_detail(request, id):
+def problem_detail(request, problem_id):
     user = request.user
-    username = user.userprofile.display_name
-    problem = Problem.objects.get(id=id)
+    problem = get_object_or_404(Problem, id=problem_id)
+
+    if not problem.is_public:
+        contest = problem.contests.first()
+
+        if contest:
+            if (not user == contest.created_by and not user in contest.moderators.all()):
+                now = timezone.now()
+                
+                if now <= contest.end_time:
+                    return HttpResponse('Permission Denied To View Contest Problem')
+        else:
+            return HttpResponse('Not Found')
+
     testcases = problem.testcases.filter(is_hidden=False)
 
     is_admin = False
 
-    if problem.is_public:
-        if user.has_perm('problem.change_problem'):
-            is_admin = True
-    elif not problem.is_public:
-        contest = problem.contests.first()
-
-        if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
-            is_admin = True
+    if user.has_perm('problem.change_problem'):
+        is_admin = True
 
     language_id = '71'
     language_name = LANGUAGES[language_id]
@@ -58,10 +65,6 @@ def problem_detail(request, id):
     if request.method == 'POST':
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
-
-        submission_type = request.GET.get('type')
-        if submission_type == 'contest':
-            print('yes')
 
         current_submission = Submission.objects.create(
             user=request.user,
@@ -159,8 +162,13 @@ def create_problem(request):
 @permission_required('problem.change_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_problem(request, problem_id):
-    problem_type = 'public'
     current_problem = Problem.objects.get(id=problem_id)
+
+    if not current_problem.is_public:
+        return HttpResponse('Permission Denied')
+
+    problem_type = 'public'
+
     current_testcases = current_problem.testcases.all()
 
     if request.method == 'POST':
@@ -219,7 +227,10 @@ def edit_problem(request, problem_id):
 @permission_required('problem.delete_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def delete_problem(request, problem_id):
-    problem = Problem.objects.get(id=problem_id)
+    problem = get_object_or_404(Problem, id=problem_id)
+
+    if not problem.is_public:
+        return HttpResponse('Permission Denied')
 
     if request.method == 'POST':
         problem.delete()
@@ -248,7 +259,7 @@ def submission(request):
 
 @login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
-    submissions = Submission.objects.filter(user=request.user).order_by('-submitted_at')
+    submissions = Submission.objects.filter(user=request.user, contest__isnull=True).order_by('-submitted_at')
     
     data = []
 
@@ -272,7 +283,7 @@ def submissions_api(request):
 
 @login_required(login_url='/accounts/google/login/')
 def submission_details(request, id):
-    submission = get_object_or_404(Submission, id=id, user=request.user)
+    submission = get_object_or_404(Submission, id=id, user=request.user, contest__isnull=True)
 
     context = {
         'problem_id': submission.problem.id,

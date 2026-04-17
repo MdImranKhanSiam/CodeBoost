@@ -6,10 +6,26 @@
 
 
 <div class="container">
+  {% if contest_id %}
+      <button class="universal-btn" onclick="window.location.href='{% url 'contest-page' contest_id %}'">
+          <span class="icon">
+              <i class="fa-solid fa-eye"></i>
+          </span>
+          <span class="text">View Contest</span>
+      </button>
+      <br><br>
+  {% endif %}
 
   <!-- HEADER -->
   <div class="submission-header">
-    <div class="submission-title">Submission Details</div>
+    <div class="submission-title">
+      
+      {% if contest_id %}
+        Contest Submission Details
+      {% else %}
+        Submission Details
+      {% endif %}
+    </div>
     <div class="verdict 
     {% if verdict == 'Accepted' %}
         AC
@@ -28,7 +44,7 @@
     </div>
   </div>
 
-    <div class="problem-link" onclick="window.location.href='/problems/problem_detail/{{ problem_id }}/'">
+    <div class="problem-link" {% if contest_id %} onclick="window.location.href='/contests/contest_problem_detail/{{ contest_id }}/{{ problem_id }}/'" {% else %} onclick="window.location.href='/problems/problem_detail/{{ problem_id }}/'" {% endif %}>
     <span class="label">Problem:</span>
     <span class="name">{{ problem_name }}</span>
     </div>
