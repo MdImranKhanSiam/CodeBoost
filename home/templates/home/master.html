@@ -7,7 +7,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CodeBoost</title>
-    <link rel="icon" href="{% static 'image/other/codeboost.png' %}">
+    <link rel="icon" href="{% static 'image/other/codeboost_150x150.png' %}">
 
     <link rel="stylesheet" href="{% static 'css/home/master.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"/>
@@ -27,7 +27,7 @@
         <nav class="navbar">
 
             <button class="logo-icon">
-                <img onclick="openLogo(this.src)" class="logo-icon-img" src="{% static 'image/other/codeboost.png' %}" />
+                <img onclick="openLogo()" class="logo-icon-img" src="{% static 'image/other/codeboost_150x150.png' %}" />
 
                 <span>
                     <div class="logo">
@@ -103,7 +103,7 @@
         <!-- Center Logo -->
 
         <button class="logo-icon">
-            <img onclick="openLogo(this.src)" class="logo-icon-img" src="{% static 'image/other/codeboost.png' %}" />
+            <img onclick="openLogo()" class="logo-icon-img" src="{% static 'image/other/codeboost_150x150.png' %}" />
 
             <span>
                 <div class="logo">
@@ -326,17 +326,16 @@
 
 
         // Logo Modal
-        function openLogo(src) {
+        function openLogo() {
             const logoModal = document.getElementById("logoModal");
             const logo = document.getElementById("modalLogo");
-            logo.src = src;
+            logo.src = "{% static 'image/other/codeboost_optimized.png' %}";
             logoModal.style.display = "flex";
         }
 
         function closeLogo() {
             document.getElementById("logoModal").style.display = "none";
         }
-
 
     </script>
 </body>
