@@ -4,6 +4,8 @@
 
 <link rel="stylesheet" href="{% static 'css/contest/contests.css' %}" />
 
+<div id="floatingError" class="floating-error"></div>
+
 <section class="contests-section">
 
     <!-- HEADER -->
@@ -127,7 +129,7 @@
 <!-- JS -->
 <script>
 
-
+const errorBox = document.getElementById("floatingError");
 
 function contestPage(contestId) {
     window.location.href = `/contests/contest_page/${contestId}/`;
@@ -179,7 +181,15 @@ function updateContests() {
             btn.classList.remove("enter-btn", "view-btn");
             btn.classList.add("locked-btn");
             btn.innerText = "Locked";
-            btn.onclick = () => alert("Contest hasn't started yet");
+
+            btn.onclick = () => {
+                errorBox.textContent = "Contest hasn't started yet!";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
 
         } else if (now >= start && now <= end) {
             // RUNNING
@@ -230,11 +240,33 @@ function updateContests() {
         }
 
         
-        
-        if (joined) {
+        if (isAdmin) {
+            registerBtn.textContent = "Registration Disabled";
+            registerBtn.classList.add("disabled");
+            // registerBtn.disabled = true;
+
+            registerBtn.onclick = () => {
+                errorBox.textContent = "Admins of the contest cannot register";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
+        }
+        else if (joined) {
             registerBtn.textContent = "Registered ✔";
             registerBtn.classList.add("registered");
-            registerBtn.disabled = true;
+            // registerBtn.disabled = true;
+
+            registerBtn.onclick = () => {
+                errorBox.textContent = "Already Registered!";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
         }
         else if (now <= regDeadline) {
             registerBtn.textContent = "Register";
@@ -247,11 +279,19 @@ function updateContests() {
         else {
             registerBtn.textContent = "Registration Closed";
             registerBtn.classList.add("disabled");
-            registerBtn.disabled = true;
+            // registerBtn.disabled = true;
+
+            registerBtn.onclick = () => {
+                errorBox.textContent = "Registration for this contest is now closed!";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
         }
 
         if (isAdmin) {
-            console.log('This is admin mf');
             btn.classList.remove("view-btn", "locked-btn");
             btn.classList.add("enter-btn");
             btn.innerText = "Admin Access";

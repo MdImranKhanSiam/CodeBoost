@@ -55,9 +55,22 @@ class Submission(models.Model):
     #     ('CE', 'Compilation Error'),
     # ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
-    contest = models.ForeignKey("contest.Contest", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="submissions")
+    # Get all submissions of a user
+    # user.submissions.all()
+
+    # Get user submissions in a contest
+    # contest.submissions.filter(user=user)
+
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="submissions")
+    # Get submissions of a problem
+    # problem.submissions.all()
+    # problem.submissions.filter(verdict='AC')
+
+    contest = models.ForeignKey("contest.Contest", on_delete=models.CASCADE, null=True, blank=True, related_name="submissions")
+    # Get submissions in a contest
+    # contest.submissions.all()
+
     code = models.TextField()
     language = models.CharField(max_length=50)
     total_testcases = models.IntegerField(default=0)
@@ -79,11 +92,27 @@ class Submission(models.Model):
             models.Index(fields=['problem', 'verdict']),
             # Submission.objects.filter(problem=problem, verdict="accepted")
 
-            models.Index(fields=['user']),
-            # Submission.objects.filter(user=request.user)
 
-            models.Index(fields=['problem']),
-            # Submission.objects.filter(problem=problem)
+            #Contest-based queries
+
+            models.Index(fields=['contest', '-submitted_at']),
+            # Submission.objects.filter(contest=contest).order_by('-submitted_at')
+
+            models.Index(fields=['contest', 'user', 'problem', 'submitted_at'])
+            # Submission.objects.filter(contest=contest, user=user, problem=problem).order_by('submitted_at')
+
+            # models.Index(fields=['contest', 'user']),
+            # Submission.objects.filter(contest=contest, user=request.user)
+
+            # models.Index(fields=['contest', 'problem']),
+            # Submission.objects.filter(contest=contest, problem=problem)
+
+            # models.Index(fields=['contest', 'verdict']),
+            # Submission.objects.filter(contest=contest, user=user, problem=problem)
+
+            # models.Index(fields=['contest', 'problem', 'verdict']),
+            # Submission.objects.filter(contest=contest, problem=problem, verdict='AC')
+
         ]
 
 

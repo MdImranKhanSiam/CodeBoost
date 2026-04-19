@@ -11,6 +11,7 @@ from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 from . models import Contest
 from . forms import ContestForm
+from . services import contest_rank
 
 
 
@@ -87,11 +88,15 @@ def edit_contest(request, contest_id):
 @ratelimit(key='user', rate='5/m', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_registration(request, id):
+    user = request.user
     now = timezone.now()
 
     contest = get_object_or_404(Contest, id=id)
 
-    if request.user in contest.participants.all():
+    if user == contest.created_by or user in contest.moderators.all():
+        return HttpResponse('Admins of the contest cannot register!')
+
+    if user in contest.participants.all():
         return HttpResponse('Already registered')
 
     if contest.registration_deadline <= now:
@@ -119,6 +124,41 @@ def contest_page(request, id):
     is_admin = None
 
     contest = get_object_or_404(Contest, id=id)
+    problems = contest.problems.all()
+    participants = contest.participants.all()
+
+    rank = contest_rank(contest, problems, participants)
+
+
+    serial = 'A'
+
+    for problem in problems:
+        problem.serial = serial
+        serial = chr(ord(serial) + 1)
+
+    # participants = [18, 36, 34, 37]
+    standings = [
+        {
+            'participant': User.objects.get(id=36),
+            'solved': 6,
+            'penalty': 243,
+        },
+        {
+            'participant': User.objects.get(id=18),
+            'solved': 4,
+            'penalty': 623
+        },
+        {
+            'participant': User.objects.get(id=37),
+            'solved': 3,
+            'penalty': 245
+        },
+        {
+            'participant': User.objects.get(id=34),
+            'solved': 3,
+            'penalty': 343
+        }
+    ]
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
         is_admin = True
@@ -152,7 +192,6 @@ def contest_page(request, id):
                 active_moderators = json.loads(request.POST.get('active_moderators'))
                 contest.moderators.set(active_moderators)
 
-        problems = contest.problems.all()
         
         context = {
             'contest': contest,
@@ -172,13 +211,12 @@ def contest_page(request, id):
 
     if now >= contest.start_time and now <= contest.end_time and user not in contest.participants.all():
         return HttpResponse('You are not a participant of this contest')
-
-    problems = contest.problems.all()
     
     context = {
         'contest': contest,
         'is_admin': is_admin,
         'problems': problems,
+        'standings': standings,
     }
 
     return render(request, 'contest/contest_page.html', context)
