@@ -1,0 +1,688 @@
+{% extends 'home/master.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/contest/contest_page_second.css' %}">
+
+<!-- ==================== ADMIN MODALS — UNTOUCHED ==================== -->
+<div class="search-modal" id="contestSettingsModal">
+    <div class="search-modal-content">
+        <h3>Contest Settings</h3>
+        <button class="edit-contest-btn" id="editContestBtn" onclick="window.location.href='{% url 'edit-contest' contest.id %}'">
+            <span class="icon"><i class="fa-solid fa-pen-to-square"></i></span>
+            <span class="text">Edit Contest</span>
+        </button>
+        <button class="edit-contest-btn" id="addModeratorsBtn">
+            <span class="icon"><i class="fa-solid fa-user-plus"></i></span>
+            <span class="text">Add Moderators</span>
+        </button>
+        <button class="edit-contest-btn" id="removeModeratorsBtn">
+            <span class="icon"><i class="fa-solid fa-user-minus"></i></span>
+            <span class="text">Remove Moderators</span>
+        </button>
+        <button class="edit-contest-btn" id="addProblemsBtn">
+            <span class="icon"><i class="fa-solid fa-circle-plus"></i></span>
+            <span class="text">Add Problems</span>
+        </button>
+        <button class="edit-contest-btn" id="createProblemsBtn" onclick="window.location.href='{% url 'create-contest-problem' contest.id %}'">
+            <span class="icon"><i class="fa-solid fa-circle-plus"></i></span>
+            <span class="text">Create New Problem</span>
+        </button>
+    </div>
+</div>
+
+<div class="search-modal" id="addModeratorsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+            <div class="selector">
+                <h3>Add Moderators</h3>
+                <input type="text" id="userSearch" placeholder="Search users...">
+                <div class="dropdown" id="userDropdown"></div>
+                <div class="selected" id="selectedUsers"></div>
+            </div>
+            <input type="hidden" name="users" id="usersInput">
+            <button type="submit" class="submit-btn">Add Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="removeModeratorsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+            <div class="modal-header"><h3>Remove Moderators</h3></div>
+            <div class="moderator-scroll">
+                <div class="moderator-list" id="moderatorList"></div>
+            </div>
+            <input type="hidden" name="active_moderators" id="moderatorsInput">
+            <button type="submit" class="moderator-submit-btn">Update Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="addProblemsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+            <div class="selector">
+                <h3>Add Problems</h3>
+                <input type="text" id="problemSearch" placeholder="Search problems...">
+                <div class="dropdown" id="problemDropdown"></div>
+                <div class="selected" id="selectedProblems"></div>
+            </div>
+            <input type="hidden" name="problems" id="problemsInput">
+            <button type="submit" class="submit-btn">Add Problems</button>
+        </form>
+    </div>
+</div>
+<!-- ==================== END ADMIN MODALS ==================== -->
+
+
+<div class="contest-page">
+
+    {% if is_admin %}
+    <div class="admin-toolbar">
+        <button class="settings-trigger-btn" id="contestSettingsBtn">
+            <i class="fa-solid fa-gear"></i>
+            <span>Contest Settings</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- HEADER -->
+    <div class="contest-header">
+        <div class="header-left">
+            <div class="header-top-row">
+                <span class="contest-status-pill" id="statusPill"></span>
+            </div>
+            <h1 class="contest-title">{{ contest.name }}</h1>
+            {% if contest.description %}
+            <p class="contest-description">{{ contest.description }}</p>
+            {% endif %}
+            <div class="contest-meta-row">
+                <span class="meta-item">
+                    <i class="fa-regular fa-clock"></i>
+                    {{ contest.start_time|date:"M d, Y · H:i" }} — {{ contest.end_time|date:"H:i" }}
+                </span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="timer-card">
+                <div class="timer-label-text" id="timerLabel">Time Remaining</div>
+                <div class="timer-digits" id="timer">--:--:--</div>
+                <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="contest-tabs">
+        <button class="tab-btn active" id="tabProblems" onclick="showTab('problems', this)">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>Problems</span>
+        </button>
+        <button class="tab-btn" id="tabSubmissions" onclick="viewSubmissions(this)">
+            <i class="fa-solid fa-code"></i>
+            <span>My Submissions</span>
+        </button>
+        <button class="tab-btn" id="tabStandings" onclick="showTab('standings', this); buildStandings()">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Standings</span>
+        </button>
+    </div>
+
+    <!-- PROBLEMS TAB -->
+    <div id="problems" class="tab active">
+        <div class="table-wrap">
+            <table class="cp-table problems-cp-table">
+                <thead>
+                    <tr>
+                        <th class="th-serial">#</th>
+                        <th class="th-title">Problem</th>
+                        <th class="th-stat">AC / Total</th>
+                        <th class="th-status">Your Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in problems %}
+                    <tr class="prob-row" onclick="window.location.href='{% url 'contest-problem-detail' contest.id p.id %}'">
+                        <td>
+                            <span class="serial-pill">{{ p.serial }}</span>
+                        </td>
+                        <td class="prob-title-cell">
+                            <span class="prob-name">{{ p.title }}</span>
+                        </td>
+                        <td class="prob-stat-cell">
+                            <span class="ac-count">{{ p.solved }}</span>
+                            <span class="stat-divider">/</span>
+                            <span class="total-count">{{ p.attempted }}</span>
+                        </td>
+                        <td class="prob-status-cell">
+                            {% if user_status.p.id == "solved" %}
+                                <span class="user-status-pill status-solved">
+                                    <i class="fa-solid fa-check"></i> Solved
+                                </span>
+                            {% elif user_status.p.id == "tried" %}
+                                <span class="user-status-pill status-tried">
+                                    <i class="fa-solid fa-xmark"></i> Tried
+                                </span>
+                            {% else %}
+                                <span class="user-status-pill status-none">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-state">No problems added yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- STANDINGS TAB -->
+    <!-- STANDINGS TAB -->
+    <div id="standings" class="tab">
+        <div class="standings-toolbar">
+            <div class="standings-info">
+                <i class="fa-solid fa-trophy"></i>
+                <span id="standingsCount">— participants</span>
+            </div>
+            <div class="autoreload-wrap">
+                <label class="autoreload-label">
+                    <i class="fa-solid fa-rotate"></i>
+                    Auto Reload
+                </label>
+                <div class="autoreload-controls">
+                    <input 
+                        type="number" 
+                        id="reloadIntervalInput" 
+                        class="reload-input" 
+                        value="30" 
+                        min="5" 
+                        max="300"
+                        placeholder="sec"
+                    >
+                    <span class="reload-unit">sec</span>
+                    <button class="reload-toggle-btn" id="reloadToggleBtn" onclick="toggleAutoReload()">
+                        <i class="fa-solid fa-play" id="reloadIcon"></i>
+                        <span id="reloadBtnText">Start</span>
+                    </button>
+                </div>
+                <div class="reload-countdown" id="reloadCountdown"></div>
+            </div>
+        </div>
+
+        <div class="standings-outer">
+            <div class="standings-scroll">
+                <table class="cp-table standings-cp-table" id="standingsTable">
+                    <thead id="standingsHead"></thead>
+                    <tbody id="standingsBody">
+                        <tr><td colspan="10" class="empty-state">Loading standings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- YOUR SUBMISSIONS TAB -->
+    <div id="your_submissions" class="tab">
+        <div class="submissions-wrap">
+            <div class="submissions-header-bar">
+                <span class="submissions-title">
+                    <i class="fa-solid fa-code"></i> My Submissions
+                </span>
+                <button class="refresh-subs-btn" onclick="fetchSubmissions()">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+            </div>
+            <div id="submissions-list" class="submissions-list">
+                <div class="loading">Loading submissions...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+// ==================== DATA FROM DJANGO ====================
+const startTime = new Date("{{ contest.start_time|date:'c' }}");
+const endTime   = new Date("{{ contest.end_time|date:'c' }}");
+
+const problemsData = [
+    {% for p in problems %}
+    { id: {{ p.id }}, serial: "{{ p.serial }}", title: "{{ p.title|escapejs }}" },
+    {% endfor %}
+];
+
+const standingsData = [
+    {% for s in standings %}
+    {
+        display_name: "{{ s.participant.userprofile.display_name|escapejs }}",
+        avatar: "{{ s.participant.userprofile.avatar|default:''|escapejs }}",
+        total_solved: {{ s.total_solved }},
+        total_penalty_minutes: {{ s.total_penalty_in_minutes }},
+        problems: {
+            {% for sp in s.solved_problems_and_penalties %}
+            "{{ sp.problem.id }}": {
+                solved: {% if sp.solved_timestamp %}true{% else %}false{% endif %},
+                attempts: {{ sp.attempts }},
+                time: "{{ sp.solved_timestamp|default:'' }}",
+            },
+            {% endfor %}
+        }
+    },
+    {% endfor %}
+];
+
+// ==================== TAB SWITCH ====================
+function showTab(tabId, btn) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+}
+
+// ==================== TIMER ====================
+function updateTimer() {
+    const now   = new Date();
+    const pill  = document.getElementById("statusPill");
+    const label = document.getElementById("timerLabel");
+    const disp  = document.getElementById("timer");
+    const bar   = document.getElementById("timerBar");
+
+    const totalDuration = endTime - startTime;
+
+    if (now < startTime) {
+        pill.className = "contest-status-pill pill-upcoming";
+        pill.textContent = "Upcoming";
+        label.textContent = "Starts In";
+        disp.textContent = formatTime(startTime - now);
+        const pct = 100 - ((startTime - now) / (startTime - new Date(startTime - 7*86400000)) * 100);
+        bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+        bar.style.background = "#f59e0b";
+    } else if (now < endTime) {
+        pill.className = "contest-status-pill pill-running";
+        pill.innerHTML = '<span class="pulse-dot"></span> Running';
+        label.textContent = "Time Remaining";
+        disp.textContent = formatTime(endTime - now);
+        const elapsed = now - startTime;
+        const pct = 100 - (elapsed / totalDuration * 100);
+        bar.style.width = Math.max(0, pct) + "%";
+        bar.style.background = pct > 25 ? "#22c55e" : "#ef4444";
+    } else {
+        pill.className = "contest-status-pill pill-ended";
+        pill.textContent = "Finished";
+        label.textContent = "";
+        disp.textContent = "Contest Ended";
+        bar.style.width = "0%";
+    }
+}
+
+function formatTime(ms) {
+    let total = Math.floor(ms / 1000);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+
+// ==================== STANDINGS ====================
+let standingsBuilt = false;
+
+function buildStandings() {
+    standingsBuilt = true;
+    const head = document.getElementById("standingsHead");
+    const body = document.getElementById("standingsBody");
+    const countEl = document.getElementById("standingsCount");
+
+    if (countEl) countEl.textContent = `${standingsData.length} participant${standingsData.length !== 1 ? 's' : ''}`;
+
+    // Header
+    let hRow = `<tr>
+        <th class="sth sth-rank">#</th>
+        <th class="sth sth-user">Participant</th>
+        <th class="sth sth-solved">Solved</th>
+        <th class="sth sth-penalty">Penalty</th>`;
+    problemsData.forEach(p => {
+        hRow += `<th class="sth sth-prob"><span class="prob-col-label">${p.serial}</span></th>`;
+    });
+    hRow += `</tr>`;
+    head.innerHTML = hRow;
+
+    if (standingsData.length === 0) {
+        body.innerHTML = `<tr><td colspan="${4 + problemsData.length}" class="empty-state">No participants yet.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = "";
+    standingsData.forEach((s, idx) => {
+        const rankNum = idx + 1;
+        let rankCell = "";
+        if      (rankNum === 1) rankCell = `<span class="rank-medal medal-gold">1</span>`;
+        else if (rankNum === 2) rankCell = `<span class="rank-medal medal-silver">2</span>`;
+        else if (rankNum === 3) rankCell = `<span class="rank-medal medal-bronze">3</span>`;
+        else                    rankCell = `<span class="rank-plain">${rankNum}</span>`;
+
+        let row = `<tr class="standing-row ${rankNum <= 3 ? 'row-top-' + rankNum : ''}">
+            <td class="std-rank">${rankCell}</td>
+            <td class="std-user">
+                <div class="std-user-inner">
+                    <img class="std-avatar" src="${s.avatar}" onerror="this.src='https://res.cloudinary.com/dxd9uxsfv/image/upload/v1770963972/bjngg2xwjfd0vp69xv45.jpg'">
+                    <span class="std-name">${s.display_name}</span>
+                </div>
+            </td>
+            <td class="std-solved"><span class="solved-num-badge">${s.total_solved}</span></td>
+            <td class="std-penalty">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
+
+        problemsData.forEach(p => {
+            const pd = s.problems ? s.problems[String(p.id)] : null;
+            if (pd && pd.solved) {
+                const triesLabel = pd.attempts === 1 ? "1 try" : `${pd.attempts} tries`;
+                row += `<td class="prob-result-cell cell-solved">
+                            <div class="cell-check"><i class="fa-solid fa-check"></i></div>
+                            <div class="cell-tries">${triesLabel}</div>
+                            <div class="cell-time">${pd.time}</div>
+                        </td>`;
+            } else if (pd && pd.attempts > 0) {
+                row += `<td class="prob-result-cell cell-attempted">
+                            <div class="cell-wrong-icon"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="cell-wrong-tries">${pd.attempts}</div>
+                        </td>`;
+            } else {
+                row += `<td class="prob-result-cell cell-empty"></td>`;
+            }
+        });
+
+        row += `</tr>`;
+        body.innerHTML += row;
+    });
+}
+
+// ==================== AUTO RELOAD ====================
+let reloadTimer = null;
+let reloadCountdownTimer = null;
+let reloadActive = false;
+let countdownValue = 0;
+
+function toggleAutoReload() {
+    if (reloadActive) {
+        stopAutoReload();
+    } else {
+        startAutoReload();
+    }
+}
+
+function startAutoReload() {
+    const input = document.getElementById("reloadIntervalInput");
+    const seconds = parseInt(input.value) || 30;
+    if (seconds < 5) { input.value = 5; return; }
+
+    reloadActive = true;
+    countdownValue = seconds;
+
+    const btn = document.getElementById("reloadToggleBtn");
+    const icon = document.getElementById("reloadIcon");
+    const text = document.getElementById("reloadBtnText");
+    btn.classList.add("active");
+    icon.className = "fa-solid fa-stop";
+    text.textContent = "Stop";
+    input.disabled = true;
+
+    updateCountdownDisplay();
+
+    reloadCountdownTimer = setInterval(() => {
+        countdownValue--;
+        updateCountdownDisplay();
+        if (countdownValue <= 0) {
+            reloadStandings();
+            countdownValue = seconds;
+        }
+    }, 1000);
+}
+
+function stopAutoReload() {
+    reloadActive = false;
+    clearInterval(reloadCountdownTimer);
+
+    const btn = document.getElementById("reloadToggleBtn");
+    const icon = document.getElementById("reloadIcon");
+    const text = document.getElementById("reloadBtnText");
+    const countdown = document.getElementById("reloadCountdown");
+    btn.classList.remove("active");
+    icon.className = "fa-solid fa-play";
+    text.textContent = "Start";
+    countdown.textContent = "";
+    document.getElementById("reloadIntervalInput").disabled = false;
+}
+
+function updateCountdownDisplay() {
+    const el = document.getElementById("reloadCountdown");
+    if (el) el.textContent = `Reloading in ${countdownValue}s`;
+}
+
+function reloadStandings() {
+    standingsBuilt = false;
+    buildStandings();
+}
+
+// ==================== ADMIN — UNTOUCHED ====================
+const isAdmin = {{ is_admin|yesno:"true,false" }};
+
+if (isAdmin) {
+    const contestSettingsModal  = document.getElementById("contestSettingsModal");
+    const addModeratorsModal    = document.getElementById("addModeratorsModal");
+    const removeModeratorsModal = document.getElementById("removeModeratorsModal");
+    const addProblemsModal      = document.getElementById("addProblemsModal");
+    const contestSettingsBtn    = document.getElementById("contestSettingsBtn");
+    const addModeratorsBtn      = document.getElementById("addModeratorsBtn");
+    const removeModeratorsBtn   = document.getElementById("removeModeratorsBtn");
+    const addProblemsBtn        = document.getElementById("addProblemsBtn");
+
+    contestSettingsBtn.onclick  = () => contestSettingsModal.classList.add("active");
+    contestSettingsModal.onclick  = e => { if (e.target === contestSettingsModal)  contestSettingsModal.classList.remove("active"); };
+    addModeratorsBtn.onclick    = () => addModeratorsModal.classList.add("active");
+    addModeratorsModal.onclick  = e => { if (e.target === addModeratorsModal)  addModeratorsModal.classList.remove("active"); };
+    removeModeratorsBtn.onclick = () => removeModeratorsModal.classList.add("active");
+    removeModeratorsModal.onclick = e => { if (e.target === removeModeratorsModal) removeModeratorsModal.classList.remove("active"); };
+    addProblemsBtn.onclick      = () => addProblemsModal.classList.add("active");
+    addProblemsModal.onclick    = e => { if (e.target === addProblemsModal)  addProblemsModal.classList.remove("active"); };
+
+    let problems = [];
+    let users = [];
+
+    {% for problem in unincluded_problems %}
+        problems.push({ id: {{ problem.id }}, title: "{{ problem.title|escapejs }}" });
+    {% endfor %}
+
+    {% for user in non_moderator_users %}
+        users.push({ id: {{ user.id }}, display_name: "{{ user.userprofile.display_name|escapejs }}", avatar: "{{ user.userprofile.avatar }}" });
+    {% endfor %}
+
+    let selectedProblems = [];
+    let selectedUsers = [];
+
+    function initSearch({ inputId, dropdownId, selectedBoxId, data, selectedArray, labelKey, hasAvatar = false }) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+        const selectedBox = document.getElementById(selectedBoxId);
+        input.addEventListener("input", function () {
+            const value = input.value.toLowerCase();
+            dropdown.innerHTML = "";
+            if (!value) return;
+            const filtered = data.filter(item => (item[labelKey] || "").toLowerCase().includes(value));
+            filtered.forEach(item => {
+                if (selectedArray.includes(item.id)) return;
+                const option = document.createElement("div");
+                option.className = "dropdown-item";
+                if (hasAvatar) {
+                    option.innerHTML = `<img src="${item.avatar}" class="avatar"><span>${item[labelKey]}</span>`;
+                } else {
+                    option.textContent = item[labelKey];
+                }
+                option.onclick = () => {
+                    selectedArray.push(item.id);
+                    renderSelected(selectedBox, selectedArray, data, labelKey, hasAvatar);
+                    dropdown.innerHTML = "";
+                    input.value = "";
+                    updateHiddenInputs();
+                };
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
+    function renderSelected(container, selectedArray, data, labelKey, hasAvatar) {
+        container.innerHTML = "";
+        selectedArray.forEach(id => {
+            const item = data.find(x => x.id === id);
+            if (!item) return;
+            const tag = document.createElement("div");
+            tag.className = "tag";
+            if (hasAvatar) {
+                tag.innerHTML = `<img src="${item.avatar}" class="avatar small"><span>${item[labelKey]}</span><span class="remove-btn">✖</span>`;
+            } else {
+                tag.innerHTML = `<span>${item[labelKey]}</span><span class="remove-btn">✖</span>`;
+            }
+            tag.querySelector(".remove-btn").onclick = () => {
+                const index = selectedArray.indexOf(id);
+                if (index > -1) selectedArray.splice(index, 1);
+                renderSelected(container, selectedArray, data, labelKey, hasAvatar);
+                updateHiddenInputs();
+            };
+            container.appendChild(tag);
+        });
+    }
+
+    function updateHiddenInputs() {
+        document.getElementById("usersInput").value = JSON.stringify(selectedUsers);
+        document.getElementById("problemsInput").value = JSON.stringify(selectedProblems);
+    }
+
+    initSearch({ inputId: "userSearch", dropdownId: "userDropdown", selectedBoxId: "selectedUsers", data: users, selectedArray: selectedUsers, labelKey: "display_name", hasAvatar: true });
+    initSearch({ inputId: "problemSearch", dropdownId: "problemDropdown", selectedBoxId: "selectedProblems", data: problems, selectedArray: selectedProblems, labelKey: "title" });
+
+    let Moderators = [];
+    {% for moderator in moderators %}
+        Moderators.push({ id: {{ moderator.id }}, display_name: "{{ moderator.userprofile.display_name|escapejs }}", avatar: "{{ moderator.userprofile.avatar }}" });
+    {% endfor %}
+
+    let activeModerators = Moderators.map(m => m.id);
+    const moderatorsList = document.getElementById("moderatorList");
+
+    function renderModerators() {
+        moderatorsList.innerHTML = "";
+        Moderators.forEach(mod => {
+            if (!activeModerators.includes(mod.id)) return;
+            const row = document.createElement("div");
+            row.className = "moderator-item";
+            row.innerHTML = `
+                <div class="moderator-info">
+                    <img class="moderator-avatar" src="${mod.avatar}" />
+                    <span class="moderator-name">${mod.display_name}</span>
+                </div>
+                <button type="button" class="moderator-remove-btn" onclick="removeModerator(${mod.id})">Remove</button>`;
+            moderatorsList.appendChild(row);
+        });
+    }
+
+    function updateHiddenInput() {
+        document.getElementById("moderatorsInput").value = JSON.stringify(activeModerators);
+    }
+
+    function removeModerator(id) {
+        activeModerators = activeModerators.filter(modId => modId !== id);
+        renderModerators();
+        updateHiddenInput();
+    }
+
+    renderModerators();
+    updateHiddenInput();
+}
+
+// ==================== SUBMISSIONS — UNTOUCHED ====================
+async function fetchSubmissions() {
+    const list = document.getElementById("submissions-list");
+    list.innerHTML = `<div class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>`;
+
+    try {
+        const response = await fetch("{% url 'contest-submissions-api' contest.id %}");
+        const data = await response.json();
+
+        list.innerHTML = "";
+
+        if (data.submissions.length === 0) {
+            list.innerHTML = `<div class="sub-empty">
+                <i class="fa-solid fa-code"></i>
+                <p>No submissions yet.</p>
+            </div>`;
+            return;
+        }
+
+        data.submissions.forEach(sub => {
+            let statusClass, statusIcon;
+            if      (sub.status === "Accepted")    { statusClass = "accepted"; statusIcon = "fa-check"; }
+            else if (sub.status === "Wrong Answer") { statusClass = "wrong";    statusIcon = "fa-xmark"; }
+            else if (sub.status === "Pending")      { statusClass = "pending";  statusIcon = "fa-clock"; }
+            else                                    { statusClass = "error";    statusIcon = "fa-triangle-exclamation"; }
+
+            const card = document.createElement("div");
+            card.className = "sub-card";
+            card.innerHTML = `
+                <div class="sub-card-left ${statusClass}-bar"></div>
+                <div class="sub-card-body">
+                    <div class="sub-card-top">
+                        <span class="sub-prob-name" onclick="window.location.href='/contests/contest_problem_detail/${sub.contest_id}/${sub.problem_id}/'">
+                            ${sub.problem_title}
+                        </span>
+                        <span class="sub-verdict-pill ${statusClass}">
+                            <i class="fa-solid ${statusIcon}"></i>
+                            ${sub.status}
+                        </span>
+                    </div>
+                    <div class="sub-card-meta">
+                        <span class="sub-meta-item">
+                            <i class="fa-solid fa-code"></i> ${sub.language}
+                        </span>
+                        <span class="sub-meta-item">
+                            <i class="fa-regular fa-clock"></i> ${sub.submitted_at}
+                        </span>
+                        <span class="sub-meta-item">
+                            <i class="fa-solid fa-bolt"></i> ${sub.execution_time}s
+                        </span>
+                        <span class="sub-meta-item">
+                            <i class="fa-solid fa-memory"></i> ${sub.memory_used} KB
+                        </span>
+                    </div>
+                    <div class="sub-card-testcases">
+                        <div class="tc-bar-wrap">
+                            <div class="tc-bar" style="width: ${sub.total_testcases > 0 ? (sub.passed_testcases / sub.total_testcases * 100) : 0}%"></div>
+                        </div>
+                        <span class="tc-label">${sub.passed_testcases} / ${sub.total_testcases} testcases</span>
+                    </div>
+                </div>
+                <div class="sub-card-action" onclick="window.location.href='/contests/contest_submission_details/${sub.contest_id}/${sub.submission_id}/'">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>`;
+            list.appendChild(card);
+        });
+
+    } catch (err) {
+        list.innerHTML = `<div class="sub-empty"><i class="fa-solid fa-triangle-exclamation"></i><p>Failed to load submissions.</p></div>`;
+        console.error("Error fetching submissions:", err);
+    }
+}
+
+function viewSubmissions(btn) {
+    showTab('your_submissions', btn);
+    fetchSubmissions();
+}
+</script>
+
+{% endblock %}

@@ -124,41 +124,19 @@ def contest_page(request, id):
     is_admin = None
 
     contest = get_object_or_404(Contest, id=id)
-    problems = contest.problems.all()
+    problems = contest.problems.all().order_by('id')
     participants = contest.participants.all()
 
-    rank = contest_rank(contest, problems, participants)
+    standings = contest_rank(contest, problems, participants)
 
-
+    problem_serial_id = {}
     serial = 'A'
 
     for problem in problems:
         problem.serial = serial
+        problem_serial_id[problem.id] = serial
         serial = chr(ord(serial) + 1)
 
-    # participants = [18, 36, 34, 37]
-    standings = [
-        {
-            'participant': User.objects.get(id=36),
-            'solved': 6,
-            'penalty': 243,
-        },
-        {
-            'participant': User.objects.get(id=18),
-            'solved': 4,
-            'penalty': 623
-        },
-        {
-            'participant': User.objects.get(id=37),
-            'solved': 3,
-            'penalty': 245
-        },
-        {
-            'participant': User.objects.get(id=34),
-            'solved': 3,
-            'penalty': 343
-        }
-    ]
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
         is_admin = True
@@ -197,12 +175,13 @@ def contest_page(request, id):
             'contest': contest,
             'is_admin': is_admin,
             'problems': problems,
+            'standings': standings,
             'unincluded_problems': unincluded_problems,
             'moderators': moderators,
             'non_moderator_users': non_moderator_users,
         }
         
-        return render(request, 'contest/contest_page.html', context)
+        return render(request, 'contest/contest_page_second.html', context)
 
     is_admin = False
 
@@ -219,7 +198,7 @@ def contest_page(request, id):
         'standings': standings,
     }
 
-    return render(request, 'contest/contest_page.html', context)
+    return render(request, 'contest/contest_page_second.html', context)
 
 
 

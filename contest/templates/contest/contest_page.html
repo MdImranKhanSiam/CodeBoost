@@ -198,8 +198,8 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ s.participant.userprofile.display_name }}</td>
-                    <td>{{ s.solved }}</td>
-                    <td>{{ s.penalty }}</td>
+                    <td>{{ s.total_solved }}</td>
+                    <td>{{ s.total_penalty_in_minutes }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
