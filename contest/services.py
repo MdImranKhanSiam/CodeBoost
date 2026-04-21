@@ -2,6 +2,13 @@ from problem.models import Submission
 
 def contest_rank(contest, problems, participants):
     rank = []
+    overallStatus = {}
+
+    for problem in problems:
+        overallStatus[problem.id] = {
+            'solved': 0,
+            'attempted': 0
+        }
 
     for participant in participants:
         solved_problems_and_penalties = []
@@ -40,6 +47,8 @@ def contest_rank(contest, problems, participants):
                         'solved_timestamp': solved_timestamp
                     }
                 )
+
+                overallStatus[problem.id]['solved'] += 1
             else:
                 solved_problems_and_penalties.append(
                     {
@@ -47,6 +56,9 @@ def contest_rank(contest, problems, participants):
                         'attempts': attempts
                     }
                 )
+            
+            if attempts > 0:
+                overallStatus[problem.id]['attempted'] += 1
 
         total_penalty = sum(item.get('penalty', 0) for item in solved_problems_and_penalties)
         total_penalty_in_minutes = int(total_penalty/60000)
@@ -64,4 +76,4 @@ def contest_rank(contest, problems, participants):
 
     rank = sorted(rank, key=lambda x: (-x["total_solved"], x["total_penalty"]))
 
-    return rank
+    return rank, overallStatus

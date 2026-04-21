@@ -127,15 +127,15 @@ def contest_page(request, id):
     problems = contest.problems.all().order_by('id')
     participants = contest.participants.all()
 
-    standings = contest_rank(contest, problems, participants)
+    standings, overallStatus = contest_rank(contest, problems, participants)
 
-    problem_serial_id = {}
     serial = 'A'
 
     for problem in problems:
         problem.serial = serial
-        problem_serial_id[problem.id] = serial
         serial = chr(ord(serial) + 1)
+        problem.solved = overallStatus[problem.id]['solved']
+        problem.attempted = overallStatus[problem.id]['attempted']
 
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
@@ -170,7 +170,22 @@ def contest_page(request, id):
                 active_moderators = json.loads(request.POST.get('active_moderators'))
                 contest.moderators.set(active_moderators)
 
-        
+        problems = contest.problems.all().order_by('id')
+
+        serial = 'A'
+
+        for problem in problems:
+            problem.serial = serial
+            serial = chr(ord(serial) + 1)
+            getOverallStatus = overallStatus.get(problem.id, None)
+
+            if getOverallStatus:
+                problem.solved = getOverallStatus['solved']
+                problem.attempted = getOverallStatus['attempted']
+            else:
+                problem.solved = 0
+                problem.attempted = 0
+
         context = {
             'contest': contest,
             'is_admin': is_admin,

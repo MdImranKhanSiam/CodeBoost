@@ -158,19 +158,7 @@
                             <span class="stat-divider">/</span>
                             <span class="total-count">{{ p.attempted }}</span>
                         </td>
-                        <td class="prob-status-cell">
-                            {% if user_status.p.id == "solved" %}
-                                <span class="user-status-pill status-solved">
-                                    <i class="fa-solid fa-check"></i> Solved
-                                </span>
-                            {% elif user_status.p.id == "tried" %}
-                                <span class="user-status-pill status-tried">
-                                    <i class="fa-solid fa-xmark"></i> Tried
-                                </span>
-                            {% else %}
-                                <span class="user-status-pill status-none">—</span>
-                            {% endif %}
-                        </td>
+                        <td class="prob-status-cell" id="solvedStatus-{{p.id}}"></td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -190,7 +178,7 @@
                 <i class="fa-solid fa-trophy"></i>
                 <span id="standingsCount">— participants</span>
             </div>
-            <div class="autoreload-wrap">
+            <!-- <div class="autoreload-wrap">
                 <label class="autoreload-label">
                     <i class="fa-solid fa-rotate"></i>
                     Auto Reload
@@ -212,7 +200,7 @@
                     </button>
                 </div>
                 <div class="reload-countdown" id="reloadCountdown"></div>
-            </div>
+            </div> -->
         </div>
 
         <div class="standings-outer">
@@ -248,6 +236,8 @@
 
 
 <script>
+const currentUserId = "{{ request.user.id }}";
+
 // ==================== DATA FROM DJANGO ====================
 const startTime = new Date("{{ contest.start_time|date:'c' }}");
 const endTime   = new Date("{{ contest.end_time|date:'c' }}");
@@ -260,7 +250,7 @@ const problemsData = [
 
 const standingsData = [
     {% for s in standings %}
-    {
+    {   participant_id: "{{ s.participant.id}}",
         display_name: "{{ s.participant.userprofile.display_name|escapejs }}",
         avatar: "{{ s.participant.userprofile.avatar|default:''|escapejs }}",
         total_solved: {{ s.total_solved }},
@@ -277,6 +267,49 @@ const standingsData = [
     },
     {% endfor %}
 ];
+
+
+
+function updateStatus(problemId, status) {
+    const cell = document.getElementById(`solvedStatus-${problemId}`);
+
+    if (status === "solved") {
+        cell.innerHTML = `
+            <span class="user-status-pill status-solved">
+                <i class="fa-solid fa-check"></i> Solved
+            </span>
+        `;
+    } else if (status === "tried") {
+        cell.innerHTML = `
+            <span class="user-status-pill status-tried">
+                <i class="fa-solid fa-xmark"></i> Tried
+            </span>
+        `;
+    } else {
+        cell.innerHTML = `
+            <span class="user-status-pill status-none">—</span>
+        `;
+    }
+}
+
+standingsData.forEach(participant => {
+    if (participant.participant_id == currentUserId) {
+        problemsData.forEach(problem => {
+            const currentProblemStatus = participant.problems[problem.id];
+
+            if (currentProblemStatus.solved) {
+                updateStatus(problem.id, "solved");
+            }
+            else if (currentProblemStatus.attempts > 0) {
+                updateStatus(problem.id, "tried")
+            }
+            else {
+                updateStatus(problem.id, "none")
+            }
+        });
+    }
+});
+// console.log(solvedProblems);
 
 // ==================== TAB SWITCH ====================
 function showTab(tabId, btn) {
@@ -374,7 +407,7 @@ function buildStandings() {
             <td class="std-rank">${rankCell}</td>
             <td class="std-user">
                 <div class="std-user-inner">
-                    <img class="std-avatar" src="${s.avatar}" onerror="this.src='https://res.cloudinary.com/dxd9uxsfv/image/upload/v1770963972/bjngg2xwjfd0vp69xv45.jpg'">
+                    <img class="std-avatar" src="${s.avatar}">
                     <span class="std-name">${s.display_name}</span>
                 </div>
             </td>
