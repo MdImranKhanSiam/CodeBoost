@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_api',
     'home',
     'problem',
     'contest',
@@ -130,6 +132,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'home.middleware.BlockDirectGoogleCallbackMiddleware',
     'axes.middleware.AxesMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 AXES_FAILURE_LIMIT = 10
@@ -256,3 +259,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+
+
+CORS_ALLOW_ALL_ORIGINS = True
