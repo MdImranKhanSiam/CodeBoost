@@ -19,9 +19,9 @@ from . services import contest_rank
 def contests(request):
     now = timezone.now()
 
-    upcoming = list(Contest.objects.filter(start_time__gt=now).order_by("start_time"))
-    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now).order_by("end_time"))
-    ended = list(Contest.objects.filter(end_time__lt=now).order_by("-end_time"))
+    upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=False).order_by("start_time"))
+    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now,  is_private=False).order_by("end_time"))
+    ended = list(Contest.objects.filter(end_time__lt=now,  is_private=False).order_by("-end_time"))
     
     contests = running + upcoming + ended
 
@@ -30,6 +30,23 @@ def contests(request):
     }
 
     return render(request, 'contest/contests.html', context)
+
+
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
+def private_contests(request):
+    now = timezone.now()
+
+    upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=True).order_by("start_time"))
+    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now,  is_private=True).order_by("end_time"))
+    ended = list(Contest.objects.filter(end_time__lt=now,  is_private=True).order_by("-end_time"))
+    
+    contests = running + upcoming + ended
+
+    context = {
+        'contests': contests,
+    }
+
+    return render(request, 'contest/private_contests.html', context)
 
 
 @ratelimit(key='user', rate='5/m', method='POST', block=True)
