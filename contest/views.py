@@ -15,7 +15,7 @@ from . services import contest_rank
 
 
 
-
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 def contests(request):
     now = timezone.now()
 
@@ -32,6 +32,7 @@ def contests(request):
     return render(request, 'contest/contests.html', context)
 
 
+@ratelimit(key='user', rate='5/m', method='POST', block=True)
 @permission_required('contest.add_contest', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def create_contest(request):
@@ -56,7 +57,7 @@ def create_contest(request):
 
 
 
-
+@ratelimit(key='user', rate='5/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_contest(request, contest_id):
     user = request.user
@@ -116,7 +117,7 @@ def contest_registration(request, id):
 
 
 
-
+@ratelimit(key='user', rate='20/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_page(request, id):
     now = timezone.now()
@@ -215,6 +216,21 @@ def contest_page(request, id):
 
     return render(request, 'contest/contest_page_second.html', context)
 
+
+@ratelimit(key='user', rate='5/m', method='POST', block=True)
+@login_required(login_url='/accounts/google/login/')
+def leaderboard(request, contest_id):
+    now = timezone.now()
+    contest = get_object_or_404(Contest, id=contest_id)
+
+    if now < contest.start_time:
+        return HttpResponse("The contest hasn't started yet!", status=403)
+
+    context = {
+        'contest_id': contest_id,
+    }
+
+    return render(request, 'contest/leaderboard.html', context)
 
 
 

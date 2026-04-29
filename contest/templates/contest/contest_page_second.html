@@ -178,7 +178,7 @@
                 <i class="fa-solid fa-trophy"></i>
                 <span id="standingsCount">— participants</span>
             </div>
-            <!-- <div class="autoreload-wrap">
+            <div class="autoreload-wrap">
                 <label class="autoreload-label">
                     <i class="fa-solid fa-rotate"></i>
                     Auto Reload
@@ -200,7 +200,7 @@
                     </button>
                 </div>
                 <div class="reload-countdown" id="reloadCountdown"></div>
-            </div> -->
+            </div>
         </div>
 
         <div class="standings-outer">
@@ -237,37 +237,55 @@
 
 <script>
 const currentUserId = "{{ request.user.id }}";
+contest_id = "{{ contest.id }}";
 
 // ==================== DATA FROM DJANGO ====================
 const startTime = new Date("{{ contest.start_time|date:'c' }}");
 const endTime   = new Date("{{ contest.end_time|date:'c' }}");
 
-const problemsData = [
-    {% for p in problems %}
-    { id: {{ p.id }}, serial: "{{ p.serial }}", title: "{{ p.title|escapejs }}" },
-    {% endfor %}
-];
+problemsData = [];
 
-const standingsData = [
-    {% for s in standings %}
-    {   participant_id: "{{ s.participant.id}}",
-        display_name: "{{ s.participant.userprofile.display_name|escapejs }}",
-        avatar: "{{ s.participant.userprofile.avatar|default:''|escapejs }}",
-        total_solved: {{ s.total_solved }},
-        total_penalty_minutes: {{ s.total_penalty_in_minutes }},
-        problems: {
-            {% for sp in s.solved_problems_and_penalties %}
-            "{{ sp.problem.id }}": {
-                solved: {% if sp.solved_timestamp %}true{% else %}false{% endif %},
-                attempts: {{ sp.attempts }},
-                time: "{{ sp.solved_timestamp|default:'' }}",
-            },
-            {% endfor %}
+standingsData = [];
+
+
+async function fetchStandings() {
+    try {
+        const response = await fetch(`/api/contest_leaderboard/?contest_id=${contest_id}`, {
+            method: "GET",
+        });
+
+        if (response) {
+            const data = await response.json();
+
+            problemsData = data['problems'];
+
+            data['standings'].forEach(participant => {
+                const problems = {}
+
+                participant['solved_problems_and_penalties'].forEach(problem => {
+                    problems[problem['problem_id']] = {
+                        solved: problem['solved_timestamp'] ? true : false,
+                        attempts: problem['attempts'],
+                        time: problem['solved_timestamp'],
+                    };
+                });
+
+                standingsData.push({
+                    participant_id: participant['participant_id'],
+                    display_name: participant['participant_name'],
+                    avatar: participant['participant_avatar'],
+                    total_solved: participant['total_solved'],
+                    total_penalty_minutes: participant['total_penalty_in_minutes'],
+                    problems: problems,
+                });
+            });
+
+            start();
         }
-    },
-    {% endfor %}
-];
-
+    } catch (error) {
+        console.error('Error Fetching Standings', error);
+    }
+}
 
 
 function updateStatus(problemId, status) {
@@ -502,8 +520,16 @@ function updateCountdownDisplay() {
 
 function reloadStandings() {
     standingsBuilt = false;
+    problemsData.length = 0;
+    standingsData.length = 0;
+    fetchStandings();
+}
+
+function start() {
     buildStandings();
 }
+
+fetchStandings();
 
 // ==================== ADMIN — UNTOUCHED ====================
 const isAdmin = {{ is_admin|yesno:"true,false" }};

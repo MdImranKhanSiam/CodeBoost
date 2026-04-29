@@ -13,4 +13,5 @@ urlpatterns = [
     path('contest_submission_details/<str:contest_id>/<str:submission_id>/', views.contest_submission_details, name='contest-submission-details'),
     path('contest_submissions_api/<str:contest_id>/', views.contest_submissions_api, name='contest-submissions-api'),
     path('contest_registration/<str:id>/', views.contest_registration, name='contest-registration'),
+    path('leaderboard/<str:contest_id>/', views.leaderboard, name='leaderboard'),
 ]

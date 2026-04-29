@@ -1,0 +1,250 @@
+{% extends 'home/master.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/contest/contest_page_second.css' %}" />
+<link rel="stylesheet" href="{% static 'css/contest/leaderboard.css' %}" />
+
+<div class="leaderboard-section">
+    <div class="standings-toolbar">
+        <div class="standings-info">
+            <i class="fa-solid fa-trophy"></i>
+            <span id="standingsCount">— participants</span>
+        </div>
+        <div class="autoreload-wrap">
+            <label class="autoreload-label">
+                <i class="fa-solid fa-rotate"></i>
+                Auto Reload
+            </label>
+            <div class="autoreload-controls">
+                <input 
+                    type="number" 
+                    id="reloadIntervalInput" 
+                    class="reload-input" 
+                    value="30" 
+                    min="5" 
+                    max="300"
+                    placeholder="sec"
+                >
+                <span class="reload-unit">sec</span>
+                <button class="reload-toggle-btn" id="reloadToggleBtn" onclick="toggleAutoReload()">
+                    <i class="fa-solid fa-play" id="reloadIcon"></i>
+                    <span id="reloadBtnText">Start</span>
+                </button>
+            </div>
+            <div class="reload-countdown" id="reloadCountdown"></div>
+        </div>
+    </div>
+
+    <div class="standings-outer">
+        <div class="standings-scroll">
+            <table class="cp-table standings-cp-table" id="standingsTable">
+                <thead id="standingsHead"></thead>
+                <tbody id="standingsBody">
+                    <tr><td colspan="10" class="empty-state">Loading standings...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+contest_id = "{{ contest_id }}";
+
+problemsData = [];
+standingsData = [];
+
+async function fetchStandings() {
+    try {
+        const response = await fetch(`/api/contest_leaderboard/?contest_id=${contest_id}`, {
+            method: "GET",
+        });
+
+        if (response) {
+            const data = await response.json();
+
+            problemsData = data['problems'];
+
+            data['standings'].forEach(participant => {
+                const problems = {}
+
+                participant['solved_problems_and_penalties'].forEach(problem => {
+                    problems[problem['problem_id']] = {
+                        solved: problem['solved_timestamp'] ? true : false,
+                        attempts: problem['attempts'],
+                        time: problem['solved_timestamp'],
+                    };
+                });
+
+                standingsData.push({
+                    participant_id: participant['participant_id'],
+                    display_name: participant['participant_name'],
+                    avatar: participant['participant_avatar'],
+                    total_solved: participant['total_solved'],
+                    total_penalty_minutes: participant['total_penalty_in_minutes'],
+                    problems: problems,
+                });
+            });
+
+            start();
+        }
+    } catch (error) {
+        console.error('Error Fetching Standings', error);
+    }
+}
+
+
+
+// ==================== STANDINGS ====================
+let standingsBuilt = false;
+
+function buildStandings() {
+    standingsBuilt = true;
+    const head = document.getElementById("standingsHead");
+    const body = document.getElementById("standingsBody");
+    const countEl = document.getElementById("standingsCount");
+
+    if (countEl) countEl.textContent = `${standingsData.length} participant${standingsData.length !== 1 ? 's' : ''}`;
+
+    // Header
+    let hRow = `<tr>
+        <th class="sth sth-rank">#</th>
+        <th class="sth sth-user">Participant</th>
+        <th class="sth sth-solved">Solved</th>
+        <th class="sth sth-penalty">Penalty</th>`;
+    problemsData.forEach(p => {
+        hRow += `<th class="sth sth-prob"><span class="prob-col-label">${p.serial}</span></th>`;
+    });
+    hRow += `</tr>`;
+    head.innerHTML = hRow;
+
+    if (standingsData.length === 0) {
+        body.innerHTML = `<tr><td colspan="${4 + problemsData.length}" class="empty-state">No participants yet.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = "";
+    standingsData.forEach((s, idx) => {
+        const rankNum = idx + 1;
+        let rankCell = "";
+        if      (rankNum === 1) rankCell = `<span class="rank-medal medal-gold">1</span>`;
+        else if (rankNum === 2) rankCell = `<span class="rank-medal medal-silver">2</span>`;
+        else if (rankNum === 3) rankCell = `<span class="rank-medal medal-bronze">3</span>`;
+        else                    rankCell = `<span class="rank-plain">${rankNum}</span>`;
+
+        let row = `<tr class="standing-row ${rankNum <= 3 ? 'row-top-' + rankNum : ''}">
+            <td class="std-rank">${rankCell}</td>
+            <td class="std-user">
+                <div class="std-user-inner">
+                    <img class="std-avatar" src="${s.avatar}">
+                    <span class="std-name">${s.display_name}</span>
+                </div>
+            </td>
+            <td class="std-solved"><span class="solved-num-badge">${s.total_solved}</span></td>
+            <td class="std-penalty">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
+
+        problemsData.forEach(p => {
+            const pd = s.problems ? s.problems[String(p.id)] : null;
+            if (pd && pd.solved) {
+                const triesLabel = pd.attempts === 1 ? "1 try" : `${pd.attempts} tries`;
+                row += `<td class="prob-result-cell cell-solved">
+                            <div class="cell-check"><i class="fa-solid fa-check"></i></div>
+                            <div class="cell-tries">${triesLabel}</div>
+                            <div class="cell-time">${pd.time}</div>
+                        </td>`;
+            } else if (pd && pd.attempts > 0) {
+                row += `<td class="prob-result-cell cell-attempted">
+                            <div class="cell-wrong-icon"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="cell-wrong-tries">${pd.attempts}</div>
+                        </td>`;
+            } else {
+                row += `<td class="prob-result-cell cell-empty"></td>`;
+            }
+        });
+
+        row += `</tr>`;
+        body.innerHTML += row;
+    });
+}
+
+// ==================== AUTO RELOAD ====================
+let reloadTimer = null;
+let reloadCountdownTimer = null;
+let reloadActive = false;
+let countdownValue = 0;
+
+function toggleAutoReload() {
+    if (reloadActive) {
+        stopAutoReload();
+    } else {
+        startAutoReload();
+    }
+}
+
+function startAutoReload() {
+    const input = document.getElementById("reloadIntervalInput");
+    const seconds = parseInt(input.value) || 30;
+    if (seconds < 5) { input.value = 5; return; }
+
+    reloadActive = true;
+    countdownValue = seconds;
+
+    const btn = document.getElementById("reloadToggleBtn");
+    const icon = document.getElementById("reloadIcon");
+    const text = document.getElementById("reloadBtnText");
+    btn.classList.add("active");
+    icon.className = "fa-solid fa-stop";
+    text.textContent = "Stop";
+    input.disabled = true;
+
+    updateCountdownDisplay();
+
+    reloadCountdownTimer = setInterval(() => {
+        countdownValue--;
+        updateCountdownDisplay();
+        if (countdownValue <= 0) {
+            reloadStandings();
+            countdownValue = seconds;
+        }
+    }, 1000);
+}
+
+function stopAutoReload() {
+    reloadActive = false;
+    clearInterval(reloadCountdownTimer);
+
+    const btn = document.getElementById("reloadToggleBtn");
+    const icon = document.getElementById("reloadIcon");
+    const text = document.getElementById("reloadBtnText");
+    const countdown = document.getElementById("reloadCountdown");
+    btn.classList.remove("active");
+    icon.className = "fa-solid fa-play";
+    text.textContent = "Start";
+    countdown.textContent = "";
+    document.getElementById("reloadIntervalInput").disabled = false;
+}
+
+function updateCountdownDisplay() {
+    const el = document.getElementById("reloadCountdown");
+    if (el) el.textContent = `Reloading in ${countdownValue}s`;
+}
+
+function reloadStandings() {
+    standingsBuilt = false;
+    problemsData.length = 0;
+    standingsData.length = 0;
+    fetchStandings();
+}
+
+function start() {
+    buildStandings();
+}
+
+fetchStandings();
+
+
+</script>
+
+{% endblock %}

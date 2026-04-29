@@ -10,124 +10,173 @@
 
     <!-- HEADER -->
     <div class="contests-header">
-        <h1>Contests</h1>
+        <div class="header-text">
+            <h1 class="contests-main-title">
+                <span class="title-icon"><i class="fa-solid fa-trophy"></i></span>
+                Contests
+            </h1>
+            <p class="contests-sub">Compete, solve problems, and climb the leaderboard</p>
+        </div>
 
         {% if request.user.is_authenticated and perms.contest.add_contest %}
-            <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
-                <span class="icon">
-                    <i class="fa-solid fa-trophy"></i>
-                </span>
-                <span class="text">Create Contest</span>
-            </button>
+        <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
+            <span class="icon"><i class="fa-solid fa-trophy"></i></span>
+            <span class="text">Create Contest</span>
+        </button>
         {% endif %}
-
     </div>
 
-    <br>
-    <!-- ACTIVE / UPCOMING -->
-    
-    <div class="contest-list">
+    <!-- STATS BAR -->
+    <div class="contests-statsbar">
+        <div class="statbar-item">
+            <span class="statbar-num">{{ contests|length }}</span>
+            <span class="statbar-label">Total Contests</span>
+        </div>
+        <div class="statbar-divider"></div>
+        <div class="statbar-item">
+            <span class="statbar-dot dot-running"></span>
+            <span class="statbar-num" id="statbar-live-num">0</span>
+            <span class="statbar-label">Live Now</span>
+        </div>
+        <div class="statbar-divider"></div>
+        <div class="statbar-item">
+            <span class="statbar-dot dot-upcoming"></span>
+            <span class="statbar-num" id="statbar-upcoming-num">0</span>
+            <span class="statbar-label">Upcoming</span>
+        </div>
+    </div>
 
+    <!-- CONTEST LIST -->
+    <div class="contest-list">
         {% for contest in contests %}
         <div class="contest-card"
-                data-start="{{ contest.start_time|date:'c' }}"
-                data-end="{{ contest.end_time|date:'c' }}"
-                data-registration="{{ contest.registration_deadline|date:'c' }}"
-                data-contest_id="{{ contest.id }}"
-                data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
-                data-admin="{% if request.user.is_staff or request.user == contest.created_by or request.user in contest.moderators.all %}true{% else %}false{% endif %}"
-                >
+             data-start="{{ contest.start_time|date:'c' }}"
+             data-end="{{ contest.end_time|date:'c' }}"
+             data-registration="{{ contest.registration_deadline|date:'c' }}"
+             data-contest_id="{{ contest.id }}"
+             data-joined="{% if request.user in contest.participants.all %}true{% else %}false{% endif %}"
+             data-admin="{% if request.user.is_staff or request.user == contest.created_by or request.user in contest.moderators.all %}true{% else %}false{% endif %}">
 
-            <!-- TOP -->
-            <div class="contest-top">
-                <h3 class="contest-title">
-                    {{ contest.name }}
-                </h3>
+            <!-- GLOW BORDER EFFECT -->
+            <div class="card-glow"></div>
 
-                <span class="contest-status">Loading...</span>
-            </div>
+            <!-- LEFT STRIPE -->
+            <div class="card-stripe"></div>
 
-            <!-- DESCRIPTION -->
-            <!-- <p class="contest-desc">
-                {{ contest.description|truncatechars:150 }}
-            </p> -->
+            <!-- CARD INNER -->
+            <div class="card-inner">
 
-            <!-- INFO ROW -->
-            <div class="contest-info">
-                <div>📅 Start: {{ contest.start_time }}</div>
-                <div>⏱ End: {{ contest.end_time }}</div>
-            </div>
+                <!-- === TOP SECTION === -->
+                <div class="card-top-section">
 
-            <!-- COUNTDOWN -->
-            <div class="contest-countdown">
-                ⏳ <span class="countdown-text">Calculating...</span>
-            </div>
+                    <div class="card-title-block">
+                        <div class="card-title-row">
+                            <h3 class="contest-title">{{ contest.name }}</h3>
+                            <span class="contest-status">Loading...</span>
+                        </div>
+                    </div>
 
-            <div class="registration-timer">
-                📝 <span class="reg-text">Checking...</span>
-            </div>
+                    <!-- TIMER BLOCK -->
+                    <div class="card-timer-block">
+                        <div class="timer-circle">
+                            <svg class="timer-ring" viewBox="0 0 100 100">
+                                <circle class="timer-ring-bg" cx="50" cy="50" r="42"/>
+                                <circle class="timer-ring-fill" cx="50" cy="50" r="42"/>
+                            </svg>
+                            <div class="timer-inner">
+                                <span class="countdown-text">--:--:--</span>
+                                <span class="timer-circle-label">remaining</span>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- FOOTER -->
-            <div class="contest-footer">
-
-                <div class="left">
-                    👥 {{ contest.participants.count }} participants
                 </div>
 
-                <div class="middle">
+                <!-- === INFO STRIP === -->
+                <div class="card-info-strip">
+                    <div class="info-chip">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>{{ contest.start_time|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="info-chip">
+                        <i class="fa-regular fa-clock"></i>
+                        <span>{{ contest.start_time|date:"H:i" }} — {{ contest.end_time|date:"H:i" }}</span>
+                    </div>
+                    <div class="info-chip">
+                        <i class="fa-solid fa-users"></i>
+                        <span>{{ contest.participants.count }} participants</span>
+                    </div>
+                    <div class="info-chip registration-timer">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span class="reg-text">Checking...</span>
+                    </div>
+                </div>
 
-                    <!-- HOST -->
-                    <div class="host">
-                        👤 Host:
-                        {% if contest.created_by %}
+                <!-- === DIVIDER === -->
+                <div class="card-hr"></div>
+
+                <!-- === FOOTER === -->
+                <div class="card-footer-section">
+
+                    <!-- HOST & MODS -->
+                    <div class="card-people-block">
+                        <div class="people-row">
+                            <span class="people-tag">Host</span>
                             <span class="host-name">
-                                {{ contest.created_by.userprofile.display_name }}
+                                {% if contest.created_by %}
+                                    {{ contest.created_by.userprofile.display_name }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
                             </span>
-                        {% else %}
-                            <span class="host-name">Unknown</span>
-                        {% endif %}
+                        </div>
+                        <div class="people-row">
+                            <span class="people-tag">Mods</span>
+                            <span class="mod-names-wrap">
+                                {% if contest.moderators.all %}
+                                    {% for mod in contest.moderators.all|slice:":3" %}
+                                        <span class="mod-name">{{ mod.userprofile.display_name }}</span>{% if not forloop.last %}<span class="mod-sep">,</span>{% endif %}
+                                    {% endfor %}
+                                    {% if contest.moderators.count > 3 %}
+                                        <span class="more-mods">+{{ contest.moderators.count|add:"-3" }} more</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="mod-none">None</span>
+                                {% endif %}
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- MODERATORS -->
-                    <div class="moderators">
-                        🛡 Moderators:
-                        {% if contest.moderators.all %}
-                            
-                            {% for mod in contest.moderators.all|slice:":3" %}
-                                <span class="mod-name">
-                                    {{ mod.userprofile.display_name }}
-                                </span>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-
-                            {% if contest.moderators.count > 3 %}
-                                <span class="more-mods">
-                                    +{{ contest.moderators.count|add:"-3" }} more
-                                </span>
-                            {% endif %}
-
-                        {% else %}
-                            <span class="mod-name">None</span>
-                        {% endif %}
+                    <!-- BUTTONS -->
+                    <div class="card-buttons-block">
+                        <button class="leaderboard-btn"
+                            onclick="event.stopPropagation(); window.location.href='/contests/leaderboard/{{ contest.id }}/'">
+                            <i class="fa-solid fa-ranking-star"></i>
+                            <span>Leaderboard</span>
+                        </button>
+                        <button class="register-btn">Loading...</button>
+                        <button class="action-btn">Loading...</button>
                     </div>
 
-                </div>
-
-                <div class="right">
-                    <button class="register-btn">Loading...</button>
-                    <button class="action-btn">Loading...</button>
                 </div>
 
             </div>
-
+        </div>
+        {% empty %}
+        <div class="empty-contests-state">
+            <div class="empty-icon"><i class="fa-solid fa-trophy"></i></div>
+            <h3>No contests available</h3>
+            <p>Check back soon for upcoming contests</p>
         </div>
         {% endfor %}
-
     </div>
-    
+
 </section>
 
-<!-- JS -->
 <script>
+// =====================================================
+// ORIGINAL JS — COMPLETELY UNTOUCHED
+// =====================================================
 
 const errorBox = document.getElementById("floatingError");
 
@@ -306,6 +355,125 @@ function updateContests() {
 // Run every second
 setInterval(updateContests, 1000);
 updateContests();
+
+// =====================================================
+// ADDED JS — stripe color sync with status
+// =====================================================
+function syncStripes() {
+    document.querySelectorAll('.contest-card').forEach(card => {
+        const statusEl = card.querySelector('.contest-status');
+        const stripe = card.querySelector('.card-stripe');
+        const timerCircle = card.querySelector('.timer-circle');
+        if (!statusEl || !stripe) return;
+        const bg = statusEl.style.background;
+        if (bg === '#4CAF50') {
+            stripe.style.background = 'linear-gradient(180deg, #22c55e, #16a34a)';
+            stripe.style.boxShadow = '2px 0 12px rgba(34,197,94,0.3)';
+            if (timerCircle) {
+                timerCircle.style.borderColor = 'rgba(34,197,94,0.4)';
+                timerCircle.style.boxShadow = '0 0 20px rgba(34,197,94,0.15), inset 0 0 20px rgba(34,197,94,0.05)';
+            }
+        } else if (bg === '#2196f3') {
+            stripe.style.background = 'linear-gradient(180deg, #3b82f6, #1d4ed8)';
+            stripe.style.boxShadow = '2px 0 12px rgba(59,130,246,0.3)';
+            if (timerCircle) {
+                timerCircle.style.borderColor = 'rgba(59,130,246,0.4)';
+                timerCircle.style.boxShadow = '0 0 20px rgba(59,130,246,0.15), inset 0 0 20px rgba(59,130,246,0.05)';
+            }
+        } else {
+            stripe.style.background = 'linear-gradient(180deg, #475569, #334155)';
+            stripe.style.boxShadow = 'none';
+            if (timerCircle) {
+                timerCircle.style.borderColor = 'rgba(71,85,105,0.3)';
+                timerCircle.style.boxShadow = 'none';
+            }
+        }
+    });
+}
+
+setInterval(syncStripes, 1000);
+syncStripes();
+
+// =====================================================
+// ADDED JS — live/upcoming counts + ring sync
+// =====================================================
+
+function updateStatbar() {
+    let liveCount = 0;
+    let upcomingCount = 0;
+    const now = new Date();
+
+    document.querySelectorAll('.contest-card').forEach(card => {
+        const start = new Date(card.dataset.start);
+        const end   = new Date(card.dataset.end);
+        if (now >= start && now <= end) liveCount++;
+        else if (now < start) upcomingCount++;
+    });
+
+    const liveEl     = document.getElementById('statbar-live-num');
+    const upcomingEl = document.getElementById('statbar-upcoming-num');
+    if (liveEl)     liveEl.textContent     = liveCount;
+    if (upcomingEl) upcomingEl.textContent = upcomingCount;
+}
+
+function syncRings() {
+    document.querySelectorAll('.contest-card').forEach(card => {
+        const start  = new Date(card.dataset.start);
+        const end    = new Date(card.dataset.end);
+        const now    = new Date();
+        const stripe = card.querySelector('.card-stripe');
+        const ring   = card.querySelector('.timer-ring-fill');
+        const statusEl = card.querySelector('.contest-status');
+        if (!ring) return;
+
+        const CIRCUMFERENCE = 264;
+
+        if (now < start) {
+            // Upcoming — blue ring full
+            ring.style.stroke          = '#3b82f6';
+            ring.style.filter          = 'drop-shadow(0 0 6px rgba(59,130,246,0.5))';
+            ring.style.strokeDashoffset = '0';
+            if (stripe) {
+                stripe.style.background  = 'linear-gradient(180deg, #3b82f6, #1d4ed8)';
+                stripe.style.boxShadow   = '2px 0 12px rgba(59,130,246,0.3)';
+            }
+        } else if (now >= start && now <= end) {
+            // Running — green ring depleting
+            const total   = (end - start) / 1000;
+            const elapsed = (now - start) / 1000;
+            const pct     = Math.max(0, 1 - elapsed / total);
+            const offset  = CIRCUMFERENCE * (1 - pct);
+
+            ring.style.stroke          = pct > 0.25 ? '#22c55e' : '#ef4444';
+            ring.style.filter          = pct > 0.25
+                ? 'drop-shadow(0 0 6px rgba(34,197,94,0.5))'
+                : 'drop-shadow(0 0 6px rgba(239,68,68,0.5))';
+            ring.style.strokeDashoffset = offset.toString();
+            if (stripe) {
+                stripe.style.background  = pct > 0.25
+                    ? 'linear-gradient(180deg, #22c55e, #16a34a)'
+                    : 'linear-gradient(180deg, #ef4444, #b91c1c)';
+                stripe.style.boxShadow   = pct > 0.25
+                    ? '2px 0 12px rgba(34,197,94,0.3)'
+                    : '2px 0 12px rgba(239,68,68,0.3)';
+            }
+        } else {
+            // Ended — gray empty ring
+            ring.style.stroke          = '#1e293b';
+            ring.style.filter          = 'none';
+            ring.style.strokeDashoffset = CIRCUMFERENCE.toString();
+            if (stripe) {
+                stripe.style.background  = 'linear-gradient(180deg, #334155, #1e293b)';
+                stripe.style.boxShadow   = 'none';
+            }
+        }
+    });
+}
+
+setInterval(syncRings, 1000);
+setInterval(updateStatbar, 1000);
+syncRings();
+updateStatbar();
 
 </script>
 

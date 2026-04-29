@@ -1,18 +1,46 @@
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django_ratelimit.decorators import ratelimit
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from contest.models import Contest
 from contest.services import contest_rank
 
-@api_view(["POST"])
-def contest_leaderboard(request):
-    post_data = request.data
 
-    contest = get_object_or_404(Contest, id=post_data['contest_id'])
+
+@api_view(["GET"])
+@ratelimit(key='user', rate='12/m', block=True)
+@permission_classes([IsAuthenticated])
+def contest_leaderboard(request):
+    now = timezone.now()
+    contest_id = request.GET.get('contest_id')
+
+    contest = get_object_or_404(Contest, id=contest_id)
+
+    if now < contest.start_time:
+        return HttpResponse("The contest hasn't started yet!", status=403)
+    
     problems = contest.problems.all().order_by('id')
     participants = contest.participants.all()
+
+    problems_data = []
+
+    serial = 'A'
+
+    for problem in problems:
+        current3 = {}
+
+        current3['id'] = problem.id
+        current3['serial'] = serial
+        current3['title'] = problem.title
+        
+        serial = chr(ord(serial) + 1)
+
+        problems_data.append(current3)
 
     standings, overallStatus = contest_rank(contest, problems, participants)
 
@@ -50,8 +78,9 @@ def contest_leaderboard(request):
 
         standings_data.append(current)
 
-    print(standings_data)
+    # print(standings_data)
 
     data['standings'] = standings_data
+    data['problems'] = problems_data
 
     return Response(data)
