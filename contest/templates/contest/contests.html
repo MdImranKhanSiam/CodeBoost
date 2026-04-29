@@ -217,6 +217,7 @@ function updateContests() {
         const countdownEl = card.querySelector('.countdown-text');
         const btn = card.querySelector('.action-btn');
         const registerBtn = card.querySelector('.register-btn');
+        const leaderboardBtn = card.querySelector('.leaderboard-btn');
 
         if (!start || !end) return;
 
@@ -347,6 +348,21 @@ function updateContests() {
             btn.onclick = () => {
                 contestPage(currentContestId);
             };
+        }
+
+        if (!isAdmin) {
+            if (now < start) {
+                leaderboardBtn.classList.add("disabled");
+
+                leaderboardBtn.onclick = () => {
+                    errorBox.textContent = "The contest hasn't started yet!";
+                    errorBox.classList.add("show");
+
+                    setTimeout(() => {
+                        errorBox.classList.remove("show");
+                    }, 3000);
+                };
+            }
         }
 
     });

@@ -451,6 +451,13 @@
     box-shadow: 0 4px 14px rgba(245,158,11,0.15);
 }
 
+.leaderboard-btn.disabled {
+    background: rgba(71,85,105,0.1);
+    border-color: rgba(71,85,105,0.2);
+    color: #475569;
+    cursor: not-allowed;
+}
+
 /* Register button — base */
 .register-btn {
     display: inline-flex;
