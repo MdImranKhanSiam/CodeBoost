@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from problem.models import Problem, TestCase, Submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 from problem.background_task import code_submission
@@ -37,6 +38,8 @@ def contests(request):
 @ratelimit(key='user', rate='10/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def private_contests(request):
+    user = request.user
+
     if request.method == 'POST':
         contest_id = request.POST.get('contest_id', '').strip()
         private_key = request.POST.get('private_key', '').strip()
@@ -61,9 +64,27 @@ def private_contests(request):
 
     now = timezone.now()
 
-    upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=True).order_by("start_time"))
-    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now,  is_private=True).order_by("end_time"))
-    ended = list(Contest.objects.filter(end_time__lt=now,  is_private=True).order_by("-end_time"))
+    upcoming = list(Contest.objects.filter(
+        start_time__gt=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("start_time"))
+    
+    running = list(Contest.objects.filter(
+        start_time__lte=now,
+        end_time__gte=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("end_time"))
+    
+    ended = list(Contest.objects.filter(
+        end_time__lt=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("-end_time"))
     
     contests = running + upcoming + ended
 
