@@ -18,6 +18,11 @@
             <p class="contests-sub">Compete, solve problems, and climb the leaderboard</p>
         </div>
 
+        <button class="private-contest-btn" onclick="window.location.href=''">
+            <span class="icon"><i class="fa-solid fa-lock"></i></span>
+            <span class="text">Private Contests</span>
+        </button>
+
         {% if request.user.is_authenticated and perms.contest.add_contest %}
         <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
             <span class="icon"><i class="fa-solid fa-trophy"></i></span>
