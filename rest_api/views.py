@@ -23,7 +23,7 @@ def contest_leaderboard(request):
     contest = get_object_or_404(Contest, id=contest_id)
 
     if contest.is_private:
-        if user not in contest.participants.all():
+        if user not in contest.participants.all() and user not in contest.moderators.all() and user != contest.created_by:
             return HttpResponseForbidden('Permission Denied.')
 
 

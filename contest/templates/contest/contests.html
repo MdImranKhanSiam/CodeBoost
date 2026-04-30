@@ -313,6 +313,12 @@ function updateContests() {
                 contestPage(currentContestId);
             };
 
+            leaderboardBtn.classList.remove("disabled");
+            
+            leaderboardBtn.onclick = () => {
+                    contestLeaderboard(currentContestId);
+            };
+
         }
 
         if (regDeadlineStr) {
