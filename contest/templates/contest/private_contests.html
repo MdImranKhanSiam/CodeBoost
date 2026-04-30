@@ -8,6 +8,134 @@
 
 <section class="contests-section">
 
+
+<!-- FLOATING JOIN BUTTON -->
+<button class="pk-fab" id="pkFab" onclick="openPKModal()">
+    <span class="pk-fab-ring"></span>
+    <i class="fa-solid fa-key"></i>
+    <span class="pk-fab-label">Join Private Contest</span>
+</button>
+
+<!-- BACKDROP -->
+<div class="pk-backdrop" id="pkBackdrop" onclick="closePKModal()"></div>
+
+<!-- MODAL -->
+<div class="pk-modal" id="pkModal">
+
+    <!-- Noise texture overlay -->
+    <div class="pk-modal-noise"></div>
+
+    <!-- Header -->
+    <div class="pk-modal-header">
+        <div class="pk-header-icon-wrap">
+            <div class="pk-header-icon-ring"></div>
+            <div class="pk-header-icon">
+                <i class="fa-solid fa-lock-open"></i>
+            </div>
+        </div>
+        <div class="pk-header-text">
+            <h2 class="pk-modal-title">Join Private Contest</h2>
+            <p class="pk-modal-subtitle">Enter the contest credentials to unlock access</p>
+        </div>
+        <button class="pk-close-btn" onclick="closePKModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="pk-modal-divider"></div>
+
+    <!-- Error banner (Django messages) -->
+    {% for message in join_error %}
+    <div class="pk-error-banner" id="pkErrorBanner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+
+    <!-- Form -->
+    <form method="POST" class="pk-form" id="pkForm">
+        {% csrf_token %}
+
+        <!-- Contest ID -->
+        <div class="pk-field-group" id="pkFieldId">
+            <label class="pk-label" for="contestIdInput">
+                <i class="fa-solid fa-hashtag"></i>
+                Contest ID
+            </label>
+            <div class="pk-input-wrap">
+                <input
+                    type="number"
+                    id="contestIdInput"
+                    name="contest_id"
+                    class="pk-input"
+                    placeholder="e.g. 42"
+                    autocomplete="off"
+                    min="1"
+                />
+                <div class="pk-input-border"></div>
+                <div class="pk-input-glow"></div>
+            </div>
+            <span class="pk-field-hint">The numeric ID of the contest</span>
+        </div>
+
+        <!-- Private Key -->
+        <div class="pk-field-group" id="pkFieldKey">
+            <label class="pk-label" for="privateKeyInput">
+                <i class="fa-solid fa-key"></i>
+                Private Key
+            </label>
+            <div class="pk-input-wrap">
+                <input
+                    type="text"
+                    id="privateKeyInput"
+                    name="private_key"
+                    class="pk-input"
+                    placeholder="Enter secret key"
+                    autocomplete="off"
+                />
+                <button type="button" class="pk-toggle-vis" id="pkToggleVis" onclick="toggleKeyVisibility()">
+                    <i class="fa-solid fa-eye" id="pkEyeIcon"></i>
+                </button>
+                <div class="pk-input-border"></div>
+                <div class="pk-input-glow"></div>
+            </div>
+            <span class="pk-field-hint">Case-sensitive secret key provided by the host</span>
+        </div>
+
+        <!-- Info box -->
+        <div class="pk-info-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>You'll be redirected to the registration page after verification. Make sure you're signed in.</span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="pk-submit-btn" id="pkSubmitBtn">
+            <span class="pk-submit-bg"></span>
+            <span class="pk-submit-content">
+                <i class="fa-solid fa-unlock"></i>
+                <span class="pk-submit-text">Unlock & Register</span>
+            </span>
+            <span class="pk-submit-shimmer"></span>
+        </button>
+
+    </form>
+
+    <!-- Footer note -->
+    <p class="pk-modal-footer-note">
+        Don't have a key? Contact the contest host for access credentials.
+    </p>
+
+</div>
+
+<!-- Open modal automatically if there was an error -->
+{% if join_error %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => openPKModal());
+</script>
+{% endif %}
+
+
     <!-- HEADER -->
     <div class="contests-header">
         <div class="header-text">
@@ -18,17 +146,17 @@
             <p class="contests-sub">Compete, solve problems, and climb the leaderboard</p>
         </div>
 
-        <button class="private-contest-btn" onclick="window.location.href='{% url 'private-contests' %}'">
-            <span class="icon"><i class="fa-solid fa-lock"></i></span>
-            <span class="text">Private Contests</span>
+        <button class="public-contest-btn" onclick="window.location.href='{% url 'contests' %}'">
+            <span class="icon"><i class="fa-solid fa-globe"></i></span>
+            <span class="text">Public Contests</span>
         </button>
 
-        {% if request.user.is_authenticated and perms.contest.add_contest %}
-        <button class="create-contest-btn" onclick="window.location.href='{% url 'create-contest' %}'">
+        
+        <button class="create-contest-btn" onclick="window.location.href=''">
             <span class="icon"><i class="fa-solid fa-trophy"></i></span>
             <span class="text">Create Contest</span>
         </button>
-        {% endif %}
+        
     </div>
 
     <!-- STATS BAR -->
@@ -197,10 +325,6 @@ function contestRegistration(contestId) {
     window.location.href = `/contests/contest_registration/${contestId}/`;
 }
 
-function contestLeaderboard(contestId) {
-    window.location.href = `/contests/leaderboard/${contestId}/`;
-}
-
 function formatTime(diff) {
     if (diff <= 0) return "00:00:00";
 
@@ -254,17 +378,6 @@ function updateContests() {
                 }, 3000);
             };
 
-            leaderboardBtn.classList.add("disabled");
-
-            leaderboardBtn.onclick = () => {
-                errorBox.textContent = "The contest hasn't started yet!";
-                errorBox.classList.add("show");
-
-                setTimeout(() => {
-                    errorBox.classList.remove("show");
-                }, 3000);
-            };
-
         } else if (now >= start && now <= end) {
             // RUNNING
             statusEl.innerText = "Running";
@@ -272,34 +385,12 @@ function updateContests() {
 
             let diff = Math.floor((end - now) / 1000);
             countdownEl.innerText = "Ends in: " + formatTime(diff);
-
-            if (joined) {
-                btn.classList.remove("locked-btn", "view-btn");
-                btn.classList.add("enter-btn");
-                btn.innerText = "Enter";
-                
-                btn.onclick = () => {
-                    contestPage(currentContestId);
-                };
-            } else {
-                btn.classList.remove("enter-btn", "view-btn");
-                btn.classList.add("locked-btn");
-                btn.innerText = "Locked";
-
-                btn.onclick = () => {
-                    errorBox.textContent = "You are not a participant of this contest!";
-                    errorBox.classList.add("show");
-
-                    setTimeout(() => {
-                        errorBox.classList.remove("show");
-                    }, 3000);
-                };
-            }
-
-            leaderboardBtn.classList.remove("disabled");
+            btn.classList.remove("locked-btn", "view-btn");
+            btn.classList.add("enter-btn");
+            btn.innerText = "Enter";
             
-            leaderboardBtn.onclick = () => {
-                    contestLeaderboard(currentContestId);
+            btn.onclick = () => {
+                contestPage(currentContestId);
             };
 
         } else {
@@ -322,19 +413,6 @@ function updateContests() {
             if (regDiff <= 0) {
                 regEl.innerText = "🔒 Registration Closed";
                 regContainer.style.color = "#64748b";
-
-                registerBtn.textContent = "Registration Closed";
-                registerBtn.classList.add("disabled");
-                // registerBtn.disabled = true;
-
-                registerBtn.onclick = () => {
-                    errorBox.textContent = "Registration for this contest is now closed!";
-                    errorBox.classList.add("show");
-
-                    setTimeout(() => {
-                        errorBox.classList.remove("show");
-                    }, 3000);
-                };
             } else {
                 regEl.innerText = "Registration closes in: " + formatTime(regDiff);
 
@@ -385,6 +463,20 @@ function updateContests() {
                 contestRegistration(currentContestId);
             };
         }
+        else {
+            registerBtn.textContent = "Registration Closed";
+            registerBtn.classList.add("disabled");
+            // registerBtn.disabled = true;
+
+            registerBtn.onclick = () => {
+                errorBox.textContent = "Registration for this contest is now closed!";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
+        }
 
         if (isAdmin) {
             btn.classList.remove("view-btn", "locked-btn");
@@ -393,6 +485,21 @@ function updateContests() {
             btn.onclick = () => {
                 contestPage(currentContestId);
             };
+        }
+
+        if (!isAdmin) {
+            if (now < start) {
+                leaderboardBtn.classList.add("disabled");
+
+                leaderboardBtn.onclick = () => {
+                    errorBox.textContent = "The contest hasn't started yet!";
+                    errorBox.classList.add("show");
+
+                    setTimeout(() => {
+                        errorBox.classList.remove("show");
+                    }, 3000);
+                };
+            }
         }
 
     });
@@ -520,6 +627,56 @@ setInterval(syncRings, 1000);
 setInterval(updateStatbar, 1000);
 syncRings();
 updateStatbar();
+
+
+
+
+// =====================================================
+// PRIVATE KEY MODAL
+// =====================================================
+
+function openPKModal() {
+    document.getElementById('pkModal')?.classList.add('active');
+    document.getElementById('pkBackdrop')?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('contestIdInput')?.focus(), 300);
+}
+
+function closePKModal() {
+    document.getElementById('pkModal')?.classList.remove('active');
+    document.getElementById('pkBackdrop')?.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function toggleKeyVisibility() {
+    const input = document.getElementById('privateKeyInput');
+    const icon  = document.getElementById('pkEyeIcon');
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// Default private key input to password type
+document.addEventListener('DOMContentLoaded', () => {
+    const ki = document.getElementById('privateKeyInput');
+    if (ki) ki.type = 'password';
+
+    // Submit loading state
+    document.getElementById('pkForm')?.addEventListener('submit', function() {
+        const btn = document.getElementById('pkSubmitBtn');
+        if (btn) btn.classList.add('loading');
+    });
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePKModal();
+});
 
 </script>
 

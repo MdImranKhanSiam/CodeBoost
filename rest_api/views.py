@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
@@ -13,13 +13,19 @@ from contest.services import contest_rank
 
 
 @api_view(["GET"])
-@ratelimit(key='user', rate='12/m', block=True)
+@ratelimit(key='user', rate='12/m', method='GET', block=True)
 @permission_classes([IsAuthenticated])
 def contest_leaderboard(request):
+    user = request.user
     now = timezone.now()
     contest_id = request.GET.get('contest_id')
 
     contest = get_object_or_404(Contest, id=contest_id)
+
+    if contest.is_private:
+        if user not in contest.participants.all():
+            return HttpResponseForbidden('Permission Denied.')
+
 
     if now < contest.start_time:
         return HttpResponse("The contest hasn't started yet!", status=403)
