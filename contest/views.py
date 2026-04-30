@@ -138,11 +138,9 @@ def contest_registration(request, id):
 
     if contest.is_private:
         private_key = request.session.get('private_key')
-        print(dict(request.session))
+        # print(dict(request.session))
         
         if private_key:
-            del request.session['private_key']
-            
             if contest.private_key != private_key:
                 return HttpResponseForbidden('Permission Denied.')
         else:
@@ -150,9 +148,20 @@ def contest_registration(request, id):
             
 
     if user == contest.created_by or user in contest.moderators.all():
+        if contest.is_private:
+            del request.session['private_key']
+
+            return redirect('contest-page', contest.id)
+
         return HttpResponse('Admins of the contest cannot register!')
 
     if user in contest.participants.all():
+        if contest.is_private:
+            del request.session['private_key']
+
+            if now >= contest.start_time:
+                return redirect('contest-page', contest.id)
+        
         return HttpResponse('Already registered')
 
     if contest.registration_deadline <= now:
@@ -161,6 +170,10 @@ def contest_registration(request, id):
     if request.method == "POST":
         if request.POST.get("agree"):
             contest.participants.add(request.user)
+            del request.session['private_key']
+
+            if now >= contest.start_time:
+                return redirect('contest-page', contest.id)
 
             return redirect('contests')
 

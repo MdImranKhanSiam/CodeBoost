@@ -286,8 +286,7 @@
 
                     <!-- BUTTONS -->
                     <div class="card-buttons-block">
-                        <button class="leaderboard-btn"
-                            onclick="event.stopPropagation(); window.location.href='/contests/leaderboard/{{ contest.id }}/'">
+                        <button class="leaderboard-btn">
                             <i class="fa-solid fa-ranking-star"></i>
                             <span>Leaderboard</span>
                         </button>
@@ -323,6 +322,10 @@ function contestPage(contestId) {
 
 function contestRegistration(contestId) {
     window.location.href = `/contests/contest_registration/${contestId}/`;
+}
+
+function contestLeaderboard(contestId) {
+    window.location.href = `/contests/leaderboard/${contestId}/`;
 }
 
 function formatTime(diff) {
@@ -378,6 +381,17 @@ function updateContests() {
                 }, 3000);
             };
 
+            leaderboardBtn.classList.add("disabled");
+
+            leaderboardBtn.onclick = () => {
+                errorBox.textContent = "The contest hasn't started yet!";
+                errorBox.classList.add("show");
+
+                setTimeout(() => {
+                    errorBox.classList.remove("show");
+                }, 3000);
+            };
+
         } else if (now >= start && now <= end) {
             // RUNNING
             statusEl.innerText = "Running";
@@ -385,12 +399,34 @@ function updateContests() {
 
             let diff = Math.floor((end - now) / 1000);
             countdownEl.innerText = "Ends in: " + formatTime(diff);
-            btn.classList.remove("locked-btn", "view-btn");
-            btn.classList.add("enter-btn");
-            btn.innerText = "Enter";
+
+            if (joined) {
+                btn.classList.remove("locked-btn", "view-btn");
+                btn.classList.add("enter-btn");
+                btn.innerText = "Enter";
+                
+                btn.onclick = () => {
+                    contestPage(currentContestId);
+                };
+            } else {
+                btn.classList.remove("enter-btn", "view-btn");
+                btn.classList.add("locked-btn");
+                btn.innerText = "Locked";
+
+                btn.onclick = () => {
+                    errorBox.textContent = "You are not a participant of this contest!";
+                    errorBox.classList.add("show");
+
+                    setTimeout(() => {
+                        errorBox.classList.remove("show");
+                    }, 3000);
+                };
+            }
+
+            leaderboardBtn.classList.remove("disabled");
             
-            btn.onclick = () => {
-                contestPage(currentContestId);
+            leaderboardBtn.onclick = () => {
+                    contestLeaderboard(currentContestId);
             };
 
         } else {
@@ -413,6 +449,20 @@ function updateContests() {
             if (regDiff <= 0) {
                 regEl.innerText = "🔒 Registration Closed";
                 regContainer.style.color = "#64748b";
+
+                registerBtn.textContent = "Registration Closed";
+                registerBtn.classList.add("disabled");
+                // registerBtn.disabled = true;
+
+                registerBtn.onclick = () => {
+                    errorBox.textContent = "Registration for this contest is now closed!";
+                    errorBox.classList.add("show");
+
+                    setTimeout(() => {
+                        errorBox.classList.remove("show");
+                    }, 3000);
+                };
+
             } else {
                 regEl.innerText = "Registration closes in: " + formatTime(regDiff);
 
@@ -463,20 +513,6 @@ function updateContests() {
                 contestRegistration(currentContestId);
             };
         }
-        else {
-            registerBtn.textContent = "Registration Closed";
-            registerBtn.classList.add("disabled");
-            // registerBtn.disabled = true;
-
-            registerBtn.onclick = () => {
-                errorBox.textContent = "Registration for this contest is now closed!";
-                errorBox.classList.add("show");
-
-                setTimeout(() => {
-                    errorBox.classList.remove("show");
-                }, 3000);
-            };
-        }
 
         if (isAdmin) {
             btn.classList.remove("view-btn", "locked-btn");
@@ -485,21 +521,6 @@ function updateContests() {
             btn.onclick = () => {
                 contestPage(currentContestId);
             };
-        }
-
-        if (!isAdmin) {
-            if (now < start) {
-                leaderboardBtn.classList.add("disabled");
-
-                leaderboardBtn.onclick = () => {
-                    errorBox.textContent = "The contest hasn't started yet!";
-                    errorBox.classList.add("show");
-
-                    setTimeout(() => {
-                        errorBox.classList.remove("show");
-                    }, 3000);
-                };
-            }
         }
 
     });

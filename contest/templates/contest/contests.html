@@ -158,8 +158,7 @@
 
                     <!-- BUTTONS -->
                     <div class="card-buttons-block">
-                        <button class="leaderboard-btn"
-                            onclick="event.stopPropagation(); window.location.href='/contests/leaderboard/{{ contest.id }}/'">
+                        <button class="leaderboard-btn">
                             <i class="fa-solid fa-ranking-star"></i>
                             <span>Leaderboard</span>
                         </button>
@@ -335,6 +334,7 @@ function updateContests() {
                         errorBox.classList.remove("show");
                     }, 3000);
                 };
+
             } else {
                 regEl.innerText = "Registration closes in: " + formatTime(regDiff);
 
