@@ -8,6 +8,8 @@ class Contest(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     registration_deadline = models.DateTimeField(null=True, blank=True)
+    is_private = models.BooleanField(default=False)
+    private_key = models.CharField(max_length=20, blank=True, null=True)
 
     problems = models.ManyToManyField("problem.Problem", related_name="contests", null=True, blank=True)
     # problem.contests.all() #To find all contest this problem instance belong to

@@ -20,7 +20,7 @@ def contest_rank(contest, problems, participants):
             attempts = 0
             solved_timestamp = 0
 
-            submissions = Submission.objects.filter(contest=contest, user=participant, problem=problem).order_by('submitted_at')
+            submissions = Submission.objects.filter(contest=contest, user=participant, problem=problem).exclude(verdict='Pending').order_by('submitted_at')
 
             for submission in submissions:
                 attempts += 1

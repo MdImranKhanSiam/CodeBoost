@@ -100,12 +100,84 @@
             {% if contest.description %}
             <p class="contest-description">{{ contest.description }}</p>
             {% endif %}
-            <div class="contest-meta-row">
-                <span class="meta-item">
-                    <i class="fa-regular fa-clock"></i>
-                    {{ contest.start_time|date:"M d, Y · H:i" }} — {{ contest.end_time|date:"H:i" }}
-                </span>
+        <div class="contest-meta-row">
+            <span class="meta-item">
+                <i class="fa-regular fa-clock"></i>
+                {{ contest.start_time|date:"M d, Y · H:i" }} — {{ contest.end_time|date:"H:i" }}
+            </span>
+        </div>
+
+        <!-- CONTEST CREDENTIAL STRIP -->
+        <div class="contest-cred-strip">
+
+            <!-- Contest ID -->
+            <div class="cred-chip" id="credChipId">
+                <div class="cred-chip-icon">
+                    <i class="fa-solid fa-fingerprint"></i>
+                </div>
+                <div class="cred-chip-body">
+                    <span class="cred-chip-label">Contest ID</span>
+                    <div class="cred-chip-value-row">
+                        <span class="cred-chip-value" id="contestIdDisplay">{{ contest.id }}</span>
+                        <button class="cred-copy-btn" id="copyIdBtn" onclick="copyCredential('contestIdDisplay', 'copyIdBtn')" title="Copy ID">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="cred-copied-toast" id="toastId">Copied!</div>
             </div>
+
+            {% if contest.is_private %}
+            
+            <div class="cred-chip cred-chip-private" id="credChipKey">
+                <div class="cred-chip-icon icon-private">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div class="cred-chip-body">
+                    <span class="cred-chip-label">Private Key</span>
+                    <div class="cred-chip-value-row">
+                        <span class="cred-chip-value cred-key-masked" id="privateKeyDisplay" data-key="{{ contest.private_key }}">
+                            ••••••••••••
+                        </span>
+                        <button class="cred-eye-btn" id="keyEyeBtn" onclick="toggleKeyDisplay()" title="Show/hide key">
+                            <i class="fa-solid fa-eye" id="keyEyeIcon"></i>
+                        </button>
+                        <button class="cred-copy-btn" id="copyKeyBtn" onclick="copyCredential('privateKeyDisplay', 'copyKeyBtn')" title="Copy key">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="cred-copied-toast" id="toastKey">Copied!</div>
+            </div>
+            
+
+            <!-- Private badge (visible to everyone) -->
+            <div class="cred-chip cred-chip-badge">
+                <div class="cred-chip-icon icon-lock">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div class="cred-chip-body">
+                    <span class="cred-chip-label">Visibility</span>
+                    <div class="cred-chip-value-row">
+                        <span class="cred-chip-value cred-private-text">Private Contest</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="cred-chip cred-chip-badge cred-chip-public">
+                <div class="cred-chip-icon icon-public">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div class="cred-chip-body">
+                    <span class="cred-chip-label">Visibility</span>
+                    <div class="cred-chip-value-row">
+                        <span class="cred-chip-value cred-public-text">Public Contest</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
         </div>
         <div class="header-right">
             <div class="timer-card">
@@ -744,6 +816,79 @@ function viewSubmissions(btn) {
     showTab('your_submissions', btn);
     fetchSubmissions();
 }
+
+
+// ==================== CREDENTIALS ====================
+
+let keyVisible = false;
+
+function toggleKeyDisplay() {
+    const display = document.getElementById('privateKeyDisplay');
+    const eyeIcon = document.getElementById('keyEyeIcon');
+    const eyeBtn  = document.getElementById('keyEyeBtn');
+    if (!display) return;
+
+    keyVisible = !keyVisible;
+
+    if (keyVisible) {
+        const key = display.dataset.key;
+        display.textContent = key;
+        display.classList.remove('cred-key-masked');
+        display.classList.add('cred-key-revealed');
+        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        eyeBtn.classList.add('active');
+    } else {
+        display.textContent = '••••••••••••';
+        display.classList.add('cred-key-masked');
+        display.classList.remove('cred-key-revealed');
+        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        eyeBtn.classList.remove('active');
+    }
+}
+
+function copyCredential(sourceId, btnId) {
+    const sourceEl = document.getElementById(sourceId);
+    const btn      = document.getElementById(btnId);
+    if (!sourceEl || !btn) return;
+
+    // For masked key, copy the real value from data attribute
+    let textToCopy = sourceEl.dataset.key ?? sourceEl.textContent.trim();
+    if (sourceId === 'privateKeyDisplay') {
+        textToCopy = sourceEl.dataset.key || sourceEl.textContent.trim();
+    }
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        // Button feedback
+        btn.classList.add('copied');
+        const icon = btn.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fa-solid fa-check';
+
+        // Toast feedback
+        const toastId = sourceId === 'contestIdDisplay' ? 'toastId' : 'toastKey';
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            icon.className = originalClass;
+        }, 1800);
+    }).catch(() => {
+        // Fallback for older browsers
+        const ta = document.createElement('textarea');
+        ta.value = textToCopy;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    });
+}
+
 </script>
 
 {% endblock %}

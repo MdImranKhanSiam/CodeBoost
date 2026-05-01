@@ -1,9 +1,11 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from problem.models import Problem, TestCase, Submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 from problem.background_task import code_submission
@@ -15,13 +17,14 @@ from . services import contest_rank
 
 
 
-@ratelimit(key='user', rate='10/m', method='POST', block=True)
+@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
 def contests(request):
     now = timezone.now()
 
-    upcoming = list(Contest.objects.filter(start_time__gt=now).order_by("start_time"))
-    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now).order_by("end_time"))
-    ended = list(Contest.objects.filter(end_time__lt=now).order_by("-end_time"))
+    upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=False).order_by("start_time"))
+    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now,  is_private=False).order_by("end_time"))
+    ended = list(Contest.objects.filter(end_time__lt=now,  is_private=False).order_by("-end_time"))
     
     contests = running + upcoming + ended
 
@@ -30,6 +33,66 @@ def contests(request):
     }
 
     return render(request, 'contest/contests.html', context)
+
+
+@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def private_contests(request):
+    user = request.user
+
+    if request.method == 'POST':
+        contest_id = request.POST.get('contest_id', '').strip()
+        private_key = request.POST.get('private_key', '').strip()
+
+        if not contest_id or not private_key:
+            messages.error(request, 'Please enter both Contest ID and Private Key.')
+            return redirect('private-contests')
+        
+        try:
+            contest = Contest.objects.get(id=contest_id, is_private=True)
+        except:
+            messages.error(request, 'No private contest found with that ID.')
+            return redirect('private-contests')
+        
+        if contest.private_key != private_key:
+            messages.error(request, 'Invalid private key for this contest.')
+            return redirect('private-contests')
+        
+        request.session['private_key'] = private_key
+
+        return redirect('contest-registration', contest.id)
+
+    now = timezone.now()
+
+    upcoming = list(Contest.objects.filter(
+        start_time__gt=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("start_time"))
+    
+    running = list(Contest.objects.filter(
+        start_time__lte=now,
+        end_time__gte=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("end_time"))
+    
+    ended = list(Contest.objects.filter(
+        end_time__lt=now,
+        is_private=True
+        ).filter(
+            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+        ).distinct().order_by("-end_time"))
+    
+    contests = running + upcoming + ended
+
+    context = {
+        'contests': contests,
+    }
+
+    return render(request, 'contest/private_contests.html', context)
 
 
 @ratelimit(key='user', rate='5/m', method='POST', block=True)
@@ -94,10 +157,34 @@ def contest_registration(request, id):
 
     contest = get_object_or_404(Contest, id=id)
 
+    if contest.is_private:
+        private_key = request.session.get('private_key')
+        # print(dict(request.session))
+        
+        if private_key:
+            if contest.private_key != private_key:
+                return HttpResponseForbidden('Permission Denied.')
+        else:
+            return HttpResponseForbidden('Permission Denied.')
+            
+
     if user == contest.created_by or user in contest.moderators.all():
+        if contest.is_private:
+            del request.session['private_key']
+
+            return redirect('contest-page', contest.id)
+
         return HttpResponse('Admins of the contest cannot register!')
 
     if user in contest.participants.all():
+        if contest.is_private:
+            del request.session['private_key']
+
+            if now >= contest.start_time:
+                return redirect('contest-page', contest.id)
+            else:
+                return redirect('private-contests')
+        
         return HttpResponse('Already registered')
 
     if contest.registration_deadline <= now:
@@ -106,6 +193,10 @@ def contest_registration(request, id):
     if request.method == "POST":
         if request.POST.get("agree"):
             contest.participants.add(request.user)
+            del request.session['private_key']
+
+            if now >= contest.start_time:
+                return redirect('contest-page', contest.id)
 
             return redirect('contests')
 
@@ -117,7 +208,7 @@ def contest_registration(request, id):
 
 
 
-@ratelimit(key='user', rate='20/m', method='POST', block=True)
+@ratelimit(key='user', rate='10/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_page(request, id):
     now = timezone.now()
@@ -217,11 +308,16 @@ def contest_page(request, id):
     return render(request, 'contest/contest_page_second.html', context)
 
 
-@ratelimit(key='user', rate='5/m', method='POST', block=True)
+@ratelimit(key='user', rate='5/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def leaderboard(request, contest_id):
+    user = request.user
     now = timezone.now()
     contest = get_object_or_404(Contest, id=contest_id)
+
+    if contest.is_private:
+        if user not in contest.participants.all() and user not in contest.moderators.all() and user != contest.created_by:
+            return HttpResponseForbidden('Permission Denied.')
 
     if now < contest.start_time:
         return HttpResponse("The contest hasn't started yet!", status=403)
@@ -234,7 +330,7 @@ def leaderboard(request, contest_id):
 
 
 
-@ratelimit(key='user', rate='6/m', method='POST', block=True)
+@ratelimit(key='user', rate='10/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_problem_detail(request, contest_id, problem_id):
     now = timezone.now()
@@ -301,7 +397,7 @@ def contest_problem_detail(request, contest_id, problem_id):
 
 
 
-
+@ratelimit(key='user', rate='15/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_submissions_api(request, contest_id):
     user=request.user
@@ -329,6 +425,7 @@ def contest_submissions_api(request, contest_id):
 
 
 # Work Left
+@ratelimit(key='user', rate='5/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_submission_details(request, contest_id, submission_id):
     user=request.user
@@ -353,6 +450,7 @@ def contest_submission_details(request, contest_id, submission_id):
 
 
 
+@ratelimit(key='user', rate='5/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def create_contest_problem(request, contest_id):
     user = request.user
@@ -420,7 +518,7 @@ def create_contest_problem(request, contest_id):
 
 
 
-
+@ratelimit(key='user', rate='5/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_contest_problem(request, problem_id):
     user = request.user
@@ -491,6 +589,7 @@ def edit_contest_problem(request, problem_id):
     
 
 
+@ratelimit(key='user', rate='5/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def delete_contest_problem(request, problem_id):
     user = request.user

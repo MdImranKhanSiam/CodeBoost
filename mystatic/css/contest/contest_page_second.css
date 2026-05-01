@@ -155,7 +155,7 @@
     border-radius: 18px;
     margin-bottom: 24px;
     position: relative;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 .contest-header::before {
     content: "";
@@ -196,6 +196,7 @@
     50% { opacity: 0.4; transform: scale(0.75); }
 }
 
+
 .contest-title {
     font-size: 28px;
     font-weight: 700;
@@ -216,6 +217,286 @@
     gap: 20px;
     flex-wrap: wrap;
 }
+
+
+/* ================================================
+   CONTEST CREDENTIAL STRIP
+   ================================================ */
+
+.contest-cred-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+/* ── Base Chip ── */
+.cred-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px 11px 13px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid #1a2e4a;
+    border-radius: 12px;
+    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    /* overflow: hidden; */
+    min-width: 0;
+}
+
+.cred-chip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 0% 50%, rgba(59,130,246,0.06), transparent 70%);
+}
+.cred-chip:hover::before { opacity: 1; }
+.cred-chip:hover {
+    border-color: #1e3a5f;
+    background: rgba(255,255,255,0.035);
+}
+
+/* ── Chip Icon ── */
+.cred-chip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    color: #60a5fa;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.25s;
+}
+.cred-chip:hover .cred-chip-icon {
+    background: rgba(59,130,246,0.16);
+    border-color: rgba(59,130,246,0.35);
+    box-shadow: 0 0 12px rgba(59,130,246,0.15);
+}
+
+.icon-private {
+    background: rgba(139,92,246,0.12);
+    border-color: rgba(139,92,246,0.25);
+    color: #a78bfa;
+}
+.cred-chip:hover .icon-private {
+    background: rgba(139,92,246,0.2);
+    border-color: rgba(139,92,246,0.4);
+    box-shadow: 0 0 12px rgba(139,92,246,0.15);
+}
+
+.icon-lock {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.2);
+    color: #f87171;
+}
+
+.icon-public {
+    background: rgba(34,197,94,0.1);
+    border-color: rgba(34,197,94,0.2);
+    color: #4ade80;
+}
+
+/* ── Chip Body ── */
+.cred-chip-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.cred-chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #334155;
+    line-height: 1;
+}
+
+.cred-chip-value-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.cred-chip-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* ID value gets a slight blue tint */
+#contestIdDisplay {
+    color: #60a5fa;
+    font-size: 15px;
+}
+
+/* Key masked state */
+.cred-key-masked {
+    letter-spacing: 0.18em;
+    color: #475569;
+    font-size: 13px;
+}
+
+/* Revealed key */
+.cred-key-revealed {
+    color: #c4b5fd;
+    font-family: 'Courier New', monospace;
+    font-size: 13.5px;
+    letter-spacing: 0.05em;
+}
+
+/* Private / public text */
+.cred-private-text {
+    color: #f87171;
+    font-size: 13px;
+}
+.cred-public-text {
+    color: #4ade80;
+    font-size: 13px;
+}
+
+/* ── Copy Button ── */
+.cred-copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a2e4a;
+    color: #334155;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    padding: 0;
+}
+.cred-copy-btn:hover {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.3);
+    color: #60a5fa;
+    transform: scale(1.08);
+}
+.cred-copy-btn.copied {
+    background: rgba(34,197,94,0.12);
+    border-color: rgba(34,197,94,0.3);
+    color: #4ade80;
+}
+
+/* ── Eye Button ── */
+.cred-eye-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a2e4a;
+    color: #334155;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    padding: 0;
+}
+.cred-eye-btn:hover {
+    background: rgba(139,92,246,0.12);
+    border-color: rgba(139,92,246,0.3);
+    color: #a78bfa;
+    transform: scale(1.08);
+}
+.cred-eye-btn.active {
+    background: rgba(139,92,246,0.15);
+    border-color: rgba(139,92,246,0.35);
+    color: #c4b5fd;
+}
+
+/* ── Copied Toast ── */
+.cred-copied-toast {
+    position: absolute;
+    top: -28px;
+    right: 10px;
+    background: #22c55e;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.35);
+    z-index: 10;
+}
+.cred-copied-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Private chip accent left border ── */
+.cred-chip-private {
+    border-left: 2px solid rgba(139,92,246,0.35);
+}
+.cred-chip-private:hover {
+    border-left-color: rgba(139,92,246,0.6);
+    box-shadow: 0 0 20px rgba(139,92,246,0.06);
+}
+
+/* ── Badge chip (no hover effect) ── */
+.cred-chip-badge { cursor: default; }
+.cred-chip-badge:hover {
+    border-color: #1a2e4a;
+    background: rgba(255,255,255,0.025);
+    box-shadow: none;
+}
+.cred-chip-badge:hover::before { opacity: 0; }
+
+/* ── Key reveal animation ── */
+@keyframes credReveal {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.cred-key-revealed { animation: credReveal 0.2s ease; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+    .contest-cred-strip {
+        gap: 8px;
+    }
+    .cred-chip {
+        padding: 9px 12px 9px 10px;
+        gap: 10px;
+    }
+    .cred-chip-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+    .cred-chip-value { font-size: 13px; }
+    #contestIdDisplay { font-size: 14px; }
+}
+
+
 .meta-item {
     display: flex;
     align-items: center;
