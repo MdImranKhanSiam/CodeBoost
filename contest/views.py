@@ -182,6 +182,8 @@ def contest_registration(request, id):
 
             if now >= contest.start_time:
                 return redirect('contest-page', contest.id)
+            else:
+                return redirect('private-contests')
         
         return HttpResponse('Already registered')
 

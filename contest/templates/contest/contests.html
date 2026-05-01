@@ -13,14 +13,14 @@
         <div class="header-text">
             <h1 class="contests-main-title">
                 <span class="title-icon"><i class="fa-solid fa-trophy"></i></span>
-                Contests
+                Public Contests
             </h1>
             <p class="contests-sub">Compete, solve problems, and climb the leaderboard</p>
         </div>
 
         <button class="private-contest-btn" onclick="window.location.href='{% url 'private-contests' %}'">
             <span class="icon"><i class="fa-solid fa-lock"></i></span>
-            <span class="text">Private Contests</span>
+            <span class="text">View Private Contests</span>
         </button>
 
         {% if request.user.is_authenticated and perms.contest.add_contest %}
