@@ -1,0 +1,214 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/home/flip_clock.css' %}">
+
+<!-- ══════════════════════════════════════════════
+     FLIP CLOCK BAR
+══════════════════════════════════════════════ -->
+<div class="clock-bar">
+    <div class="clock-bar-inner">
+
+        <div class="clock-left">
+            <div class="clock-label">
+                <i class="fa-regular fa-clock"></i>
+                <span>Local Time</span>
+            </div>
+            <div class="clock-date" id="clockDate">—</div>
+        </div>
+
+        <div class="flip-clock">
+            <!-- Hours -->
+            <div class="fc-group">
+                <div class="fd" id="fd-h1">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fd" id="fd-h2">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fc-group-label">HH</div>
+            </div>
+
+            <div class="fc-dots"><span></span><span></span></div>
+
+            <!-- Minutes -->
+            <div class="fc-group">
+                <div class="fd" id="fd-m1">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fd" id="fd-m2">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fc-group-label">MM</div>
+            </div>
+
+            <div class="fc-dots"><span></span><span></span></div>
+
+            <!-- Seconds -->
+            <div class="fc-group">
+                <div class="fd" id="fd-s1">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fd" id="fd-s2">
+                    <div class="fd-half fd-top"><span class="fdd">0</span></div>
+                    <div class="fd-half fd-bot"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-ft"><span class="fdd">0</span></div>
+                    <div class="fd-flap fd-fb"><span class="fdd">0</span></div>
+                    <div class="fd-crease"></div>
+                </div>
+                <div class="fc-group-label">SS</div>
+            </div>
+        </div>
+
+        <div class="clock-right">
+            <div class="clock-tz" id="clockTz">—</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FLIP CLOCK BAR
+══════════════════════════════════════════════ -->
+
+
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   FLIP CLOCK — correct two-flap mechanism
+
+   Each digit card:
+   ┌──────────┐  ← top-half  (static, shows NEW  digit top portion)
+   │  top     │
+   ├──────────┤  ← crease line
+   │  bottom  │
+   └──────────┘  ← bot-half  (static, shows NEW digit bottom portion)
+
+   Overlaying the statics are two animated flaps:
+   • fd-ft  (top flap)    pivot = bottom edge, 0° → -90°  (folds away like a page)
+   • fd-fb  (bottom flap) pivot = top edge,   90° →   0°  (drops in like a falling card)
+
+   Sequence for A → B:
+   1. Static top set to B  (hidden under top flap still showing A)
+   2. Static bot stays A   (visible while bottom flap hasn't arrived yet)
+   3. Top flap  (showing A) rotates 0 → -90°  ease-in  (gravity feel)
+   4. ~200ms in: static bot switches to B
+   5. Bottom flap (showing B) rotates 90 → 0°  ease-out (soft landing)
+══════════════════════════════════════════════════════════ */
+
+
+// ══════════════════════════════════════════════
+//      FLIP CLOCK BAR
+// ══════════════════════════════════════════════ 
+
+const DS = {};
+
+function initDS() {
+    ['h1','h2','m1','m2','s1','s2'].forEach(id => {
+        DS[id] = { val: null, busy: false };
+    });
+}
+
+function flipTo(id, newVal) {
+    const s  = DS[id];
+    if (!s) return;
+    const fd = document.getElementById('fd-' + id);
+    if (!fd) return;
+
+    const topH = fd.querySelector('.fd-top .fdd');
+    const botH = fd.querySelector('.fd-bot .fdd');
+    const ft   = fd.querySelector('.fd-ft');
+    const fb   = fd.querySelector('.fd-fb');
+    const ftD  = ft.querySelector('.fdd');
+    const fbD  = fb.querySelector('.fdd');
+
+    const oldVal = s.val;
+    s.val = newVal;
+
+    /* Initial paint — no animation */
+    if (oldVal === null) {
+        topH.textContent = ftD.textContent = fbD.textContent = botH.textContent = newVal;
+        ft.style.transform = 'rotateX(0deg)';
+        fb.style.transform = 'rotateX(0deg)';
+        return;
+    }
+
+    if (oldVal === newVal || s.busy) return;
+    s.busy = true;
+
+    /* Content setup */
+    topH.textContent = newVal;   // static top → new  (under top flap, not visible yet)
+    botH.textContent = oldVal;   // static bot → old  (visible while bottom flap absent)
+    ftD.textContent  = oldVal;   // top flap shows old digit — about to fold away
+    fbD.textContent  = newVal;   // bottom flap shows new digit — about to drop in
+
+    /* Snap flaps to start position without transition */
+    ft.style.transition = 'none';
+    fb.style.transition = 'none';
+    ft.style.transform  = 'rotateX(0deg)';
+    fb.style.transform  = 'rotateX(90deg)';  // edge-on = invisible
+
+    void ft.offsetWidth; /* force reflow */
+
+    /* Phase 1 — top flap folds down (ease-in mimics gravity acceleration) */
+    ft.style.transition = 'transform 0.22s ease-in';
+    ft.style.transform  = 'rotateX(-90deg)';
+
+    /* Phase 2 — bottom flap drops in (ease-out mimics soft landing) */
+    setTimeout(() => {
+        botH.textContent = newVal;                         /* static bot now correct */
+        fb.style.transition = 'transform 0.22s ease-out';
+        fb.style.transform  = 'rotateX(0deg)';
+        setTimeout(() => { s.busy = false; }, 230);
+    }, 200);
+}
+
+/* Clock tick */
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+
+function tickClock() {
+    const now = new Date();
+    const hh = pad2(now.getHours()), mm = pad2(now.getMinutes()), ss = pad2(now.getSeconds());
+
+    flipTo('h1', hh[0]); flipTo('h2', hh[1]);
+    flipTo('m1', mm[0]); flipTo('m2', mm[1]);
+    flipTo('s1', ss[0]); flipTo('s2', ss[1]);
+
+    const de = document.getElementById('clockDate');
+    if (de) de.textContent = `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+    const te = document.getElementById('clockTz');
+    if (te) te.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+}
+
+initDS();
+setInterval(tickClock, 1000);
+tickClock();
+
+// ══════════════════════════════════════════════
+//      FLIP CLOCK BAR
+// ══════════════════════════════════════════════ 
+
+</script>

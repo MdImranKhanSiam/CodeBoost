@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.contests, name='contests'),
     path('create_contest/', views.create_contest, name='create-contest'),
+    path('create_private_contest/', views.create_private_contest, name='create-private-contest'),
     path('edit_contest/<str:contest_id>/', views.edit_contest, name='edit-contest'),
     path('create_contest_problem/<str:contest_id>', views.create_contest_problem, name='create-contest-problem'),
     path('edit_contest_problem/<str:problem_id>', views.edit_contest_problem, name='edit-contest-problem'),

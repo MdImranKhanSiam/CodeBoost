@@ -35,7 +35,8 @@ def contests(request):
     return render(request, 'contest/contests.html', context)
 
 
-@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def private_contests(request):
     user = request.user
@@ -95,7 +96,8 @@ def private_contests(request):
     return render(request, 'contest/private_contests.html', context)
 
 
-@ratelimit(key='user', rate='5/m', method='POST', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @permission_required('contest.add_contest', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def create_contest(request):
@@ -111,16 +113,40 @@ def create_contest(request):
 
             return redirect('contest-page', contest_creation_form.id)
 
-
     context = {
-        'contest_form' :contest_form,
+        'contest_form': contest_form,
     }
 
     return render(request, 'contest/create_contest.html', context)
 
 
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def create_private_contest(request):
+    contest_form = ContestForm()
 
-@ratelimit(key='user', rate='5/m', method='POST', block=True)
+    if request.method == 'POST':
+        received_form = ContestForm(request.POST)
+
+        if received_form.is_valid():
+            contest_creation_form = received_form.save(commit=False)
+            contest_creation_form.created_by = request.user
+            contest_creation_form.is_private = True
+            contest_creation_form.private_key = request.POST.get('private_key')
+            contest_creation_form.save()
+
+            return redirect('contest-page', contest_creation_form.id)
+
+
+    context = {
+        'contest_form': contest_form,
+    }
+
+    return render(request, 'contest/create_contest.html', context)
+
+
+@ratelimit(key='user', rate='30/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_contest(request, contest_id):
     user = request.user
@@ -149,7 +175,7 @@ def edit_contest(request, contest_id):
 
 
 
-@ratelimit(key='user', rate='5/m', block=True)
+@ratelimit(key='user', rate='30/m', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_registration(request, id):
     user = request.user
@@ -208,7 +234,8 @@ def contest_registration(request, id):
 
 
 
-@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_page(request, id):
     now = timezone.now()
@@ -308,7 +335,7 @@ def contest_page(request, id):
     return render(request, 'contest/contest_page_second.html', context)
 
 
-@ratelimit(key='user', rate='5/m', method='GET', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def leaderboard(request, contest_id):
     user = request.user
@@ -329,8 +356,8 @@ def leaderboard(request, contest_id):
     return render(request, 'contest/leaderboard.html', context)
 
 
-
-@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_problem_detail(request, contest_id, problem_id):
     now = timezone.now()
@@ -397,7 +424,7 @@ def contest_problem_detail(request, contest_id, problem_id):
 
 
 
-@ratelimit(key='user', rate='15/m', method='GET', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_submissions_api(request, contest_id):
     user=request.user
@@ -450,7 +477,8 @@ def contest_submission_details(request, contest_id, submission_id):
 
 
 
-@ratelimit(key='user', rate='5/m', method='GET', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def create_contest_problem(request, contest_id):
     user = request.user
@@ -518,7 +546,8 @@ def create_contest_problem(request, contest_id):
 
 
 
-@ratelimit(key='user', rate='5/m', method='GET', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_contest_problem(request, problem_id):
     user = request.user
@@ -589,7 +618,8 @@ def edit_contest_problem(request, problem_id):
     
 
 
-@ratelimit(key='user', rate='5/m', method='GET', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def delete_contest_problem(request, problem_id):
     user = request.user

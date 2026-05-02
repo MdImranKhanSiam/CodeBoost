@@ -1,0 +1,369 @@
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+
+.clock-bar {
+    width: 100%;
+    background: #060d1a;
+    border-bottom: 1px solid #0d1a2e;
+    padding: 20px 0 22px;
+}
+
+.clock-bar-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.clock-left, .clock-right {
+    flex: 1;
+}
+
+.clock-right { text-align: right; }
+
+.clock-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #243450;
+    margin-bottom: 5px;
+}
+.clock-label i { font-size: 11px; }
+
+.clock-date {
+    font-size: 12px;
+    color: #2d4060;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+}
+
+.clock-tz {
+    font-size: 11px;
+    color: #1e3050;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+
+/* ── Flip Clock Container ── */
+.flip-clock {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ── Digit Pair Group ── */
+.fc-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.fc-group-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #1a2d46;
+}
+
+/* Pair of digits sits side-by-side inside the group */
+.fc-group {
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Override: pair row inside group */
+.fc-group > .fd + .fd {
+    margin-left: 3px;
+}
+
+/* The two digit cards sit side-by-side */
+.fc-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 5px;
+}
+
+.fc-group-label {
+    width: 100%;
+    text-align: center;
+    order: 99; /* always last */
+}
+
+
+/* ── Colon Separator (two dots) ── */
+.fc-dots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    height: 72px;          /* matches digit height */
+    width: 16px;
+    flex-shrink: 0;
+    padding-bottom: 18px;  /* optically center with the digit (account for label below) */
+}
+
+.fc-dots span {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #3b82f6;
+    box-shadow: 0 0 8px rgba(59,130,246,0.5);
+    animation: dotBlink 1s step-end infinite;
+}
+.fc-dots span:last-child { animation-delay: 0.5s; }
+
+@keyframes dotBlink {
+    0%, 100% { opacity: 1;   background: #3b82f6; box-shadow: 0 0 10px rgba(59,130,246,0.6); }
+    50%       { opacity: 0.15; background: #1e3050; box-shadow: none; }
+}
+
+
+/* ══════════════════════════════════════════════════
+   SINGLE DIGIT CARD
+   ══════════════════════════════════════════════════
+   Structure (per card, height = FD_H, each half = FD_H/2):
+
+   ┌─────────────┐  ← fd-top  (static, shows top  half of NEW digit)
+   │   top half  │
+   ├─────────────┤  ← fd-crease
+   │  bot half   │
+   └─────────────┘  ← fd-bot  (static, shows bottom half of NEW digit)
+
+   Layered above (z-index 3):
+   • fd-ft  top flap  — pivot: bottom edge — OLD digit top half
+   • fd-fb  bot flap  — pivot: top edge   — NEW digit bot half
+
+   Digit positioning trick:
+   - .fdd has height = FD_H (full card), line-height = FD_H → character vertically centred
+   - In top-half context:  position bottom:0 → span overflows upward; overflow:hidden clips, showing top half of char
+   - In bot-half context:  position top:-FD_HALF → span shifted up; overflow:hidden shows bottom half of char
+════════════════════════════════════════════════════ */
+
+/* Dimensions as CSS custom properties for easy resizing */
+:root {
+    --fd-w:    48px;
+    --fd-h:    72px;
+    --fd-half: 36px;   /* = fd-h / 2 */
+    --fd-fs:   40px;
+    --fd-r:    8px;
+    --fd-bg-t: linear-gradient(180deg, #0e2244 0%, #0c1c38 100%);
+    --fd-bg-b: linear-gradient(180deg, #0c1c38 0%, #091525 100%);
+}
+
+.fd {
+    position: relative;
+    width: var(--fd-w);
+    height: var(--fd-h);
+    /* perspective must be on the parent of the 3D element */
+    perspective: 250px;
+    border-radius: var(--fd-r);
+    flex-shrink: 0;
+    box-shadow:
+        0 6px 24px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+/* ── Static halves ── */
+.fd-half {
+    position: absolute;
+    left: 0; right: 0;
+    height: var(--fd-half);
+    overflow: hidden;
+    z-index: 1;
+}
+
+.fd-top {
+    top: 0;
+    border-radius: var(--fd-r) var(--fd-r) 0 0;
+    background: var(--fd-bg-t);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.04);
+}
+
+.fd-bot {
+    bottom: 0;
+    border-radius: 0 0 var(--fd-r) var(--fd-r);
+    background: var(--fd-bg-b);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.3);
+}
+
+/* ── Animated flaps ── */
+.fd-flap {
+    position: absolute;
+    left: 0; right: 0;
+    height: var(--fd-half);
+    overflow: hidden;
+    z-index: 3;
+    /* Each flap has its own perspective context for the 3D rotation */
+    will-change: transform;
+}
+
+.fd-ft {
+    top: 0;
+    border-radius: var(--fd-r) var(--fd-r) 0 0;
+    background: var(--fd-bg-t);
+    transform-origin: center bottom;   /* pivot at the crease line */
+    transform: rotateX(0deg);
+    box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.06),
+        0 2px 6px rgba(0,0,0,0.4);
+}
+
+.fd-fb {
+    bottom: 0;
+    border-radius: 0 0 var(--fd-r) var(--fd-r);
+    background: var(--fd-bg-b);
+    transform-origin: center top;      /* pivot at the crease line */
+    transform: rotateX(0deg);          /* resting = flat (covers bot half) */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+/* ── Digit span (shared by all four layers) ── */
+.fdd {
+    position: absolute;
+    left: 0; right: 0;
+    height: var(--fd-h);          /* full card height */
+    line-height: var(--fd-h);     /* vertically centres character in full height */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: var(--fd-fs);
+    font-weight: 700;
+    color: #60a5fa;
+    text-align: center;
+    text-shadow: 0 0 18px rgba(96,165,250,0.4);
+    display: block;
+    user-select: none;
+}
+
+/*
+   TOP-HALF context (fd-top, fd-ft):
+   We want to see the TOP portion of the character.
+   anchor bottom:0 → span bottom = container bottom (y=36)
+   span top = 36 - 72 = -36 (above container)
+   overflow:hidden clips at y=0, so we see the first 36px of the 72px span.
+   Character is centred in 72px → starts at ~(72-40)/2=16px → top 20px of char visible. ✓
+*/
+
+/* .fd-top .fdd,
+.fd-ft  .fdd {
+    bottom: 0;
+    top: auto;
+}
+
+.fd-bot .fdd,
+.fd-fb  .fdd {
+    top: calc(-1 * var(--fd-half));  
+    bottom: auto;
+} */
+
+.fd-top .fdd,
+.fd-ft  .fdd {
+    top: 0;
+    bottom: auto;
+}
+
+.fd-bot .fdd,
+.fd-fb  .fdd {
+    bottom: 0;
+    top: auto;
+}
+
+
+/* ── Centre crease line (purely decorative) ── */
+.fd-crease {
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(var(--fd-half) - 1px);
+    height: 1px;
+    background: rgba(0,0,0,0.85);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* ── Sheen overlay on top half / top flap ── */
+.fd-top::after,
+.fd-ft::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* ── Shadow overlay on bottom half when top flap is absent (nice detail) ── */
+.fd-bot::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35), transparent);
+    z-index: 2;
+}
+
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+
+
+
+@media (max-width: 768px) {
+
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+    .clock-bar-inner {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .clock-left, .clock-right { text-align: center; }
+    .clock-label { justify-content: center; }
+    .clock-right { display: none; }
+
+    :root {
+        --fd-w: 38px; --fd-h: 56px; --fd-half: 28px; --fd-fs: 32px; --fd-r: 6px;
+    }
+    .fc-dots { height: 56px; padding-bottom: 14px; }
+
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+}
+
+
+@media (max-width: 400px) {
+    
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+    :root { --fd-w: 32px; --fd-h: 48px; --fd-half: 24px; --fd-fs: 27px; --fd-r: 5px; }
+    .fc-dots { height: 48px; gap: 7px; padding-bottom: 12px; }
+    .fc-dots span { width: 4px; height: 4px; }
+    .flip-clock { gap: 4px; }
+    .fc-group { gap: 2px; }
+
+/* ════════════════════════════════════════════════════
+   FLIP CLOCK BAR
+════════════════════════════════════════════════════ */
+
+}

@@ -4,245 +4,337 @@
 
 <link rel="stylesheet" href="{% static 'css/contest/create_contest.css' %}">
 
-<div class="contest-container">
-    <form method="POST" id="contestForm">
+{% include 'home/flip_clock.html' %}
+
+<!-- ══════════════════════════════════════════════
+     MAIN FORM
+══════════════════════════════════════════════ -->
+<div class="cc-wrap">
+
+    {% if request.resolver_match.url_name == 'create-private-contest' %}
+    <form method="POST" id="contestForm" autocomplete="off">
         {% csrf_token %}
 
-        <h2>Create Contest</h2>
-
-        <!-- Basic Fields -->
-        <div class="form-group">
-            <label>Name</label>
-            {{ contest_form.name }}
-        </div>
-
-        <div class="form-group">
-            <label>Description</label>
-            {{ contest_form.description }}
-        </div>
-
-        <div class="form-row">
-            <div>
-                <label>Start Time</label>
-                {{ contest_form.start_time }}
+        <!-- HEADER -->
+        <div class="cc-header">
+            <div class="cc-header-icon cc-icon-private">
+                <i class="fa-solid fa-lock"></i>
             </div>
-            <div>
-                <label>End Time</label>
-                {{ contest_form.end_time }}
+            <div class="cc-header-text">
+                <h1 class="cc-title">Create Private Contest</h1>
+                <p class="cc-subtitle">Only participants with the secret key can register</p>
             </div>
-            <div>
-                <label>Registration Deadline</label>
-                {{ contest_form.registration_deadline }}
+            <div class="cc-header-badge badge-private">
+                <i class="fa-solid fa-shield-halved"></i>
+                Private
             </div>
         </div>
+        <div class="cc-divider"></div>
 
-       
-        <!-- <div class="selector">
-            <h3>Add Problems</h3>
-            <input type="text" id="problemSearch" placeholder="Search problems...">
-            <div class="dropdown" id="problemDropdown"></div>
-            <div class="selected" id="selectedProblems"></div>
-        </div> -->
+        <!-- 01: DETAILS -->
+        <div class="cc-section">
+            <div class="cc-section-label">
+                <span class="cc-section-num">01</span>
+                <span>Contest Details</span>
+            </div>
+            <div class="cc-field">
+                <label class="cc-label"><i class="fa-solid fa-pen-nib"></i> Contest Name</label>
+                {{ contest_form.name }}
+                <span class="cc-field-hint">Choose a clear, memorable name</span>
+            </div>
+            <div class="cc-field">
+                <label class="cc-label"><i class="fa-solid fa-align-left"></i> Description</label>
+                {{ contest_form.description }}
+                <span class="cc-field-hint">Describe the rules, format, and what participants can expect</span>
+            </div>
+        </div>
 
-        <!-- <div class="selector">
-            <h3>Add Participants</h3>
-            <input type="text" id="userSearch" placeholder="Search users...">
-            <div class="dropdown" id="userDropdown"></div>
-            <div class="selected" id="selectedUsers"></div>
-        </div> -->
+        <!-- 02: SCHEDULE -->
+        <div class="cc-section">
+            <div class="cc-section-label">
+                <span class="cc-section-num">02</span>
+                <span>Schedule</span>
+            </div>
+            <div class="cc-time-stack">
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-play"></i> Start Time</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.start_time }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_start_time')">Now</button>
+                    </div>
+                </div>
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-stop"></i> End Time</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.end_time }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_end_time')">Now</button>
+                    </div>
+                </div>
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-calendar-xmark"></i> Registration Deadline</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.registration_deadline }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_registration_deadline')">Now</button>
+                    </div>
+                </div>
+            </div>
+            <div class="cc-duration-preview" id="durationPreview">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span id="durationText">Set start and end time to see duration</span>
+            </div>
+        </div>
 
-        <!-- <div class="selector">
-            <h3>Add Moderators</h3>
-            <input type="text" id="modSearch" placeholder="Search moderators...">
-            <div class="dropdown" id="modDropdown"></div>
-            <div class="selected" id="selectedMods"></div>
-        </div> -->
+        <!-- 03: PRIVATE KEY -->
+        <div class="cc-section cc-section-key">
+            <div class="cc-section-label">
+                <span class="cc-section-num cc-num-key">03</span>
+                <span>Private Access</span>
+            </div>
+            <div class="cc-key-card">
+                <div class="cc-key-card-glow"></div>
+                <div class="cc-key-header">
+                    <div class="cc-key-icon-wrap">
+                        <div class="cc-key-icon-ring"></div>
+                        <div class="cc-key-icon"><i class="fa-solid fa-key"></i></div>
+                    </div>
+                    <div>
+                        <h3 class="cc-key-title">Secret Key</h3>
+                        <p class="cc-key-desc">Share this with participants so they can register</p>
+                    </div>
+                </div>
+                <div class="cc-key-row">
+                    <div class="cc-key-input-wrap" id="keyInputWrap">
+                        <input type="password" name="private_key" id="privateKeyInput"
+                               class="cc-key-input" placeholder="Enter a secret key…"
+                               autocomplete="new-password" maxlength="20"/>
+                        <button type="button" class="cc-key-eye" id="keyEyeBtn" onclick="togglePKVis()">
+                            <i class="fa-solid fa-eye" id="keyEyeIcon"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="cc-key-gen-btn" onclick="generateKey()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                    </button>
+                </div>
+                <div class="cc-strength-row">
+                    <div class="cc-strength-bar"><div class="cc-strength-fill" id="keyStrFill"></div></div>
+                    <span class="cc-strength-label" id="keyStrLabel">—</span>
+                </div>
+                <div class="cc-key-hints">
+                    <div class="cc-hint" id="khLen"><i class="fa-solid fa-circle-xmark"></i> At least 6 characters</div>
+                    <div class="cc-hint" id="khNum"><i class="fa-solid fa-circle-xmark"></i> Contains a number</div>
+                    <div class="cc-hint" id="khSp"><i class="fa-solid fa-circle-xmark"></i>  Contains a special character</div>
+                </div>
+                <div class="cc-key-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Case-sensitive, up to 20 chars. Participants need both the Contest ID and this key to register.</span>
+                </div>
+            </div>
+        </div>
 
-        <!-- Hidden Inputs -->
-        <!-- <input type="hidden" name="problems" id="problemsInput"> -->
-        <!-- <input type="hidden" name="participants" id="participantsInput"> -->
-        <!-- <input type="hidden" name="moderators" id="moderatorsInput"> -->
-
-        <button type="submit" class="submit-btn">Create Contest</button>
+        <!-- SUBMIT -->
+        <button type="submit" class="cc-submit-btn" id="ccSubmitBtn">
+            <span class="cc-submit-bg"></span>
+            <span class="cc-submit-content">
+                <i class="fa-solid fa-lock"></i>
+                <span id="ccSubmitText">Create Private Contest</span>
+            </span>
+            <span class="cc-submit-shimmer"></span>
+        </button>
     </form>
+
+    {% else %}
+
+    <form method="POST" id="contestForm" autocomplete="off">
+        {% csrf_token %}
+
+        <!-- HEADER -->
+        <div class="cc-header">
+            <div class="cc-header-icon cc-icon-public">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div class="cc-header-text">
+                <h1 class="cc-title">Create Contest</h1>
+                <p class="cc-subtitle">Set up a public contest open to all participants</p>
+            </div>
+            <div class="cc-header-badge badge-public">
+                <i class="fa-solid fa-globe"></i>
+                Public
+            </div>
+        </div>
+        <div class="cc-divider"></div>
+
+        <!-- 01: DETAILS -->
+        <div class="cc-section">
+            <div class="cc-section-label">
+                <span class="cc-section-num">01</span>
+                <span>Contest Details</span>
+            </div>
+            <div class="cc-field">
+                <label class="cc-label"><i class="fa-solid fa-pen-nib"></i> Contest Name</label>
+                {{ contest_form.name }}
+                <span class="cc-field-hint">Choose a clear, memorable name</span>
+            </div>
+            <div class="cc-field">
+                <label class="cc-label"><i class="fa-solid fa-align-left"></i> Description</label>
+                {{ contest_form.description }}
+                <span class="cc-field-hint">Describe the rules, format, and what participants can expect</span>
+            </div>
+        </div>
+
+        <!-- 02: SCHEDULE -->
+        <div class="cc-section">
+            <div class="cc-section-label">
+                <span class="cc-section-num">02</span>
+                <span>Schedule</span>
+            </div>
+            <div class="cc-time-stack">
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-play"></i> Start Time</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.start_time }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_start_time')">Now</button>
+                    </div>
+                </div>
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-stop"></i> End Time</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.end_time }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_end_time')">Now</button>
+                    </div>
+                </div>
+                <div class="cc-field">
+                    <label class="cc-label"><i class="fa-solid fa-calendar-xmark"></i> Registration Deadline</label>
+                    <div class="cc-time-wrap">
+                        {{ contest_form.registration_deadline }}
+                        <button type="button" class="cc-now-btn" onclick="fillNow('id_registration_deadline')">Now</button>
+                    </div>
+                </div>
+            </div>
+            <div class="cc-duration-preview" id="durationPreview">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span id="durationText">Set start and end time to see duration</span>
+            </div>
+        </div>
+
+        <!-- SUBMIT -->
+        <button type="submit" class="cc-submit-btn cc-submit-public" id="ccSubmitBtn">
+            <span class="cc-submit-bg"></span>
+            <span class="cc-submit-content">
+                <i class="fa-solid fa-trophy"></i>
+                <span id="ccSubmitText">Create Contest</span>
+            </span>
+            <span class="cc-submit-shimmer"></span>
+        </button>
+    </form>
+    {% endif %}
+
 </div>
 
+
 <script>
+/* ══ DURATION PREVIEW ══ */
+function updateDuration() {
+    const s  = document.getElementById('id_start_time');
+    const e  = document.getElementById('id_end_time');
+    const el = document.getElementById('durationText');
+    const pr = document.getElementById('durationPreview');
+    if (!s || !e || !el || !pr) return;
 
-// let problems = [];
-// let users = [];
+    const sv = new Date(s.value), ev = new Date(e.value);
+    if (!s.value || !e.value || isNaN(sv) || isNaN(ev)) {
+        el.textContent = 'Set start and end time to see duration';
+        pr.className = 'cc-duration-preview'; return;
+    }
+    const diff = ev - sv;
+    if (diff <= 0) {
+        el.textContent = 'End time must be after start time';
+        pr.className = 'cc-duration-preview is-error'; return;
+    }
+    pr.className = 'cc-duration-preview has-value';
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    el.textContent = 'Duration: ' + (h ? h + 'h ' : '') + (m ? m + 'm' : (!h ? '< 1 min' : ''));
+}
 
-// Load problems
-// {% for p in problems %}
-//     problems.push({
-//         id: {{ p.id }},
-//         name: "{{ p.title|escapejs }}"
-//     });
-// {% endfor %}
-
-// Load users
-// {% for u in users %}
-// users.push({
-//     id: {{ u.id }},
-//     username: "{{ u.userprofile.display_name|escapejs }}",
-//     avatar: "{{ u.userprofile.avatar }}",
-// });
-// {% endfor %}
+document.addEventListener('DOMContentLoaded', () => {
+    ['id_start_time','id_end_time'].forEach(id =>
+        document.getElementById(id)?.addEventListener('change', updateDuration)
+    );
+});
 
 
+/* ══ FILL NOW ══ */
+function fillNow(fieldId) {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    const now = new Date(); now.setSeconds(0,0);
+    el.value = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+    el.dispatchEvent(new Event('change'));
+}
 
-// =====================
-// STATE
-// =====================
-// let selectedProblems = [];
-// let selectedUsers = [];
-// let selectedMods = [];
 
-// =====================
-// GENERIC SEARCH SYSTEM
-// =====================
-// function initSearch({
-//     inputId,
-//     dropdownId,
-//     selectedBoxId,
-//     data,
-//     selectedArray,
-//     labelKey,
-//     hasAvatar = false
-// }) {
-//     const input = document.getElementById(inputId);
-//     const dropdown = document.getElementById(dropdownId);
-//     const selectedBox = document.getElementById(selectedBoxId);
+/* ══ PRIVATE KEY ══ */
+let pkVisible = false;
 
-//     input.addEventListener("input", function () {
-//         const value = input.value.toLowerCase();
-//         dropdown.innerHTML = "";
+function togglePKVis() {
+    const inp = document.getElementById('privateKeyInput');
+    const ico = document.getElementById('keyEyeIcon');
+    const btn = document.getElementById('keyEyeBtn');
+    if (!inp) return;
+    pkVisible = !pkVisible;
+    inp.type = pkVisible ? 'text' : 'password';
+    ico.className = pkVisible ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    btn.classList.toggle('active', pkVisible);
+}
 
-//         if (!value) return;
+const CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%&*';
+function generateKey() {
+    const arr = new Uint8Array(12); crypto.getRandomValues(arr);
+    let key = ''; arr.forEach(b => key += CHARS[b % CHARS.length]);
+    const inp = document.getElementById('privateKeyInput');
+    if (!inp) return;
+    inp.value = key;
+    if (!pkVisible) {
+        inp.type = 'text'; pkVisible = true;
+        document.getElementById('keyEyeIcon').className = 'fa-solid fa-eye-slash';
+        document.getElementById('keyEyeBtn').classList.add('active');
+    }
+    inp.dispatchEvent(new Event('input'));
+    const w = document.getElementById('keyInputWrap');
+    if (w) { w.classList.add('generated'); setTimeout(() => w.classList.remove('generated'), 600); }
+}
 
-//         const filtered = data.filter(item =>
-//             (item[labelKey] || "").toLowerCase().includes(value)
-//         );
+function updateKeyStrength(val) {
+    const fill  = document.getElementById('keyStrFill');
+    const label = document.getElementById('keyStrLabel');
+    if (!fill) return;
+    const hasLen = val.length >= 6, hasNum = /\d/.test(val), hasSp = /[^a-zA-Z0-9]/.test(val);
+    const upd = (id, ok) => {
+        const el = document.getElementById(id); if (!el) return;
+        el.classList.toggle('ok', ok);
+        el.querySelector('i').className = ok ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
+    };
+    upd('khLen', hasLen); upd('khNum', hasNum); upd('khSp', hasSp);
+    if (!val) { fill.style.width = '0%'; fill.className = 'cc-strength-fill'; label.textContent = '—'; return; }
+    const score = [hasLen, hasNum, hasSp, val.length >= 10, val.length >= 14].filter(Boolean).length;
+    const lvls = [
+        {w:'20%',c:'str-weak',  t:'Weak'},  {w:'40%',c:'str-weak',  t:'Weak'},
+        {w:'60%',c:'str-fair',  t:'Fair'},  {w:'80%',c:'str-good',  t:'Good'},
+        {w:'100%',c:'str-strong',t:'Strong'}
+    ];
+    const lv = lvls[score-1] || lvls[0];
+    fill.style.width = lv.w; fill.className = 'cc-strength-fill ' + lv.c; label.textContent = lv.t;
+}
 
-//         filtered.forEach(item => {
-//             if (selectedArray.includes(item.id)) return;
-
-//             const option = document.createElement("div");
-//             option.className = "dropdown-item";
-
-//             if (hasAvatar) {
-//                 option.innerHTML = `
-//                     <img src="${item.avatar}" class="avatar">
-//                     <span>${item[labelKey]}</span>
-//                 `;
-//             } else {
-//                 option.textContent = item[labelKey];
-//             }
-
-//             option.onclick = () => {
-//                 selectedArray.push(item.id);
-//                 renderSelected(selectedBox, selectedArray, data, labelKey, hasAvatar);
-//                 dropdown.innerHTML = "";
-//                 input.value = "";
-//                 updateHiddenInputs();
-//             };
-
-//             dropdown.appendChild(option);
-//         });
-//     });
-
-//     document.addEventListener("click", (e) => {
-//         if (!input.contains(e.target)) {
-//             dropdown.innerHTML = "";
-//         }
-//     });
-// }
-
-// =====================
-// RENDER SELECTED TAGS
-// =====================
-// function renderSelected(container, selectedArray, data, labelKey, hasAvatar) {
-//     container.innerHTML = "";
-
-//     selectedArray.forEach(id => {
-//         const item = data.find(d => d.id === id);
-//         if (!item) return;
-
-//         const tag = document.createElement("div");
-//         tag.className = "tag";
-
-//         if (hasAvatar) {
-//             tag.innerHTML = `
-//                 <img src="${item.avatar}" class="avatar small">
-//                 <span>${item[labelKey]}</span>
-//                 <span class="remove-btn">✖</span>
-//             `;
-//         } else {
-//             tag.innerHTML = `
-//                 <span>${item[labelKey]}</span>
-//                 <span class="remove-btn">✖</span>
-//             `;
-//         }
-
-//         tag.querySelector(".remove-btn").onclick = () => {
-//             const index = selectedArray.indexOf(id);
-//             if (index > -1) selectedArray.splice(index, 1);
-//             renderSelected(container, selectedArray, data, labelKey, hasAvatar);
-//             updateHiddenInputs();
-//         };
-
-//         container.appendChild(tag);
-//     });
-// }
-
-// =====================
-// UPDATE HIDDEN INPUTS
-// =====================
-// function updateHiddenInputs() {
-//     document.getElementById("problemsInput").value = JSON.stringify(selectedProblems);
-//     document.getElementById("participantsInput").value = JSON.stringify(selectedUsers);
-//     document.getElementById("moderatorsInput").value = JSON.stringify(selectedMods);
-// }
-
-// =====================
-// INIT
-// =====================
-
-// Problems (no avatar)
-// initSearch({
-//     inputId: "problemSearch",
-//     dropdownId: "problemDropdown",
-//     selectedBoxId: "selectedProblems",
-//     data: problems,
-//     selectedArray: selectedProblems,
-//     labelKey: "name",
-//     hasAvatar: false
-// });
-
-// Participants (with avatar)
-// initSearch({
-//     inputId: "userSearch",
-//     dropdownId: "userDropdown",
-//     selectedBoxId: "selectedUsers",
-//     data: users,
-//     selectedArray: selectedUsers,
-//     labelKey: "username",
-//     hasAvatar: true
-// });
-
-// Moderators (with avatar)
-// initSearch({
-//     inputId: "modSearch",
-//     dropdownId: "modDropdown",
-//     selectedBoxId: "selectedMods",
-//     data: users,
-//     selectedArray: selectedMods,
-//     labelKey: "username",
-//     hasAvatar: true
-// });
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('privateKeyInput')?.addEventListener('input', e => updateKeyStrength(e.target.value));
+    document.getElementById('contestForm')?.addEventListener('submit', () => {
+        const btn = document.getElementById('ccSubmitBtn');
+        const txt = document.getElementById('ccSubmitText');
+        if (btn) btn.classList.add('loading');
+        if (txt) txt.textContent = 'Creating…';
+    });
+});
 </script>
-
-
-
 
 {% endblock %}

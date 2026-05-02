@@ -903,6 +903,9 @@ tr:hover {
 
 
 
+
+
+
 /* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
 
@@ -1103,31 +1106,6 @@ tr:hover {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     .hero {
         flex-direction: column;
     }
@@ -1160,5 +1138,14 @@ tr:hover {
     .footer {
         padding: 25px;
     }
+
+
+
+}
+
+
+
+@media (max-width: 400px) {
+
 
 }

@@ -6,6 +6,11 @@
 
 <div id="floatingError" class="floating-error"></div>
 
+
+{% include 'home/flip_clock.html' %}
+
+
+
 <section class="contests-section">
 
 
@@ -152,7 +157,7 @@
         </button>
 
         
-        <button class="create-contest-btn" onclick="window.location.href=''">
+        <button class="create-contest-btn" onclick="window.location.href='{% url 'create-private-contest' %}'">
             <span class="icon"><i class="fa-solid fa-trophy"></i></span>
             <span class="text">Create Contest</span>
         </button>
