@@ -1,34 +1,30 @@
-import threading
+# import threading
 from django.conf import settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.core.mail import EmailMessage
+# from django.core.mail import EmailMessage
 from . models import UserProfile, EmailTemplate
+from . tasks import send_welcome_email
 
 
 
-def send_async_email(subject,message,sender,receiver):
-    print('Inside The Send Async Email')
+# def send_async_email(subject,message,sender,receiver):
+#     print('Inside The Send Async Email')
 
-    def send_html_mail():
-        print('Inside The Send HTML Mail')
+#     def send_html_mail():
+#         print('Inside The Send HTML Mail')
 
-        email = EmailMessage(
-            subject,
-            message,
-            sender,
-            [receiver]
-        )
+#         email = EmailMessage(
+#             subject,
+#             message,
+#             sender,
+#             [receiver]
+#         )
 
-        email.content_subtype = "html"
-        # email.send(fail_silently=True)
+#         email.content_subtype = "html"
+#         email.send(fail_silently=True)
 
-    threading.Thread(target=send_html_mail).start()
+#     threading.Thread(target=send_html_mail).start()
 
-    # threading.Thread(
-    #     target=send_mail,
-    #     args=(subject, message, sender, [receiver]),
-    #     kwargs={'fail_silently': True}
-    # ).start()
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -59,6 +55,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 sender=settings.DEFAULT_FROM_EMAIL
                 receiver=user.email
 
-                send_async_email(subject,message,sender,receiver)
+                # send_async_email(subject,message,sender,receiver)
+                send_welcome_email.delay(subject,message,sender,receiver)
+
 
         return user

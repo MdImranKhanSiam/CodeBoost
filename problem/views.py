@@ -7,7 +7,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from . models import Problem, TestCase, Submission
-from . background_task import code_submission
+from . tasks import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 

@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from problem.models import Problem, TestCase, Submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
-from problem.background_task import code_submission
+from problem.tasks import code_submission
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 from . models import Contest
