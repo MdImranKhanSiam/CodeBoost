@@ -7,7 +7,11 @@ from . models import UserProfile, EmailTemplate
 
 
 def send_async_email(subject,message,sender,receiver):
+    print('Inside The Send Async Email')
+
     def send_html_mail():
+        print('Inside The Send HTML Mail')
+
         email = EmailMessage(
             subject,
             message,
@@ -16,7 +20,7 @@ def send_async_email(subject,message,sender,receiver):
         )
 
         email.content_subtype = "html"
-        email.send(fail_silently=True)
+        # email.send(fail_silently=True)
 
     threading.Thread(target=send_html_mail).start()
 
@@ -48,6 +52,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             welcome_email = EmailTemplate.objects.get(email_type='welcome')
 
             if welcome_email.is_active:
+                print('Welcome Email is active')
+
                 subject=welcome_email.subject
                 message=welcome_email.message.format(name=profile.display_name)
                 sender=settings.DEFAULT_FROM_EMAIL
