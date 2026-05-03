@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import os, ssl
+import os
 import cloudinary
 from dotenv import load_dotenv
 from pathlib import Path
@@ -115,21 +115,6 @@ elif Environment == 'Production':
     }
 
     CELERY_BROKER_URL = f"{REDIS_URL}/0"
-    CELERY_RESULT_BACKEND = f"{REDIS_URL}/0"
-
-    CELERY_BROKER_USE_SSL = {
-        "ssl_cert_reqs": ssl.CERT_NONE,
-    }
-
-    CELERY_REDIS_BACKEND_USE_SSL = {
-        "ssl_cert_reqs": ssl.CERT_NONE,
-    }
-
-
-broker_connection_retry_on_startup = True
-broker_pool_limit = None
-redis_socket_keepalive = True
-broker_heartbeat = 30
 
 
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
