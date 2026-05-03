@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import os
+import os, ssl
 import cloudinary
 from dotenv import load_dotenv
 from pathlib import Path
@@ -109,12 +109,25 @@ elif Environment == 'Production':
         'default': {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [f"{REDIS_URL}/1"],
+                "hosts": [{
+                    "address": f"{REDIS_URL}/1",
+                    "ssl_cert_reqs": ssl.CERT_REQUIRED,
+                }],
             },
         },
     }
 
     CELERY_BROKER_URL = f"{REDIS_URL}/0"
+    CELERY_RESULT_BACKEND = f"{REDIS_URL}/0"
+
+    CELERY_BROKER_USE_SSL = {
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    }
+
+    CELERY_REDIS_BACKEND_USE_SSL = {
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    }
+    
     
 
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1

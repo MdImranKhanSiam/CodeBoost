@@ -51,7 +51,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 print('Welcome Email is active')
 
                 subject=welcome_email.subject
-                message=welcome_email.message.format(name=profile.display_name)
+                message=welcome_email.message.replace("{name}", profile.display_name)
                 sender=settings.DEFAULT_FROM_EMAIL
                 receiver=user.email
 
