@@ -109,10 +109,7 @@ elif Environment == 'Production':
         'default': {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [{
-                    "address": f"{REDIS_URL}/1",
-                    "ssl_cert_reqs": ssl.CERT_REQUIRED,
-                }],
+                "hosts": [f"{REDIS_URL}/1"],
             },
         },
     }
@@ -121,14 +118,19 @@ elif Environment == 'Production':
     CELERY_RESULT_BACKEND = f"{REDIS_URL}/0"
 
     CELERY_BROKER_USE_SSL = {
-        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+        "ssl_cert_reqs": ssl.CERT_NONE,
     }
 
     CELERY_REDIS_BACKEND_USE_SSL = {
-        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+        "ssl_cert_reqs": ssl.CERT_NONE,
     }
-    
-    
+
+
+broker_connection_retry_on_startup = True
+broker_pool_limit = None
+redis_socket_keepalive = True
+broker_heartbeat = 30
+
 
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_ACKS_LATE = True
