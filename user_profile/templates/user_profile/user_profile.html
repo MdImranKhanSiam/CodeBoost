@@ -1,0 +1,10 @@
+{% extends 'home/master.html' %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/user_profile/user_profile.css' %}">
+
+{% block content %}
+<p>
+    User Profile {{ target_user.userprofile.display_name }}
+</p>
+{% endblock %}

@@ -58,7 +58,7 @@ standingsData = [];
 
 async function fetchStandings() {
     try {
-        const response = await fetch(`/api/contest_leaderboard/?contest_id=${contest_id}`, {
+        const response = await fetch(`/api/contests/contest_leaderboard/?contest_id=${contest_id}`, {
             method: "GET",
         });
 

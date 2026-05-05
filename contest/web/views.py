@@ -11,10 +11,9 @@ from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 from problem.tasks import code_submission
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from . models import Contest
-from . forms import ContestForm
-from . services import contest_rank
-
+from contest.models import Contest
+from contest.forms import ContestForm
+from contest.services import contest_rank
 
 
 @ratelimit(key='user', rate='10/m', method='GET', block=True)

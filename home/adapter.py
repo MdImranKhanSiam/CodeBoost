@@ -2,7 +2,8 @@
 from django.conf import settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 # from django.core.mail import EmailMessage
-from . models import UserProfile, EmailTemplate
+from user_profile.models import UserProfile
+from . models import EmailTemplate
 from . tasks import send_welcome_email
 
 

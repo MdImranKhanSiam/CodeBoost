@@ -54,7 +54,7 @@
 
 
                     <div class="nav-profile-menu" id="profileMenu">
-                        <a href="">
+                        <a href="{% url 'user-profile' request.user.id %}">
 
                             <div class="view-profile-grid">
                                 <div class="view-profile-grid-image">
@@ -142,7 +142,7 @@
         {% if request.user.is_authenticated %}
 
         <!-- Profile Header -->
-        <a href="">
+        <a href="{% url 'user-profile' request.user.id %}">
           <div class="view-profile-grid">
             <div class="view-profile-grid-image">
               <img src="{{ request.user.userprofile.avatar }}"/>
