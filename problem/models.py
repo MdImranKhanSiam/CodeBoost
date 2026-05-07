@@ -98,7 +98,7 @@ class Submission(models.Model):
             models.Index(fields=['contest', '-submitted_at']),
             # Submission.objects.filter(contest=contest).order_by('-submitted_at')
 
-            models.Index(fields=['contest', 'user', 'problem', 'submitted_at'])
+            models.Index(fields=['contest', 'user', 'problem', 'submitted_at']),
             # Submission.objects.filter(contest=contest, user=user, problem=problem).order_by('submitted_at')
 
             # models.Index(fields=['contest', 'user']),
@@ -112,7 +112,9 @@ class Submission(models.Model):
 
             # models.Index(fields=['contest', 'problem', 'verdict']),
             # Submission.objects.filter(contest=contest, problem=problem, verdict='AC')
-
+        
+            models.Index(fields=['user', 'verdict', 'problem', 'submitted_at'])
+            # For Progress Heatmap
         ]
 
 

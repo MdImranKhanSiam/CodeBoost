@@ -72,7 +72,8 @@
             },
             titleFormatter(locale, date, count, $el) {
                 const id = $el.attr('id') || '';
-                return id + ' ' + date.toLocaleDateString() + ' - ' + count;
+        
+                return date.toLocaleDateString() + ' — ' + count + ' ' + id;
             },
             queryParams(p) {
                 return p;

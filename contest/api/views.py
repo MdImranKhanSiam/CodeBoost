@@ -13,7 +13,7 @@ from contest.services import contest_rank
 
 
 @api_view(["GET"])
-@ratelimit(key='user', rate='12/m', method='GET', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @permission_classes([IsAuthenticated])
 def contest_leaderboard(request):
     user = request.user
