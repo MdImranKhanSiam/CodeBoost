@@ -3,8 +3,280 @@
 
 <link rel="stylesheet" href="{% static 'css/user_profile/user_profile.css' %}">
 
+
+
+
+
+
+
+
 {% block content %}
+
 <p>
     User Profile {{ target_user.userprofile.display_name }}
 </p>
+
+<select id="yearDropdown"></select>
+
+<br><br><br>
+
+<div id="heatmapDiv">
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/min/moment-with-locales.min.js"></script>
+<script src="{% static 'js/user_profile/dist/jquery.heatmap.js' %}"></script>
+
+
+<script>
+// console.log(typeof jQuery);
+// console.log(typeof $);
+// console.log($.heatmap);
+
+function ensureJanuaryAndDecember(dataByYear) {
+    const result = {};
+
+    Object.keys(dataByYear).forEach(year => {
+        const entries = dataByYear[year].data;
+
+        let hasJan1 = false;
+        let hasDec20 = false;
+
+        entries.forEach(item => {
+            const [y, m, d] = item.date.split("-");
+
+            if (m === "01" && d === "01") {
+                hasJan1 = true;
+            }
+
+            if (m === "12" && d === "24") {
+                hasDec20 = true;
+            }
+        });
+
+        const newData = [...entries];
+
+        if (!hasJan1) {
+            newData.push({
+                date: `${year}-01-01`,
+                count: 0
+            });
+        }
+
+        if (!hasDec20) {
+            newData.push({
+                date: `${year}-12-24`,
+                count: 0
+            });
+        }
+
+        result[year] = { data: newData };
+    });
+
+    return result;
+}
+
+
+const heatmapData = {
+  "2022": {
+    data: [
+      { date:'2022-01-01', count:12 },
+      { date:'2022-01-14', count:12 },
+      { date:'2022-01-16', count:12 },
+      { date:'2022-01-18', count:12 },
+      { date:'2022-01-27', count:12 },
+      { date:'2022-01-28', count:12 },
+      { date:'2022-02-03', count:7 },
+      { date:'2022-02-19', count:15 },
+      { date:'2022-03-08', count:4 },
+      { date:'2022-03-22', count:18 },
+      { date:'2022-04-11', count:9 },
+      { date:'2022-04-27', count:6 },
+      { date:'2022-05-05', count:13 },
+      { date:'2022-05-18', count:10 },
+      { date:'2022-06-02', count:16 },
+      { date:'2022-06-14', count:8 },
+      { date:'2022-06-29', count:19 },
+      { date:'2022-07-07', count:5 },
+      { date:'2022-07-21', count:11 },
+      { date:'2022-08-04', count:14 },
+      { date:'2022-08-17', count:3 },
+      { date:'2022-09-01', count:17 },
+      { date:'2022-09-15', count:9 },
+      { date:'2022-09-28', count:20 },
+      { date:'2022-10-10', count:6 },
+      { date:'2022-10-25', count:13 },
+      { date:'2022-11-06', count:7 },
+      { date:'2022-11-19', count:15 },
+      { date:'2022-12-03', count:4 },
+      { date:'2022-12-21', count:18 },
+      { date:'2022-12-30', count:4 },
+    ]
+  },
+
+  "2023": {
+    data: [
+      { date:'2023-01-09', count:8 },
+      { date:'2023-01-24', count:14 },
+      { date:'2023-02-06', count:5 },
+      { date:'2023-02-18', count:12 },
+      { date:'2023-03-02', count:16 },
+      { date:'2023-03-17', count:7 },
+      { date:'2023-03-29', count:19 },
+      { date:'2023-04-12', count:10 },
+      { date:'2023-04-26', count:3 },
+      { date:'2023-05-08', count:15 },
+      { date:'2023-05-23', count:6 },
+      { date:'2023-06-04', count:18 },
+      { date:'2023-06-19', count:9 },
+      { date:'2023-07-01', count:13 },
+      { date:'2023-07-16', count:4 },
+      { date:'2023-07-30', count:17 },
+      { date:'2023-08-11', count:8 },
+      { date:'2023-08-24', count:20 },
+      { date:'2023-09-05', count:11 },
+      { date:'2023-09-20', count:5 },
+      { date:'2023-10-03', count:14 },
+      { date:'2023-10-18', count:7 },
+      { date:'2023-11-02', count:16 },
+      { date:'2023-11-14', count:10 },
+      { date:'2023-12-01', count:19 }
+    ]
+  },
+
+  "2024": {
+    data: [
+      { date:'2024-01-07', count:6 },
+      { date:'2024-01-22', count:13 },
+      { date:'2024-02-05', count:4 },
+      { date:'2024-02-17', count:18 },
+      { date:'2024-03-01', count:9 },
+      { date:'2024-03-16', count:15 },
+      { date:'2024-03-28', count:7 },
+      { date:'2024-04-09', count:20 },
+      { date:'2024-04-23', count:11 },
+      { date:'2024-05-06', count:5 },
+      { date:'2024-05-19', count:14 },
+      { date:'2024-06-03', count:8 },
+      { date:'2024-06-15', count:17 },
+      { date:'2024-06-29', count:3 },
+      { date:'2024-07-10', count:16 },
+      { date:'2024-07-24', count:10 },
+      { date:'2024-08-08', count:19 },
+      { date:'2024-08-21', count:6 },
+      { date:'2024-09-04', count:12 },
+      { date:'2024-09-18', count:7 },
+      { date:'2024-10-02', count:15 },
+      { date:'2024-10-17', count:4 },
+      { date:'2024-11-01', count:18 },
+      { date:'2024-11-13', count:9 },
+      { date:'2024-12-05', count:13 }
+    ]
+  },
+
+  "2025": {
+    data: [
+      { date:'2025-01-11', count:5 },
+      { date:'2025-01-25', count:16 },
+      { date:'2025-02-08', count:8 },
+      { date:'2025-02-20', count:19 },
+      { date:'2025-03-04', count:10 },
+      { date:'2025-03-18', count:3 },
+      { date:'2025-04-02', count:14 },
+      { date:'2025-04-16', count:7 },
+      { date:'2025-05-01', count:18 },
+      { date:'2025-05-15', count:9 },
+      { date:'2025-05-29', count:13 },
+      { date:'2025-06-10', count:4 },
+      { date:'2025-06-24', count:17 },
+      { date:'2025-07-08', count:6 },
+      { date:'2025-07-22', count:20 },
+      { date:'2025-08-05', count:11 },
+      { date:'2025-08-19', count:5 },
+      { date:'2025-09-03', count:15 },
+      { date:'2025-09-17', count:8 },
+      { date:'2025-10-01', count:19 },
+      { date:'2025-10-14', count:7 },
+      { date:'2025-11-06', count:16 },
+      { date:'2025-11-21', count:10 },
+      { date:'2025-12-04', count:3 },
+      { date:'2025-12-18', count:14 }
+    ]
+  },
+
+  "2026": {
+    data: [
+      { date:'2026-01-05', count:9 },
+      { date:'2026-01-19', count:18 },
+      { date:'2026-02-02', count:4 },
+      { date:'2026-02-16', count:13 },
+      { date:'2026-03-03', count:7 },
+      { date:'2026-03-17', count:20 },
+      { date:'2026-04-01', count:10 },
+      { date:'2026-04-15', count:5 },
+      { date:'2026-04-29', count:16 },
+      { date:'2026-05-13', count:8 },
+      { date:'2026-05-27', count:19 },
+      { date:'2026-06-09', count:11 },
+      { date:'2026-06-23', count:3 },
+      { date:'2026-07-07', count:14 },
+      { date:'2026-07-21', count:6 },
+      { date:'2026-08-04', count:17 },
+      { date:'2026-08-18', count:9 },
+      { date:'2026-09-01', count:15 },
+      { date:'2026-09-16', count:4 },
+      { date:'2026-09-30', count:18 },
+      { date:'2026-10-12', count:7 },
+      { date:'2026-10-26', count:13 },
+      { date:'2026-11-08', count:5 },
+      { date:'2026-11-22', count:20 },
+      { date:'2026-12-06', count:10 }
+    ]
+  }
+};
+
+
+
+const updatedHeatmapData = ensureJanuaryAndDecember(heatmapData);
+
+
+const dropdown = document.getElementById("yearDropdown");
+
+Object.keys(heatmapData).forEach(year => {
+    const option = document.createElement("option");
+    option.value = year;
+    option.textContent = year;
+    dropdown.appendChild(option);
+});
+
+// Handle change
+dropdown.addEventListener("change", function () {
+    onYearChange(this.value);
+});
+
+// Your function (you control logic)
+function onYearChange(year) {
+    const container = document.getElementById("heatmapDiv");
+    container.innerHTML = "";
+
+    const solvedDiv = document.createElement("div");
+    solvedDiv.id = "Solved";
+    container.appendChild(solvedDiv);
+
+    data = updatedHeatmapData[year].data
+
+    console.log(data)
+
+    $('#Solved').heatmap({
+      data
+    });
+}
+
+// Load first year automatically
+onYearChange(dropdown.value);
+    
+
+</script>
 {% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'home/master.html' %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/user_profile/user_profile.css' %}">
+
+
+
+
+{% block content %}
+
+<p>
+    User Profile {{ target_user.userprofile.display_name }}
+</p>
+
+<div id="heatmap" style="width: 100%; height: 300px;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<!-- 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const chart = echarts.init(document.getElementById('heatmap'));
+
+    fetch('/api/heatmap/{{ user.username }}/')
+        .then(response => response.json())
+        .then(data => {
+            const option = {
+                tooltip: {
+                    position: 'top',
+                    formatter: function (p) {
+                        return `${p.data[0]}: ${p.data[1]} problems solved`;
+                    }
+                },
+                visualMap: {
+                    min: 0,
+                    max: 10,
+                    calculable: true,
+                    orient: 'horizontal',
+                    left: 'center',
+                    top: 0
+                },
+                calendar: {
+                    top: 60,
+                    left: 30,
+                    right: 30,
+                    cellSize: ['auto', 15],
+                    range: new Date().getFullYear(),
+                    itemStyle: {
+                        borderWidth: 0.5
+                    },
+                    yearLabel: { show: true },
+                    dayLabel: {
+                        firstDay: 1,
+                        nameMap: 'en'
+                    },
+                    monthLabel: {
+                        nameMap: 'en'
+                    }
+                },
+                series: {
+                    type: 'heatmap',
+                    coordinateSystem: 'calendar',
+                    data: data
+                }
+            };
+
+            chart.setOption(option);
+        });
+});
+</script> -->
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const chart = echarts.init(document.getElementById('heatmap'));
+
+    // Static sample data
+    const data = [
+        ['2026-01-02', 2],
+        ['2026-01-03', 4],
+        ['2026-01-04', 1],
+        ['2026-01-08', 5],
+        ['2026-01-10', 3],
+        ['2026-01-12', 7],
+        ['2026-01-15', 6],
+        ['2026-01-18', 8],
+        ['2026-01-20', 2],
+        ['2026-01-25', 9],
+        ['2026-02-01', 4],
+        ['2026-02-05', 5],
+        ['2026-02-10', 3],
+        ['2026-02-14', 6],
+        ['2026-02-20', 10],
+        ['2026-03-01', 7],
+        ['2026-03-10', 8],
+        ['2026-03-15', 5],
+        ['2026-04-01', 9],
+        ['2026-04-20', 4],
+        ['2026-05-01', 6],
+        ['2026-05-05', 8],
+    ];
+
+    const option = {
+        tooltip: {
+            position: 'top',
+            formatter: function (p) {
+                return `${p.data[0]}: ${p.data[1]} problems solved`;
+            }
+        },
+
+        visualMap: {
+            min: 0,
+            max: 10,
+            calculable: true,
+            orient: 'horizontal',
+            left: 'center',
+            top: 0
+        },
+
+        calendar: {
+            top: 60,
+            left: 30,
+            right: 30,
+            cellSize: ['auto', 15],
+            range: '2026',
+
+            itemStyle: {
+                borderWidth: 0.5
+            },
+
+            yearLabel: {
+                show: true
+            },
+
+            dayLabel: {
+                firstDay: 1,
+                nameMap: 'en'
+            },
+
+            monthLabel: {
+                nameMap: 'en'
+            }
+        },
+
+        series: {
+            type: 'heatmap',
+            coordinateSystem: 'calendar',
+            data: data
+        }
+    };
+
+    chart.setOption(option);
+
+    window.addEventListener('resize', function () {
+        chart.resize();
+    });
+});
+</script>
+{% endblock %}
