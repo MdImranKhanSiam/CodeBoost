@@ -4,12 +4,6 @@
 <link rel="stylesheet" href="{% static 'css/user_profile/user_profile.css' %}">
 
 
-
-
-
-
-
-
 {% block content %}
 
 <p>
@@ -32,7 +26,27 @@
 
 <script>
 
-const currentUserId = "{{ request.user.id }}";
+const currentUserId = "{{ user_id }}";
+
+async function fetchUserdata() {
+    try {
+        const response = await fetch(`/api/user_profile/user_profile_data/?user_id=${currentUserId}`, {
+            method: "GET",
+        });
+
+        if (response) {
+            const data = await response.json();
+
+            console.log(data['user_data']);
+        }
+
+    } catch (error) {
+        console.error('Error Fetching Userdata', error);
+    }
+}
+
+fetchUserdata();
+
 
 let updatedHeatmapData = {}
 
@@ -148,8 +162,6 @@ function onYearChange(year) {
     container.appendChild(solvedDiv);
 
     data = updatedHeatmapData[year].data
-
-    console.log(data)
 
     $('#Solved').heatmap({
       data
