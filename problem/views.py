@@ -11,7 +11,8 @@ from . tasks import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 
-
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
 def problems(request):
     problems = Problem.objects.filter(is_public=True)
     solved_ids = set()
@@ -33,8 +34,8 @@ def problems(request):
 
 
 
-
-@ratelimit(key='user', rate='6/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problem_detail(request, problem_id):
     user = request.user
@@ -59,7 +60,7 @@ def problem_detail(request, problem_id):
     if user.has_perm('problem.change_problem'):
         is_admin = True
 
-    language_id = '71'
+    language_id = user.userprofile.preferred_language
     language_name = LANGUAGES[language_id]
 
     if request.method == 'POST':
@@ -89,6 +90,7 @@ def problem_detail(request, problem_id):
 
 
 
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def language_snippet(request):
     language_id = request.GET.get('language_id')
@@ -101,6 +103,9 @@ def language_snippet(request):
 
 
 
+
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 @permission_required('problem.add_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def create_problem(request):
@@ -159,6 +164,9 @@ def create_problem(request):
 
 
 
+
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 @permission_required('problem.change_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_problem(request, problem_id):
@@ -224,6 +232,9 @@ def edit_problem(request, problem_id):
     return render(request, 'problem/edit_problem.html', context)
 
 
+
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@ratelimit(key='user', rate='10/m', method='POST', block=True)
 @permission_required('problem.delete_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def delete_problem(request, problem_id):
@@ -245,6 +256,7 @@ def delete_problem(request, problem_id):
 
 
 
+@ratelimit(key='user', rate='40/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submission(request):
     context = {
@@ -256,7 +268,7 @@ def submission(request):
 
 
 
-
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
     submissions = Submission.objects.filter(user=request.user, contest__isnull=True).order_by('-submitted_at')
@@ -281,6 +293,8 @@ def submissions_api(request):
 
 
 
+
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submission_details(request, id):
     submission = get_object_or_404(Submission, id=id, user=request.user, contest__isnull=True)

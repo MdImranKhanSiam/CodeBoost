@@ -18,7 +18,8 @@ class UserProfile(models.Model):
     country = models.CharField(max_length=300, null=True, blank=True)
     website = models.URLField(blank=True, null=True)
     social = models.URLField(blank=True, null=True)
-
+    github = models.URLField(blank=True, null=True)
+    preferred_language = models.CharField(max_length=50, blank=True, default='71')
     rating = models.IntegerField(default=1200, blank=True, null=True)
     solved_problems = models.ManyToManyField('problem.Problem', blank=True, null=True, related_name='solved_by')
     solved_count = models.IntegerField(default=0, blank=True, null=True)
