@@ -24,18 +24,29 @@ from . serializers import UserProfileSerializer
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @permission_classes([IsAuthenticated])
 def user_profile_data(request):
-    data = {}
-
     target_user_id = request.GET.get('user_id')
     target_user = get_object_or_404(User, id=target_user_id)
     target_user_profile = get_object_or_404(UserProfile, user=target_user)
 
-    data['user_data'] = UserProfileSerializer(target_user_profile).data
+    data = UserProfileSerializer(target_user_profile).data
 
     return Response(data)
 
 
+@api_view(["POST"])
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@permission_classes([IsAuthenticated])
+def user_profile_update(request):
+    target_user_id = request.GET.get('user_id')
+    target_user = get_object_or_404(User, id=target_user_id)
+    target_user_profile = get_object_or_404(UserProfile, user=target_user)
 
+    received_data = UserProfileSerializer(data=request.data)
+
+    if received_data.is_valid():
+        saved_data = received_data.save()
+
+        return Response(saved_data)
 
 
 # Instead of getting the query for the progress heatmap from submissions, use the field solved problems in the user profile model to add the submission IDs instead of the problem IDs.
