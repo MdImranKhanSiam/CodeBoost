@@ -1,6 +1,6 @@
 import cloudinary.uploader
 
-from collections import defaultdict, Counter
+from collections import Counter
 from django.http import HttpResponseForbidden
 from django_ratelimit.decorators import ratelimit
 from django.shortcuts import get_object_or_404

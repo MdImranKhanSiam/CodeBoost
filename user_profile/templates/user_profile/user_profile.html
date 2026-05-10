@@ -1,339 +1,480 @@
 {% extends 'home/master.html' %}
+{% block content %}
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/user_profile/user_profile.css' %}">
 
 
-{% block content %}
+<!-- ════ PAGE ════ -->
+<div class="profile-page">
 
-<p>
-    User Profile {{ target_user.userprofile.display_name }}
-</p>
+  <!-- Hero display card -->
+  <div class="hero-card" id="profile">
+    <div style="color:var(--text-muted);font-family:var(--mono);font-size:0.82rem;">Loading profile…</div>
+  </div>
 
-<div id="profile">
-
-</div>
-
-<br><br><br>
-<p>Update Profile</p>
-<form action="/api/user_profile/user_profile_update/" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <label for="avatar_file">Avatar</label>
-    <input type="file" accept="image/*" name="avatar_file" id="avatar_file">
-    <br><br>
-    <label for="display_name">Display Name</label><br>
-  <input type="text" name="display_name" id="display_name"><br><br>
- 
-  <label for="bio">Bio</label><br>
-  <textarea name="bio" id="bio" maxlength="1000"></textarea><br><br>
- 
-  <label for="gender">Gender</label><br>
-  <select name="gender" id="gender">
-    <option value="">-- Select --</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-  </select><br><br>
- 
-  <label for="date_of_birth">Date of Birth</label><br>
-  <input type="date" name="date_of_birth" id="date_of_birth"><br><br>
- 
-  <label for="country">Country</label><br>
-  <input type="text" name="country" id="country"><br><br>
- 
-  <label for="website">Website</label><br>
-  <input type="url" name="website" id="website"><br><br>
- 
-  <label for="social">Social</label><br>
-  <input type="url" name="social" id="social"><br><br>
- 
-  <label for="github">GitHub</label><br>
-  <input type="url" name="github" id="github"><br><br>
- 
-  <label for="language_select">Preferred Language</label><br>
-  <!-- Scrollable list the user clicks to pick a language -->
-  <select id="language_select" size="8" style="width:300px; overflow-y:scroll;">
-    <!-- options injected by JS -->
-  </select>
-  <!-- Hidden input that actually holds the selected language ID -->
-  <input type="hidden" name="preferred_language" id="preferred_language">
-  <br>
-  <small>Selected: <span id="selectedLanguageLabel">None</span></small>
-  <br><br>
- 
-  <button type="submit">Save Changes</button>
-</form>
-<br><br><br>
-
-<select id="yearDropdown"></select>
-
-<br><br><br>
-
-<div id="heatmapDiv">
+  <!-- Heatmap -->
+  <div class="heatmap-card">
+    <div class="section-header">
+      <div class="section-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <span class="section-title">Activity Heatmap</span>
+      <div class="year-select-row">
+        <span class="year-select-label">Year</span>
+        <select id="yearDropdown"></select>
+      </div>
+    </div>
+    <div id="heatmapDiv"></div>
+  </div>
 
 </div>
 
 
+<!-- ════ MODAL ════ -->
+<div class="modal-overlay" id="editModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <div class="section-icon" style="width:28px;height:28px;border-radius:6px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <span class="modal-title">Edit Profile</span>
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form action="/api/user_profile/user_profile_update/" method="post" enctype="multipart/form-data" id="editProfileForm">
+        {% csrf_token %}
+
+        <div class="two-col">
+
+          <!-- Basic Info -->
+          <div class="section-card">
+            <div class="card-header">
+              <div class="section-icon" style="width:24px;height:24px;border-radius:5px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span class="card-title">Basic Info</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Avatar</label>
+              <div class="file-input-wrap">
+                <label class="file-btn" for="avatar_file">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Choose Image
+                </label>
+                <input type="file" accept="image/*" name="avatar_file" id="avatar_file">
+                <span class="file-name-label" id="fileNameLabel">No file chosen</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="display_name">Display Name</label>
+              <input class="form-input" type="text" name="display_name" id="display_name" placeholder="Your display name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="bio">Bio</label>
+              <textarea class="form-textarea" name="bio" id="bio" maxlength="1000" placeholder="Tell the world about yourself…"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <div class="gender-pills">
+                <div class="gender-pill" data-val="">— Unspecified</div>
+                <div class="gender-pill" data-val="male">♂ Male</div>
+                <div class="gender-pill" data-val="female">♀ Female</div>
+              </div>
+              <select name="gender" id="gender" style="display:none;">
+                <option value=""></option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="date_of_birth">Date of Birth</label>
+              <input class="form-input" type="date" name="date_of_birth" id="date_of_birth">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="country">Country</label>
+              <input class="form-input" type="text" name="country" id="country" placeholder="e.g. Bangladesh">
+            </div>
+          </div>
+
+          <!-- Links & Language -->
+          <div class="section-card">
+            <div class="card-header">
+              <div class="section-icon" style="width:24px;height:24px;border-radius:5px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <span class="card-title">Links & Language</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="website">Website</label>
+              <input class="form-input" type="url" name="website" id="website" placeholder="https://yoursite.com">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="social">Social</label>
+              <input class="form-input" type="url" name="social" id="social" placeholder="https://facebook.com/…">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="github">GitHub</label>
+              <input class="form-input" type="url" name="github" id="github" placeholder="https://github.com/…">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="language_select">Preferred Language</label>
+              <select class="lang-list" id="language_select" size="8">
+                <!-- injected by JS -->
+              </select>
+              <input type="hidden" name="preferred_language" id="preferred_language">
+              <div class="lang-selected-badge">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="selectedLanguageLabel">None selected</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /two-col -->
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="modalCancelBtn">Cancel</button>
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
 
 
+<!-- ════ CORNER TOAST LOADER (non-blocking) ════ -->
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="loader-toast">
+    <div class="loader-hex-wrap">
+      <div class="loader-ring loader-ring-1"></div>
+      <div class="loader-ring loader-ring-2"></div>
+      <div class="loader-ring loader-ring-3"></div>
+      <div class="loader-core"></div>
+    </div>
+    <div class="loader-scan-wrap">
+      <span class="loader-label">Syncing profile…</span>
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill"></div>
+      </div>
+      <div class="loader-dots">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── Scripts ─────────────────────────────────────────────── -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/min/moment-with-locales.min.js"></script>
 <script src="{% static 'js/user_profile/dist/jquery.heatmap.js' %}"></script>
 
-
 <script>
-
+const requestUserId = "{{ request.user.id }}";
 const currentUserId = "{{ user_id }}";
 
-let userData = null;
+let userData     = null;
 let allLanguages = null;
+let dataLoaded   = 0;
 
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+
+const icons = {
+  gender:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>`,
+  dob:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  country: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`,
+  website: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  social:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+  github:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>`,
+  lang:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>`,
+};
+
+
+/* ── loadProfile ──────────────────────────────────── */
 function loadProfile(data) {
-document.getElementById("profile").innerHTML = `
-  <div class="user-profile">
-    <img src="${data.avatar}" alt="${data.display_name} Avatar">
-    <h2>${data.display_name}</h2>
-    <p>Bio: ${data.bio || "Not provided"}</p>
-    <p>Gender: ${data.gender || "Not provided"}</p>
-    <p>Date of Birth: ${data.date_of_birth || "Not provided"}</p>
-    <p>Country: ${data.country || "Not provided"}</p>
-    <p>Website: ${data.website || "Not provided"}</p>
-    <p>Social: ${data.social || "Not provided"}</p>
-    <p>GitHub: ${data.github || "Not provided"}</p>
-    <p>Preferred Language: ${data.preferred_language}</p>
-    <p>Solved Count: ${data.solved_count}</p>
-    <p>Solved Problems: ${data.solved_problems.join(", ")}</p>
-  </div>
-`;
+  const langName = (allLanguages && data.preferred_language)
+    ? (allLanguages[data.preferred_language] || data.preferred_language)
+    : (data.preferred_language || 'N/A');
+
+  const optionalChip = (icon, val, isLink) => {
+    if (!val) return '';
+    const content = isLink
+      ? `<a href="${val}" target="_blank" rel="noopener">${val.replace(/^https?:\/\//, '')}</a>`
+      : val;
+    return `<span class="meta-chip">${icon}${content}</span>`;
+  };
+
+  document.getElementById('profile').innerHTML = `
+    <div class="hero-inner">
+      <div class="avatar-wrap">
+        <img src="${data.avatar}" alt="${data.display_name}">
+        <div class="avatar-online"></div>
+      </div>
+
+      <div class="hero-info">
+        <h1 class="hero-name">${data.display_name}</h1>
+        <p class="hero-bio">${data.bio || 'No bio yet.'}</p>
+        <div class="hero-meta">
+          ${optionalChip(icons.gender,  cap(data.gender),   false)}
+          ${optionalChip(icons.dob,     data.date_of_birth, false)}
+          ${optionalChip(icons.country, data.country,       false)}
+          ${optionalChip(icons.lang,    langName,           false)}
+          ${optionalChip(icons.website, data.website,       true)}
+          ${optionalChip(icons.social,  data.social,        true)}
+          ${optionalChip(icons.github,  data.github,        true)}
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-num">${data.solved_count}</div>
+            <div class="stat-label">Solved</div>
+          </div>
+          <div class="stat-box purple">
+            <div class="stat-num">${data.contest_participated ?? 0}</div>
+            <div class="stat-label">Contests</div>
+          </div>
+        </div>
+
+        ${requestUserId === currentUserId ? `
+          <button class="btn-edit-profile" id="openModalBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Profile
+          </button>
+        ` : ''}
+
+      </div>
+    </div>
+  `;
+
+  if (requestUserId === currentUserId) {
+    document.getElementById('openModalBtn').addEventListener('click', openModal);
+  }
 }
 
-let dataLoaded = 0;
 
+/* ── Fetches ──────────────────────────────────────── */
 async function fetchUserdata() {
-    try {
-        const response = await fetch(`/api/user_profile/user_profile_data/?user_id=${currentUserId}`, {
-            method: "GET",
-        });
-
-        if (response) {
-            userData = await response.json();
-
-            dataLoaded += 1;
-
-            console.log(userData);
-
-            loadProfile(userData);
-
-            if (dataLoaded === 2) {
-    console.log(dataLoaded);
-    loadForm();
-} 
-        }
-
-    } catch (error) {
-        console.error('Error Fetching Userdata', error);
-    }
+  try {
+    const r = await fetch(`/api/user_profile/user_profile_data/?user_id=${currentUserId}`, { method: 'GET' });
+    if (r.ok) { userData = await r.json(); dataLoaded++; if (dataLoaded === 2) loadAll(); }
+  } catch (e) { console.error('Error Fetching Userdata', e); }
 }
-
 
 async function fetchLanguages() {
-    try {
-        const response = await fetch(`/api/problems/languages/`, {
-            method: "GET",
-        });
+  try {
+    const r = await fetch(`/api/problems/languages/`, { method: 'GET' });
+    if (r.ok) { allLanguages = await r.json(); dataLoaded++; if (dataLoaded === 2) loadAll(); }
+  } catch (e) { console.error('Error Fetching Languages', e); }
+}
 
-        if (response) {
-            allLanguages = await response.json();
-            dataLoaded += 1;
-            console.log(allLanguages);
+function loadAll() {
+  loadProfile(userData);
+  loadForm();
+}
 
-            if (dataLoaded === 2) {
-    console.log(dataLoaded);
-    loadForm();
-} 
-        }
+const simpleFields = ['display_name', 'bio', 'gender', 'date_of_birth', 'country', 'website', 'social', 'github'];
 
-    } catch (error) {
-        console.error('Error Fetching Languages', error);
-    }
+
+/* ── Load form ────────────────────────────────────── */
+function loadForm() {
+  simpleFields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el && userData[f] != null) el.value = userData[f];
+  });
+
+  // Gender pills
+  document.querySelectorAll('.gender-pill').forEach(pill => {
+    pill.classList.toggle('active', pill.dataset.val === (userData.gender || ''));
+  });
+
+  // Language select
+  const langSel  = document.getElementById('language_select');
+  const prefInp  = document.getElementById('preferred_language');
+  const selLabel = document.getElementById('selectedLanguageLabel');
+
+  langSel.innerHTML = '';
+  Object.entries(allLanguages).forEach(([id, name]) => {
+    const opt = document.createElement('option');
+    opt.value = id; opt.textContent = name;
+    langSel.appendChild(opt);
+  });
+
+  if (userData.preferred_language) {
+    prefInp.value = userData.preferred_language;
+    langSel.value = userData.preferred_language;
+    selLabel.textContent = allLanguages[userData.preferred_language] || userData.preferred_language;
+  }
+
+  langSel.addEventListener('change', () => {
+    prefInp.value = langSel.value;
+    selLabel.textContent = allLanguages[langSel.value] || langSel.value;
+  });
 }
 
 
-//   Form
+/* ── Gender pills ─────────────────────────────────── */
+document.querySelectorAll('.gender-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.gender-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    document.getElementById('gender').value = pill.dataset.val;
+  });
+});
 
-function loadForm() {
-    // ── 1. Pre-fill simple fields from userData ──────────────
-  const simpleFields = ['display_name', 'bio', 'gender', 'date_of_birth', 'country', 'website', 'social', 'github'];
+
+/* ── File input label ─────────────────────────────── */
+document.getElementById('avatar_file').addEventListener('change', function () {
+  document.getElementById('fileNameLabel').textContent =
+    this.files.length ? this.files[0].name : 'No file chosen';
+});
+
+
+/* ── Modal ────────────────────────────────────────── */
+const modal  = document.getElementById('editModal');
+const loader = document.getElementById('loaderOverlay');
+
+function openModal() {
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+
+/* ── Form submit — non-blocking corner toast ──────── */
+document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+
+  // Close modal, restore scroll — page stays fully usable while uploading
+  closeModal();
+  loader.classList.add('active');
+
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  const formData = new FormData();
+
   simpleFields.forEach(field => {
     const el = document.getElementById(field);
-    if (el && userData[field] !== null && userData[field] !== undefined) {
-      el.value = userData[field];
-    }
+    if (el && el.value) formData.append(field, el.value);
   });
- 
-  // ── 2. Build the language <select> from allLanguages ─────
-  const languageSelect  = document.getElementById('language_select');
-  const preferredInput  = document.getElementById('preferred_language');
-  const selectedLabel   = document.getElementById('selectedLanguageLabel');
- 
-  Object.entries(allLanguages).forEach(([id, name]) => {
-    const option  = document.createElement('option');
-    option.value  = id;
-    option.textContent = name;
-    languageSelect.appendChild(option);
-  });
- 
-  // Pre-select the language from userData
-  if (userData.preferred_language) {
-    preferredInput.value   = userData.preferred_language;
-    languageSelect.value   = userData.preferred_language;
-    selectedLabel.textContent = allLanguages[userData.preferred_language] || userData.preferred_language;
+
+  formData.append('preferred_language', document.getElementById('preferred_language').value);
+
+  const avatarInput = document.getElementById('avatar_file');
+  if (avatarInput.files.length > 0) {
+    formData.append('avatar_file', avatarInput.files[0]);
   }
- 
-  // When user picks a language, update the hidden input
-  languageSelect.addEventListener('change', () => {
-    preferredInput.value      = languageSelect.value;
-    selectedLabel.textContent = allLanguages[languageSelect.value];
-  });
 
-}
-//   Form
+  try {
+    const res  = await fetch(e.target.action, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrfToken },
+      body: formData,
+    });
 
- 
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      location.reload();
+    } else {
+      loader.classList.remove('active');
+      console.error(data.errors);
+      openModal();
+      alert('Error saving profile. Try again.');
+    }
+  } catch (err) {
+    console.error('Network error:', err);
+    loader.classList.remove('active');
+    openModal();
+    alert('Network error. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+
+/* ── Boot ─────────────────────────────────────────── */
 fetchUserdata();
 fetchLanguages();
 
-if (dataLoaded === 2) {
-    console.log(dataLoaded);
-    loadForm();
-} 
 
-
-
-
-
-
-let updatedHeatmapData = {}
+/* ════════════════════════════════════════════════════
+   HEATMAP
+════════════════════════════════════════════════════ */
+let updatedHeatmapData = {};
 
 fetch(`/api/user_profile/progress_heatmap/?user_id=${currentUserId}`)
-  .then(response => response.json())
+  .then(r => r.json())
   .then(data => {
-    let heatmapData = data;
-
-    const dropdown = document.getElementById("yearDropdown");
-
-    Object.keys(heatmapData).forEach(year => {
-        const option = document.createElement("option");
-        option.value = year;
-        option.textContent = year;
-        dropdown.appendChild(option);
+    const dropdown = document.getElementById('yearDropdown');
+    Object.keys(data).forEach(year => {
+      const opt = document.createElement('option');
+      opt.value = year; opt.textContent = year;
+      dropdown.appendChild(opt);
     });
-
-    // Handle change
-    dropdown.addEventListener("change", function () {
-        onYearChange(this.value);
-    });
-
-    updatedHeatmapData = ensureJanuaryAndDecember(heatmapData);
-
+    dropdown.addEventListener('change', function () { onYearChange(this.value); });
+    updatedHeatmapData = ensureJanuaryAndDecember(data);
     onYearChange(dropdown.value);
   })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-  
-// console.log(typeof jQuery);
-// console.log(typeof $);
-// console.log($.heatmap);
+  .catch(e => console.error('Heatmap error:', e));
 
 function ensureJanuaryAndDecember(dataByYear) {
-    const result = {};
-
-    Object.keys(dataByYear).forEach(year => {
-        const entries = dataByYear[year].data;
-
-        let hasJan1 = false;
-        let hasDec20 = false;
-
-        entries.forEach(item => {
-            const [y, m, d] = item.date.split("-");
-
-            if (m === "01" && d === "01") {
-                hasJan1 = true;
-            }
-
-            if (m === "12" && d === "24") {
-                hasDec20 = true;
-            }
-        });
-
-        const newData = [...entries];
-
-        if (!hasJan1) {
-            newData.push({
-                date: `${year}-01-01`,
-                count: 0
-            });
-        }
-
-        if (!hasDec20) {
-            newData.push({
-                date: `${year}-12-24`,
-                count: 0
-            });
-        }
-
-        result[year] = { data: newData };
+  const result = {};
+  Object.keys(dataByYear).forEach(year => {
+    const entries = dataByYear[year].data;
+    let hasJan1 = false, hasDec20 = false;
+    entries.forEach(item => {
+      const [, m, d] = item.date.split('-');
+      if (m === '01' && d === '01') hasJan1  = true;
+      if (m === '12' && d === '24') hasDec20 = true;
     });
-
-    return result;
+    const newData = [...entries];
+    if (!hasJan1)  newData.push({ date: `${year}-01-01`, count: 0 });
+    if (!hasDec20) newData.push({ date: `${year}-12-24`, count: 0 });
+    result[year] = { data: newData };
+  });
+  return result;
 }
 
-
-// const heatmapData = {
-//   "2022": {
-//     data: [
-//       { date:'2022-01-01', count:12 },
-//       { date:'2022-01-14', count:12 },
-//     ]
-//   },
-
-//   "2023": {
-//     data: [
-//       { date:'2023-01-09', count:8 },
-//       { date:'2023-01-24', count:14 },
-//       { date:'2023-12-01', count:19 }
-//     ]
-//   },
-
-//   "2026": {
-//     data: [
-//       { date:'2026-01-05', count:9 },
-//       { date:'2026-12-06', count:10 }
-//     ]
-//   }
-// };
-
-
-
-
-// Your function (you control logic)
 function onYearChange(year) {
-    const container = document.getElementById("heatmapDiv");
-    container.innerHTML = "";
-
-    const solvedDiv = document.createElement("div");
-    solvedDiv.id = "Solved";
-    container.appendChild(solvedDiv);
-
-    data = updatedHeatmapData[year].data
-
-    $('#Solved').heatmap({
-      data
-    });
+  const container = document.getElementById('heatmapDiv');
+  container.innerHTML = '';
+  const solvedDiv = document.createElement('div');
+  solvedDiv.id = 'Solved';
+  container.appendChild(solvedDiv);
+  $('#Solved').heatmap({ data: updatedHeatmapData[year].data });
 }
-
- 
-
 </script>
+
 {% endblock %}
