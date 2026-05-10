@@ -10,6 +10,61 @@
     User Profile {{ target_user.userprofile.display_name }}
 </p>
 
+<div id="profile">
+
+</div>
+
+<br><br><br>
+<p>Update Profile</p>
+<form action="/api/user_profile/user_profile_update/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label for="avatar_file">Avatar</label>
+    <input type="file" accept="image/*" name="avatar_file" id="avatar_file">
+    <br><br>
+    <label for="display_name">Display Name</label><br>
+  <input type="text" name="display_name" id="display_name"><br><br>
+ 
+  <label for="bio">Bio</label><br>
+  <textarea name="bio" id="bio" maxlength="1000"></textarea><br><br>
+ 
+  <label for="gender">Gender</label><br>
+  <select name="gender" id="gender">
+    <option value="">-- Select --</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+  </select><br><br>
+ 
+  <label for="date_of_birth">Date of Birth</label><br>
+  <input type="date" name="date_of_birth" id="date_of_birth"><br><br>
+ 
+  <label for="country">Country</label><br>
+  <input type="text" name="country" id="country"><br><br>
+ 
+  <label for="website">Website</label><br>
+  <input type="url" name="website" id="website"><br><br>
+ 
+  <label for="social">Social</label><br>
+  <input type="url" name="social" id="social"><br><br>
+ 
+  <label for="github">GitHub</label><br>
+  <input type="url" name="github" id="github"><br><br>
+ 
+  <label for="language_select">Preferred Language</label><br>
+  <!-- Scrollable list the user clicks to pick a language -->
+  <select id="language_select" size="8" style="width:300px; overflow-y:scroll;">
+    <!-- options injected by JS -->
+  </select>
+  <!-- Hidden input that actually holds the selected language ID -->
+  <input type="hidden" name="preferred_language" id="preferred_language">
+  <br>
+  <small>Selected: <span id="selectedLanguageLabel">None</span></small>
+  <br><br>
+ 
+  <button type="submit">Save Changes</button>
+</form>
+<br><br><br>
+
 <select id="yearDropdown"></select>
 
 <br><br><br>
@@ -17,6 +72,8 @@
 <div id="heatmapDiv">
 
 </div>
+
+
 
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -28,6 +85,30 @@
 
 const currentUserId = "{{ user_id }}";
 
+let userData = null;
+let allLanguages = null;
+
+function loadProfile(data) {
+document.getElementById("profile").innerHTML = `
+  <div class="user-profile">
+    <img src="${data.avatar}" alt="${data.display_name} Avatar">
+    <h2>${data.display_name}</h2>
+    <p>Bio: ${data.bio || "Not provided"}</p>
+    <p>Gender: ${data.gender || "Not provided"}</p>
+    <p>Date of Birth: ${data.date_of_birth || "Not provided"}</p>
+    <p>Country: ${data.country || "Not provided"}</p>
+    <p>Website: ${data.website || "Not provided"}</p>
+    <p>Social: ${data.social || "Not provided"}</p>
+    <p>GitHub: ${data.github || "Not provided"}</p>
+    <p>Preferred Language: ${data.preferred_language}</p>
+    <p>Solved Count: ${data.solved_count}</p>
+    <p>Solved Problems: ${data.solved_problems.join(", ")}</p>
+  </div>
+`;
+}
+
+let dataLoaded = 0;
+
 async function fetchUserdata() {
     try {
         const response = await fetch(`/api/user_profile/user_profile_data/?user_id=${currentUserId}`, {
@@ -35,10 +116,18 @@ async function fetchUserdata() {
         });
 
         if (response) {
-            const data = await response.json();
+            userData = await response.json();
 
-            console.log(data);
-            
+            dataLoaded += 1;
+
+            console.log(userData);
+
+            loadProfile(userData);
+
+            if (dataLoaded === 2) {
+    console.log(dataLoaded);
+    loadForm();
+} 
         }
 
     } catch (error) {
@@ -46,7 +135,82 @@ async function fetchUserdata() {
     }
 }
 
+
+async function fetchLanguages() {
+    try {
+        const response = await fetch(`/api/problems/languages/`, {
+            method: "GET",
+        });
+
+        if (response) {
+            allLanguages = await response.json();
+            dataLoaded += 1;
+            console.log(allLanguages);
+
+            if (dataLoaded === 2) {
+    console.log(dataLoaded);
+    loadForm();
+} 
+        }
+
+    } catch (error) {
+        console.error('Error Fetching Languages', error);
+    }
+}
+
+
+//   Form
+
+function loadForm() {
+    // ── 1. Pre-fill simple fields from userData ──────────────
+  const simpleFields = ['display_name', 'bio', 'gender', 'date_of_birth', 'country', 'website', 'social', 'github'];
+  simpleFields.forEach(field => {
+    const el = document.getElementById(field);
+    if (el && userData[field] !== null && userData[field] !== undefined) {
+      el.value = userData[field];
+    }
+  });
+ 
+  // ── 2. Build the language <select> from allLanguages ─────
+  const languageSelect  = document.getElementById('language_select');
+  const preferredInput  = document.getElementById('preferred_language');
+  const selectedLabel   = document.getElementById('selectedLanguageLabel');
+ 
+  Object.entries(allLanguages).forEach(([id, name]) => {
+    const option  = document.createElement('option');
+    option.value  = id;
+    option.textContent = name;
+    languageSelect.appendChild(option);
+  });
+ 
+  // Pre-select the language from userData
+  if (userData.preferred_language) {
+    preferredInput.value   = userData.preferred_language;
+    languageSelect.value   = userData.preferred_language;
+    selectedLabel.textContent = allLanguages[userData.preferred_language] || userData.preferred_language;
+  }
+ 
+  // When user picks a language, update the hidden input
+  languageSelect.addEventListener('change', () => {
+    preferredInput.value      = languageSelect.value;
+    selectedLabel.textContent = allLanguages[languageSelect.value];
+  });
+
+}
+//   Form
+
+ 
 fetchUserdata();
+fetchLanguages();
+
+if (dataLoaded === 2) {
+    console.log(dataLoaded);
+    loadForm();
+} 
+
+
+
+
 
 
 let updatedHeatmapData = {}

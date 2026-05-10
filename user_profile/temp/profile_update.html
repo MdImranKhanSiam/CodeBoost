@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161e;
+      --border:    #242834;
+      --accent:    #5c6cfa;
+      --accent2:   #fa5c8e;
+      --text:      #e8eaf6;
+      --muted:     #6b7280;
+      --success:   #22c55e;
+      --error:     #ef4444;
+      --radius:    12px;
+      --transition: 0.2s ease;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 80px;
+    }
+
+    /* Ambient glow behind the card */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(92,108,250,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .page-wrapper {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* ── Header ── */
+    header {
+      margin-bottom: 36px;
+    }
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ── Avatar preview ── */
+    .avatar-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .avatar-img {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      transition: border-color var(--transition);
+    }
+    .avatar-img.loaded { border-color: var(--accent); }
+    .avatar-info { flex: 1; }
+    .avatar-info label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .avatar-info input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 13px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+    .avatar-info input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(92,108,250,0.15);
+    }
+
+    /* ── Card / Section ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 28px 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form grid ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+      width: 100%;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--muted); opacity: 0.6; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(92,108,250,0.15);
+    }
+    .field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .field select option { background: var(--surface); }
+    .field textarea { resize: vertical; min-height: 96px; }
+
+    /* char counter */
+    .field-meta {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -2px;
+    }
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: color var(--transition);
+    }
+    .char-count.warn { color: var(--accent2); }
+
+    /* ── Submit button ── */
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-save {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 12px 32px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .btn-save:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-save:active { transform: translateY(0); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-save .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .btn-save.loading .spinner { display: inline-block; }
+    .btn-save.loading .btn-text { opacity: 0.7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.success { border-color: var(--success); }
+    #toast.error   { border-color: var(--error); }
+    #toast .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    #toast.success .dot { background: var(--success); }
+    #toast.error   .dot { background: var(--error); }
+
+    /* ── Inline field error ── */
+    .field-error {
+      font-size: 0.78rem;
+      color: var(--error);
+      margin-top: 2px;
+      display: none;
+    }
+    .field.has-error input,
+    .field.has-error textarea,
+    .field.has-error select {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+    }
+    .field.has-error .field-error { display: block; }
+
+    @media (max-width: 560px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <header>
+    <h1>Edit Profile</h1>
+    <p>Changes are saved immediately to your account.</p>
+  </header>
+
+  <!-- Avatar -->
+  <div class="avatar-section">
+    <img id="avatarPreview" class="avatar-img" src="" alt="Avatar preview" />
+    <div class="avatar-info">
+      <label for="avatar">Avatar URL</label>
+      <input type="url" id="avatar" name="avatar" placeholder="https://example.com/avatar.jpg" />
+    </div>
+  </div>
+
+  <!-- Basic Info -->
+  <div class="card">
+    <div class="card-title">Basic Information</div>
+    <div class="form-grid">
+
+      <div class="field full">
+        <label for="display_name">Display Name</label>
+        <input type="text" id="display_name" name="display_name" maxlength="200" placeholder="How should people call you?" />
+        <div class="field-meta"><span class="char-count" id="nameCount">0 / 200</span></div>
+        <span class="field-error" id="display_name_error"></span>
+      </div>
+
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender">
+          <option value="">— Select —</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <span class="field-error" id="gender_error"></span>
+      </div>
+
+      <div class="field">
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" />
+        <span class="field-error" id="date_of_birth_error"></span>
+      </div>
+
+      <div class="field full">
+        <label for="country">Country</label>
+        <input type="text" id="country" name="country" maxlength="300" placeholder="e.g. Bangladesh" />
+        <span class="field-error" id="country_error"></span>
+      </div>
+
+      <div class="field full">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio" maxlength="1000" placeholder="Tell us a bit about yourself…"></textarea>
+        <div class="field-meta"><span class="char-count" id="bioCount">0 / 1000</span></div>
+        <span class="field-error" id="bio_error"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Online Presence -->
+  <div class="card">
+    <div class="card-title">Online Presence</div>
+    <div class="form-grid">
+
+      <div class="field full">
+        <label for="website">Website</label>
+        <input type="url" id="website" name="website" placeholder="https://yoursite.com" />
+        <span class="field-error" id="website_error"></span>
+      </div>
+
+      <div class="field">
+        <label for="social">Social Profile</label>
+        <input type="url" id="social" name="social" placeholder="https://twitter.com/…" />
+        <span class="field-error" id="social_error"></span>
+      </div>
+
+      <div class="field">
+        <label for="github">GitHub</label>
+        <input type="url" id="github" name="github" placeholder="https://github.com/…" />
+        <span class="field-error" id="github_error"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Preferences -->
+  <div class="card">
+    <div class="card-title">Preferences</div>
+    <div class="form-grid">
+
+      <div class="field full">
+        <label for="preferred_language">Preferred Language ID</label>
+        <input type="text" id="preferred_language" name="preferred_language" placeholder="e.g. 71" />
+        <span class="field-error" id="preferred_language_error"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="actions">
+    <button class="btn-save" id="saveBtn" onclick="submitProfile()">
+      <span class="spinner"></span>
+      <span class="btn-text">Save Changes</span>
+    </button>
+  </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toast">
+  <span class="dot"></span>
+  <span id="toastMsg"></span>
+</div>
+
+
+<script>
+  // ── Config ───────────────────────────────────────────────
+  const UPDATE_URL = '/api/user_profile/user_profile_update/';
+  const FETCH_URL  = '/api/user_profile/user_profile_data/';
+
+  // ── Helpers ──────────────────────────────────────────────
+  function getCsrfToken() {
+    const match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : '';
+  }
+
+  function showToast(message, type = 'success') {
+    const toast   = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    toast.className = `show ${type}`;
+    toastMsg.textContent = message;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.className = ''; }, 3500);
+  }
+
+  function setLoading(state) {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = state;
+    btn.classList.toggle('loading', state);
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+    document.querySelectorAll('.field-error').forEach(e => e.textContent = '');
+  }
+
+  function showErrors(errors) {
+    Object.entries(errors).forEach(([field, messages]) => {
+      const el  = document.getElementById(`${field}_error`);
+      const inp = document.getElementById(field);
+      if (el && inp) {
+        el.textContent = Array.isArray(messages) ? messages.join(' ') : messages;
+        inp.closest('.field').classList.add('has-error');
+      }
+    });
+  }
+
+  // ── Character counters ────────────────────────────────────
+  function setupCounter(inputId, counterId, max) {
+    const input   = document.getElementById(inputId);
+    const counter = document.getElementById(counterId);
+    if (!input || !counter) return;
+    const update = () => {
+      const len = input.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.classList.toggle('warn', len > max * 0.85);
+    };
+    input.addEventListener('input', update);
+    update();
+  }
+  setupCounter('display_name', 'nameCount', 200);
+  setupCounter('bio', 'bioCount', 1000);
+
+  // ── Avatar live preview ───────────────────────────────────
+  const avatarInput   = document.getElementById('avatar');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const DEFAULT_AVATAR = 'https://res.cloudinary.com/dxd9uxsfv/image/upload/v1770963972/bjngg2xwjfd0vp69xv45.jpg';
+
+  function updateAvatar(url) {
+    avatarPreview.src = url || DEFAULT_AVATAR;
+  }
+  avatarPreview.addEventListener('load',  () => avatarPreview.classList.add('loaded'));
+  avatarPreview.addEventListener('error', () => { avatarPreview.src = DEFAULT_AVATAR; });
+  avatarInput.addEventListener('input', () => updateAvatar(avatarInput.value.trim()));
+  updateAvatar(DEFAULT_AVATAR);
+
+  // ── Pre-fill form with existing data ─────────────────────
+  async function loadExistingProfile() {
+    // currentUserId should be set by your Django template, e.g.:
+    // <script>const currentUserId = "{{ request.user.id }}";</script>
+    const userId = typeof currentUserId !== 'undefined' ? currentUserId : null;
+    if (!userId) return;
+
+    try {
+      const res  = await fetch(`${FETCH_URL}?user_id=${userId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const fields = [
+        'display_name', 'avatar', 'bio', 'gender',
+        'date_of_birth', 'country', 'website', 'social',
+        'github', 'preferred_language'
+      ];
+      fields.forEach(key => {
+        const el = document.getElementById(key);
+        if (el && data[key] != null) {
+          el.value = data[key];
+          // Fire input event so counters/preview update
+          el.dispatchEvent(new Event('input'));
+        }
+      });
+    } catch (err) {
+      console.error('Could not load existing profile:', err);
+    }
+  }
+  loadExistingProfile();
+
+  // ── Submit ────────────────────────────────────────────────
+  async function submitProfile() {
+    clearErrors();
+    setLoading(true);
+
+    // Collect all form fields into a plain object
+    const fields = [
+      'display_name', 'avatar', 'bio', 'gender',
+      'date_of_birth', 'country', 'website', 'social',
+      'github', 'preferred_language'
+    ];
+
+    const payload = {};
+    fields.forEach(key => {
+      const el = document.getElementById(key);
+      if (!el) return;
+      const val = el.value.trim();
+      // Only include fields that have a value (partial update)
+      if (val !== '') payload[key] = val;
+    });
+
+    try {
+      const response = await fetch(UPDATE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken':  getCsrfToken(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showToast('Profile updated successfully!', 'success');
+      } else {
+        // Show field-level errors returned by the serializer
+        if (result.errors) showErrors(result.errors);
+        showToast(result.message || 'Could not save. Check the errors above.', 'error');
+      }
+    } catch (err) {
+      console.error('Network error:', err);
+      showToast('Network error — please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+</script>
+</body>
+</html>

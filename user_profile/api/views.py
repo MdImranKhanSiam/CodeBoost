@@ -1,11 +1,15 @@
+import cloudinary.uploader
+
 from collections import defaultdict, Counter
 from django.http import HttpResponseForbidden
 from django_ratelimit.decorators import ratelimit
 from django.shortcuts import get_object_or_404
 
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
 
 from django.contrib.auth.models import User
 from user_profile.models import UserProfile
@@ -34,19 +38,39 @@ def user_profile_data(request):
 
 
 @api_view(["POST"])
-@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@ratelimit(key='user', rate='30/m', method='POST', block=True)
 @permission_classes([IsAuthenticated])
 def user_profile_update(request):
-    target_user_id = request.GET.get('user_id')
-    target_user = get_object_or_404(User, id=target_user_id)
-    target_user_profile = get_object_or_404(UserProfile, user=target_user)
+    user_profile = get_object_or_404(UserProfile, user=request.user)
 
-    received_data = UserProfileSerializer(data=request.data)
+    avatar_url = None
 
-    if received_data.is_valid():
-        saved_data = received_data.save()
+    if request.FILES.get('avatar_file'):
+        user_avatar = request.FILES.get('avatar_file')
+        response = cloudinary.uploader.upload(
+            user_avatar,
+            resource_type = "image"
+        )
 
-        return Response(saved_data)
+        avatar_url = response.get('secure_url')
+
+    data = request.data.copy()
+
+    if avatar_url:
+        data['avatar'] = avatar_url
+
+    data.pop('csrfmiddlewaretoken', None)
+    data.pop('avatar_file', None)
+
+
+    data_serializer = UserProfileSerializer(user_profile, data=data, partial=True)
+
+    if data_serializer.is_valid():
+        data_serializer.save()
+
+        return Response({"success": True, "data": data_serializer.data}, status=status.HTTP_200_OK)
+
+    return Response({"success": False, "errors": data_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Instead of getting the query for the progress heatmap from submissions, use the field solved problems in the user profile model to add the submission IDs instead of the problem IDs.

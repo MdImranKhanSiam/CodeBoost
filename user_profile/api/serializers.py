@@ -15,7 +15,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'social',
             'github',
             'preferred_language',
-            'rating',
             'solved_problems',
             'solved_count'
         ]
