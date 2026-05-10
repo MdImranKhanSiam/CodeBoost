@@ -4,6 +4,7 @@ from collections import Counter
 from django.http import HttpResponseForbidden
 from django_ratelimit.decorators import ratelimit
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -84,7 +85,7 @@ def progress_heatmap(request):
     first_ac = Submission.objects.filter(user=target_user, verdict='Accepted').order_by('problem_id', 'submitted_at').distinct('problem_id')
 
     daily_counts = Counter(
-        submission.submitted_at.date().isoformat()
+        timezone.localtime(submission.submitted_at).date().isoformat()
         for submission in first_ac
     )
     
