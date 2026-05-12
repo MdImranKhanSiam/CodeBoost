@@ -86,39 +86,31 @@ SOCIALACCOUNT_PROVIDERS = {
 
 ASGI_APPLICATION = 'CodeBoost.asgi.application'
 
-if Environment == 'Development':
-    CHANNEL_LAYERS = {
-        # 'default': {
-        #     'BACKEND' : 'channels.layers.InMemoryChannelLayer'
-        # }
 
-        'default': {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": ["redis://127.0.0.1:6379/1"],
-            },
+# Redis
+REDIS_URL = os.environ.get("REDIS_URL")
+
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [f"{REDIS_URL}/1"],
         },
+    },
+}
+
+CELERY_BROKER_URL = f"{REDIS_URL}/0"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"{REDIS_URL}/2",
     }
-
-    CELERY_BROKER_URL = f"{"redis://127.0.0.1:6379"}/0"
-    
-elif Environment == 'Production':
-    REDIS_URL = os.environ.get("REDIS_URL")
-
-    CHANNEL_LAYERS = {
-        'default': {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [f"{REDIS_URL}/1"],
-            },
-        },
-    }
-
-    CELERY_BROKER_URL = f"{REDIS_URL}/0"
-
+}
 
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_ACKS_LATE = True
+# Redis
 
 
 MIDDLEWARE = [

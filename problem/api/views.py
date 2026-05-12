@@ -14,4 +14,3 @@ def languages(request):
 
     return Response(LANGUAGES)
 
-

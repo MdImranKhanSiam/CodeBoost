@@ -420,12 +420,12 @@
                         cursor: 'pointer',
                     });
 
-                    if (cellDate.toDateString() === today.toDateString()) {
-                        cell.css('border', '1px solid #ccc'); // Dezenter grauer Rahmen
-                        // Optional:  HINTERGRUNDFARBE anpassen. Zuerst die aktuelle Farbe ermitteln
-                        const currentColor = cell.css('background-color');
-                        cell.css('background-color', shadeColor(currentColor, 0.2)); // 20% heller
-                    }
+                    // if (cellDate.toDateString() === today.toDateString()) {
+                    //     cell.css('border', '1px solid #ccc'); // Dezenter grauer Rahmen
+                    //     // Optional:  HINTERGRUNDFARBE anpassen. Zuerst die aktuelle Farbe ermitteln
+                    //     const currentColor = cell.css('background-color');
+                    //     cell.css('background-color', shadeColor(currentColor, 0.2)); // 20% heller
+                    // }
 
 
                     if (dayEntry.date) {

@@ -11,5 +11,4 @@ urlpatterns = [
     path('api/submission/', views.submissions_api, name='submission-api'),
     path('submission_details/<str:id>/', views.submission_details, name='submission-details'),
     path('language_snippet/', views.language_snippet, name='language-snippet'),
-
 ]

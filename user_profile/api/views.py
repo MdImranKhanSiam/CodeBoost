@@ -4,7 +4,7 @@ from collections import Counter
 from django.http import HttpResponseForbidden
 from django_ratelimit.decorators import ratelimit
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -84,8 +84,15 @@ def progress_heatmap(request):
     target_user = get_object_or_404(User, id=target_user_id)
     first_ac = Submission.objects.filter(user=target_user, verdict='Accepted').order_by('problem_id', 'submitted_at').distinct('problem_id')
 
+    tz_name = request.GET.get('timezone', 'UTC')
+
+    try:
+        tz = ZoneInfo(tz_name)
+    except (ZoneInfoNotFoundError, KeyError):
+        tz = ZoneInfo('UTC')
+
     daily_counts = Counter(
-        timezone.localtime(submission.submitted_at).date().isoformat()
+        submission.submitted_at.astimezone(tz).date().isoformat()
         for submission in first_ac
     )
     
