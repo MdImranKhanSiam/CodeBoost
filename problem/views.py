@@ -3,9 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import transaction
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
+from django.core.cache import cache
+
 from . models import Problem, TestCase, Submission
 from . tasks import code_submission
 from . languages import LANGUAGES, LANGUAGE_SNIPPETS
@@ -14,14 +15,37 @@ from . languages import LANGUAGES, LANGUAGE_SNIPPETS
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problems(request):
-    problems = Problem.objects.filter(is_public=True)
+    cache_key = f"problems"
+
+    problems = cache.get(cache_key)
+
+    if not problems:
+        problems = Problem.objects.filter(is_public=True)
+        cache.set(cache_key, problems, timeout=60 * 60 * 24)
+
     solved_ids = set()
     solved_count = None
 
     if request.user.is_authenticated:
         user = request.user
-        solved_ids = set(user.userprofile.solved_problems.values_list('id', flat=True))
-        solved_count = user.userprofile.solved_count
+
+        solved_ids_cache_key = f"solved_ids_{user.id}"
+
+        solved_ids = cache.get(solved_ids_cache_key)
+
+        if not solved_ids:
+            solved_ids = set(user.userprofile.solved_problems.values_list('id', flat=True))
+            cache.set(solved_ids_cache_key, solved_ids, timeout=60 * 60 * 24)
+
+        
+        solved_count_cache_key = f"solved_count_{user.id}"
+
+        solved_count = cache.get(solved_count_cache_key)
+
+        if not solved_count:
+            solved_count = user.userprofile.solved_count
+            cache.set(solved_count_cache_key, solved_count, timeout=60 * 60 * 24)
+        
 
     context = {
         'problems': problems,

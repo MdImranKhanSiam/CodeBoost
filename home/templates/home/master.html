@@ -48,20 +48,20 @@
                 {% if request.user.is_authenticated %}
                 <div class="nav-profile">
                     <button class="nav-profile-btn" id="profileBtn">
-                        <img src="{{ request.user.userprofile.avatar }}" />
-                        <span>{{ request.user.userprofile.display_name }}</span>
+                        <img src="{{ avatar }}" />
+                        <span>{{ display_name }}</span>
                     </button>
 
 
                     <div class="nav-profile-menu" id="profileMenu">
-                        <a href="{% url 'user-profile' request.user.id %}">
+                        <a href="{% url 'user-profile' user_id %}">
 
                             <div class="view-profile-grid">
                                 <div class="view-profile-grid-image">
-                                    <img src="{{ request.user.userprofile.avatar }}">
+                                    <img src="{{ avatar }}">
                                 </div>
                                 <div class="menu-header">
-                                    <strong>{{ request.user.userprofile.display_name }}</strong>
+                                    <strong>{{ display_name }}</strong>
                                     <small>View profile</small>
                                 </div>
                             </div>
@@ -142,13 +142,13 @@
         {% if request.user.is_authenticated %}
 
         <!-- Profile Header -->
-        <a href="{% url 'user-profile' request.user.id %}">
+        <a href="{% url 'user-profile' user_id %}">
           <div class="view-profile-grid">
             <div class="view-profile-grid-image">
-              <img src="{{ request.user.userprofile.avatar }}"/>
+              <img src="{{ avatar }}"/>
             </div>
             <div class="menu-header">
-              <strong>{{ request.user.userprofile.display_name }}</strong>
+              <strong>{{ display_name }}</strong>
               <small>View profile</small>
             </div>
           </div>
@@ -204,14 +204,9 @@
     </footer>
 
 
-
+    
     <script>
-
-        
-
-
-        const authenticatedUser = "{{ request.user.is_authenticated }}" === "True";
-
+        const authenticatedUser = "{{ user_id }}" ? true : false;
         
         // Nav Profile
 
