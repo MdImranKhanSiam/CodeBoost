@@ -89,6 +89,7 @@ ASGI_APPLICATION = 'CodeBoost.asgi.application'
 
 # Redis
 REDIS_URL = os.environ.get("REDIS_URL")
+REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL")
 
 CHANNEL_LAYERS = {
     'default': {
@@ -104,7 +105,7 @@ CELERY_BROKER_URL = f"{REDIS_URL}/0"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"{REDIS_URL}/2",
+        "LOCATION": f"{REDIS_CACHE_URL}/0",
     }
 }
 
