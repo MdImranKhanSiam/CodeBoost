@@ -105,7 +105,7 @@ CELERY_BROKER_URL = f"{REDIS_URL}/0"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"{REDIS_CACHE_URL}/0",
+        "LOCATION": f"{REDIS_CACHE_URL}",
     }
 }
 
