@@ -91,6 +91,7 @@ ASGI_APPLICATION = 'CodeBoost.asgi.application'
 REDIS_URL = os.environ.get("REDIS_URL")
 REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL")
 
+
 CHANNEL_LAYERS = {
     'default': {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
