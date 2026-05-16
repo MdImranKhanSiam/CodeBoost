@@ -105,25 +105,7 @@ services:
     networks:
       - internal
 
-  # ─────────────────────────────────────────────────────────
-  # PostgreSQL Daily Backup
-  # Runs every day at 2:00 AM, keeps last 30 backups
-  # ─────────────────────────────────────────────────────────
-  db_backup:
-    image: postgres:16-alpine
-    container_name: codeboost_backup
-    env_file:
-      - .env
-    volumes:
-      - ./scripts/backup.sh:/backup.sh:ro
-      - backup_data:/backups
-    entrypoint: /bin/sh -c "chmod +x /backup.sh && crond -f -l 8"
-    depends_on:
-      - db
-    restart: always
-    networks:
-      - internal
-
+ 
 networks:
   internal:
     driver: bridge
@@ -132,4 +114,3 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
-  backup_data:
