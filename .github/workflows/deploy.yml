@@ -1,0 +1,53 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main   # Triggers on every push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Step 1: Checkout latest code ──────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: SSH into VPS and deploy ───────────────────
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            echo "──────────────────────────────────"
+            echo "🚀 Starting deployment..."
+            echo "──────────────────────────────────"
+
+            cd /var/www/codeboost
+
+            # Pull latest code from GitHub
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            # Rebuild only the web container (not redis/db/nginx)
+            echo "🐳 Rebuilding web container..."
+            docker compose build --no-cache web
+
+            # Restart web container with zero downtime approach
+            echo "♻️  Restarting web container..."
+            docker compose up -d --no-deps web
+
+            # Clean up old unused Docker images to free disk space
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+
+            echo "──────────────────────────────────"
+            echo "✅ Deployment successful!"
+            echo "──────────────────────────────────"
+
+            # Show running containers
+            docker compose ps

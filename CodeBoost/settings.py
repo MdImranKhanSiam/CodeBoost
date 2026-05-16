@@ -34,10 +34,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-if Environment == 'Development':
-    DEBUG = True
-elif Environment == 'Production':
-    DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
@@ -88,7 +85,7 @@ ASGI_APPLICATION = 'CodeBoost.asgi.application'
 
 
 # Redis
-REDIS_URL = os.environ.get("REDIS_URL")
+REDIS_BROKER_URL = os.environ.get("REDIS_BROKER_URL")
 REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL")
 
 
@@ -96,20 +93,25 @@ CHANNEL_LAYERS = {
     'default': {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [f"{REDIS_URL}/1"],
+            "hosts": [f"{REDIS_BROKER_URL}/1"],
         },
     },
 }
 
-CELERY_BROKER_URL = f"{REDIS_URL}/0"
+CELERY_BROKER_URL = f"{REDIS_BROKER_URL}/0"
 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"{REDIS_CACHE_URL}/2",
+        "LOCATION": f"{REDIS_CACHE_URL}",
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
 }
 
+CELERY_RESULT_BACKEND = REDIS_BROKER_URL
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_ACKS_LATE = True
 # Redis
@@ -215,9 +217,11 @@ USE_TZ = True
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATIC_ROOT = BASE_DIR / 'static'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_DIRS = [
     BASE_DIR / 'mystatic'
@@ -246,6 +250,7 @@ REST_FRAMEWORK = {
 }
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
