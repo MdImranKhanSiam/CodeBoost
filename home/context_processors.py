@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 from . cache import get_user_data, set_user_data, invalidate_user_data
 
 def user_data(request):
-    if not request.user.is_authenticated:
+    if not request.user.is_authenticated or request.user.is_staff:
         return {}
 
     user_id = request.user.id
