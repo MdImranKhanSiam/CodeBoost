@@ -128,7 +128,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-AXES_FAILURE_LIMIT = 10
+AXES_FAILURE_LIMIT = 1000
 AXES_COOLOFF_TIME = 5  # hour
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = False
