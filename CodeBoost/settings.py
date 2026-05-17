@@ -18,8 +18,6 @@ from pathlib import Path
 load_dotenv()
 
 
-Environment = os.getenv('ENVIRONMENT_TYPE')
-
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -108,7 +106,7 @@ CACHES = {
     }
 }
 
-CELERY_RESULT_BACKEND = REDIS_BROKER_URL
+# CELERY_RESULT_BACKEND = REDIS_BROKER_URL
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_ACKS_LATE = True
