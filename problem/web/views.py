@@ -229,6 +229,8 @@ def edit_problem(request, problem_id):
             TestCase.objects.bulk_create(testcase_objects)
 
         if current_problem:
+            invalidate_problems_page()
+
             return redirect('problem-detail', current_problem.id)
         
 
@@ -254,6 +256,7 @@ def delete_problem(request, problem_id):
 
     if request.method == 'POST':
         problem.delete()
+        invalidate_problems_page()
 
         return redirect('problems')
    

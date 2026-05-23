@@ -49,7 +49,7 @@ services:
       redis-server
       --port 6379
       --requirepass ${REDIS_BROKER_PASSWORD}
-      --maxmemory 250mb
+      --maxmemory 128mb
       --maxmemory-policy allkeys-lru
       --save ""
       --appendonly no
@@ -71,7 +71,7 @@ services:
       redis-server
       --port 6380
       --requirepass ${REDIS_CACHE_PASSWORD}
-      --maxmemory 500mb
+      --maxmemory 250mb
       --maxmemory-policy allkeys-lru
       --save ""
       --appendonly no
