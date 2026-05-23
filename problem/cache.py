@@ -18,14 +18,16 @@ def get_problems_page(user_id):
         logger.warning("Cache unavailable: get_problems_page")
         return None
     
+
 def set_problems_page(user_id, data):
     try:
         cache.set(PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id), data, TTL_PROBLEMS_PAGE)
     except Exception:
         logger.warning("Cache unavailable: set_problems_page")
 
-def invalidate_problems_page(user_id):
+
+def invalidate_problems_page():
     try:
-        cache.delete(PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id))
+        cache.delete_pattern("problems:page:*")
     except Exception:
         logger.warning("Cache unavailable: invalidate_problems_page")

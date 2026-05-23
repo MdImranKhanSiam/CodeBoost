@@ -11,7 +11,7 @@ from problem.models import Problem, TestCase, Submission
 from problem.tasks import code_submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
-from problem.cache import get_problems_page, set_problems_page
+from problem.cache import get_problems_page, set_problems_page, invalidate_problems_page
 
 
 
@@ -161,6 +161,7 @@ def create_problem(request):
             TestCase.objects.bulk_create(testcase_objects)
 
         if problem:
+            invalidate_problems_page()
             return redirect('problem-detail', problem.id)
         
 
