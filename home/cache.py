@@ -6,8 +6,8 @@ logger = logging.getLogger(__name__)
 USER_DATA_CACHE_KEY = "user:data:{user_id}"
 HOMEPAGE_CACHE_KEY = "homepage"
 
-TTL_USER_DATA = 60 * 60 * 24 * 7
-TTL_HOMEPAGE = 60 * 60 * 24 * 7
+TTL_USER_DATA = 60 * 60 * 12
+TTL_HOMEPAGE = 60 * 60 * 12
 
 
 # USER_DATA

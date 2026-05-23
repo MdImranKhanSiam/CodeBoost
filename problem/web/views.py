@@ -7,51 +7,35 @@ from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from django.core.cache import cache
 
-from . models import Problem, TestCase, Submission
-from . tasks import code_submission
-from . languages import LANGUAGES, LANGUAGE_SNIPPETS
+from problem.models import Problem, TestCase, Submission
+from problem.tasks import code_submission
+from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
+
+from problem.cache import get_problems_page, set_problems_page
+
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problems(request):
-    cache_key = f"problems"
+    user = request.user
+    context = get_problems_page(user.id)
 
-    problems = cache.get(cache_key)
-
-    if not problems:
+    if not context:
         problems = Problem.objects.filter(is_public=True)
-        cache.set(cache_key, problems, timeout=60 * 60 * 24)
+        solved_ids = set()
+        solved_count = None
 
-    solved_ids = set()
-    solved_count = None
+        solved_ids = set(user.userprofile.solved_problems.values_list('id', flat=True))
+        solved_count = user.userprofile.solved_count
 
-    if request.user.is_authenticated:
-        user = request.user
+        context = {
+            'problems': problems,
+            'solved_ids': solved_ids,
+            'solved_count': solved_count,
+        }
 
-        solved_ids_cache_key = f"solved_ids_{user.id}"
-
-        solved_ids = cache.get(solved_ids_cache_key)
-
-        if not solved_ids:
-            solved_ids = set(user.userprofile.solved_problems.values_list('id', flat=True))
-            cache.set(solved_ids_cache_key, solved_ids, timeout=60 * 60 * 24)
-
-        
-        solved_count_cache_key = f"solved_count_{user.id}"
-
-        solved_count = cache.get(solved_count_cache_key)
-
-        if not solved_count:
-            solved_count = user.userprofile.solved_count
-            cache.set(solved_count_cache_key, solved_count, timeout=60 * 60 * 24)
-        
-
-    context = {
-        'problems': problems,
-        'solved_ids': solved_ids,
-        'solved_count': solved_count,
-    }
+        set_problems_page(user.id, context)
 
     return render(request, 'problem/problems.html', context)
 
