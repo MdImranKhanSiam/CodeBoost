@@ -13,6 +13,9 @@ from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 from . cache import get_problems_page, set_problems_page, invalidate_problems_page
 from . cache import get_submission_api, set_submission_api, invalidate_submission_api
+from . cache import get_submission_details, set_submission_details
+
+
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
@@ -322,20 +325,27 @@ def submissions_api(request):
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submission_details(request, id):
-    submission = get_object_or_404(Submission, id=id, user=request.user, contest__isnull=True)
+    user = request.user
 
-    context = {
-        'problem_id': submission.problem.id,
-        'problem_name': submission.problem.title,
-        'source_code': submission.code,
-        'language': LANGUAGES[submission.language],
-        'execution_time': submission.execution_time,
-        'memory_used': submission.memory_used,
-        'verdict': submission.verdict,
-        'testcase_details': submission.testcase_details,
-        'passed_testcases': submission.passed_testcases,
-        'total_testcases': submission.total_testcases,
-    }
+    context = get_submission_details(user.id, id)
+
+    if not context:
+        submission = get_object_or_404(Submission, id=id, user=request.user, contest__isnull=True)
+
+        context = {
+            'problem_id': submission.problem.id,
+            'problem_name': submission.problem.title,
+            'source_code': submission.code,
+            'language': LANGUAGES[submission.language],
+            'execution_time': submission.execution_time,
+            'memory_used': submission.memory_used,
+            'verdict': submission.verdict,
+            'testcase_details': submission.testcase_details,
+            'passed_testcases': submission.passed_testcases,
+            'total_testcases': submission.total_testcases,
+        }
+
+        set_submission_details(user.id, id, context)
 
     return render(request, 'problem/submission_details.html', context)
 

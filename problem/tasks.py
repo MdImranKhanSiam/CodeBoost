@@ -1,7 +1,7 @@
 from celery import shared_task
 import requests
 from . models import Submission
-from . web.cache import invalidate_submission_api
+from . web.cache import invalidate_submission_api, invalidate_current_submission_details
 
 def normalize_line_endings(code):
     if code is None:
@@ -127,7 +127,10 @@ def code_submission(submission_id):
 
     submission.save()
 
-    invalidate_submission_api(submission.user.id)
+    user_id = submission.user.id
+
+    invalidate_submission_api(user_id)
+    invalidate_current_submission_details(user_id, submission.id)
 
 
 
