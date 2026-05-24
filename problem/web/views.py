@@ -12,8 +12,8 @@ from problem.tasks import code_submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
 from . cache import get_problems_page, set_problems_page, invalidate_problems_page
-from . cache import get_submission_api, set_submission_api, invalidate_submission_api
-from . cache import get_submission_details, set_submission_details
+from . cache import get_submission_api, set_submission_api, invalidate_submission_api, invalidate_universal_submission_api
+from . cache import get_submission_details, set_submission_details, invalidate_universal_submission_details
 
 
 
@@ -261,7 +261,10 @@ def delete_problem(request, problem_id):
 
     if request.method == 'POST':
         problem.delete()
+
         invalidate_problems_page()
+        invalidate_universal_submission_api()
+        invalidate_universal_submission_details()
 
         return redirect('problems')
    

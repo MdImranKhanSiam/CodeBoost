@@ -68,7 +68,11 @@ def invalidate_submission_api(user_id):
         logger.warning("Cache unavailable: invalidate_submission_api")
 
 
-
+def invalidate_universal_submission_api():
+    try:
+        cache.delete_pattern(f"submission:api:*")
+    except Exception:
+        logger.warning("Cache unavailable: invalidate_submission_api")
 
 
 
@@ -88,20 +92,25 @@ def set_submission_details(user_id, submission_id, data):
         logger.warning("Cache unavailable: set_submission_details")
 
 
-def invalidate_all_submission_details(user_id):
+def invalidate_individual_all_submission_details(user_id):
     try:
         cache.delete_pattern(f"submission:details:{user_id}:*")
     except Exception:
-        logger.warning("Cache unavailable: invalidate_submission_details")
+        logger.warning("Cache unavailable: invalidate_individual_all_submission_details")
 
 
-def invalidate_current_submission_details(user_id, submission_id):
+def invalidate_individual_current_submission_details(user_id, submission_id):
     try:
         cache.delete(SUBMISSION_DETAILS_CACHE_KEY.format(user_id=user_id, submission_id=submission_id))
     except Exception:
-        logger.warning("Cache unavailable: invalidate_submission_details")
+        logger.warning("Cache unavailable: invalidate_individual_current_submission_details")
 
 
+def invalidate_universal_submission_details():
+    try:
+        cache.delete_pattern(f"submission:details:*")
+    except Exception:
+        logger.warning("Cache unavailable: invalidate_universal_submission_details")
 
 
 
