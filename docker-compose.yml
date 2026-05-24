@@ -69,14 +69,14 @@ services:
     container_name: codeboost_redis_cache
     command: >
       redis-server
-      --port 6380
+      --port 6379
       --requirepass ${REDIS_CACHE_PASSWORD}
       --maxmemory 250mb
       --maxmemory-policy allkeys-lru
       --save ""
       --appendonly no
-    expose:
-      - 6380
+    ports:
+      - "6380:6379"
     restart: always
     networks:
       - internal

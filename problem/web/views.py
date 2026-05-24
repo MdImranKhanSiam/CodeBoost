@@ -11,8 +11,8 @@ from problem.models import Problem, TestCase, Submission
 from problem.tasks import code_submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
-from problem.cache import get_problems_page, set_problems_page, invalidate_problems_page
-
+from . cache import get_problems_page, set_problems_page, invalidate_problems_page
+from . cache import get_submission_api, set_submission_api, invalidate_submission_api
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
@@ -83,6 +83,8 @@ def problem_detail(request, problem_id):
         )
 
         code_submission.delay(current_submission.id)
+
+        invalidate_submission_api(user.id)
 
         return redirect('submission')
         
@@ -283,25 +285,36 @@ def submission(request):
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submissions_api(request):
-    submissions = Submission.objects.filter(user=request.user, contest__isnull=True).order_by('-submitted_at')
-    
-    data = []
+    user = request.user
 
-    for sub in submissions:
-        data.append({
-            "submission_id": sub.id,
-            "problem_title": sub.problem.title,
-            "problem_id": sub.problem.id,
-            "status": sub.verdict,
-            "language": LANGUAGES[sub.language],
-            "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "execution_time": sub.execution_time,
-            "memory_used": sub.memory_used,
-            "total_testcases": sub.total_testcases,
-            "passed_testcases": sub.passed_testcases
-        })
+    context = get_submission_api(user.id)
+
+    if not context:
+        submissions = Submission.objects.filter(user=user, contest__isnull=True).order_by('-submitted_at')
         
-    return JsonResponse({"submissions": data})
+        data = []
+
+        for sub in submissions:
+            data.append({
+                "submission_id": sub.id,
+                "problem_title": sub.problem.title,
+                "problem_id": sub.problem.id,
+                "status": sub.verdict,
+                "language": LANGUAGES[sub.language],
+                "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "execution_time": sub.execution_time,
+                "memory_used": sub.memory_used,
+                "total_testcases": sub.total_testcases,
+                "passed_testcases": sub.passed_testcases
+            })
+
+        context = {
+            "submissions": data,
+        }
+
+        set_submission_api(user.id, context)
+        
+    return JsonResponse(context)
 
 
 
