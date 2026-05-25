@@ -18,6 +18,9 @@ python manage.py makemigrations --noinput
 echo "📦 Running migrate..."
 python manage.py migrate --noinput
 
+echo "🗑 Removing old static files..."
+rm -rf /app/static
+
 # Collect static files
 echo "📁 Collecting static files..."
 python manage.py collectstatic --noinput
