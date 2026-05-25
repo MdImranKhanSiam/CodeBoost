@@ -19,8 +19,11 @@ echo "📦 Running migrate..."
 python manage.py migrate --noinput
 
 # Collect static files
+echo "📁 Deleting previous static files..."
+rm -rf /app/staticfiles/*
+
 echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput --clear
+python manage.py collectstatic --noinput
 
 echo "🚀 Starting Daphne..."
 exec "$@"
