@@ -3,6 +3,8 @@ from django.conf import settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 # from django.core.mail import EmailMessage
 from user_profile.models import UserProfile
+from problem.models import Problem, Submission
+from contest.models import Contest
 from . models import EmailTemplate
 from . tasks import send_welcome_email
 from . web.cache import invalidate_homepage
@@ -55,7 +57,14 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 print('Welcome Email is active')
 
                 subject=welcome_email.subject
-                message=welcome_email.message.replace("{name}", profile.display_name)
+
+                message = welcome_email.message
+
+                message=message.replace("{name}", profile.display_name)
+                message=message.replace("{active_coders}", str(UserProfile.objects.count()))
+                message=message.replace("{total_problems}", str(Problem.objects.count()))
+                message=message.replace("{total_submissions}", str(Submission.objects.count()))
+                message=message.replace("{total_contests}", str(Contest.objects.count()))
                 sender=settings.DEFAULT_FROM_EMAIL
                 receiver=user.email
 

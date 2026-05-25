@@ -18,7 +18,7 @@ def home(request):
         code_snippet = CodeSnippet.objects.get(title='Welcome to competitive programming')
         active_coders = UserProfile.objects.count()
         total_problems = Problem.objects.count()
-        total_submission= Submission.objects.count()
+        total_submissions = Submission.objects.count()
         total_contests = Contest.objects.count()
 
         context = {
@@ -29,7 +29,7 @@ def home(request):
 
             'active_coders': active_coders,
             'total_problems': total_problems,
-            'total_submission': total_submission,
+            'total_submissions': total_submissions,
             'total_contests': total_contests,
         }
 

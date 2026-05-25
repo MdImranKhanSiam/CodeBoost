@@ -101,7 +101,7 @@
 <script>
   const active_coders = "{{ active_coders }}";
   const total_problems = "{{ total_problems }}";
-  const total_submission = "{{ total_submission }}";
+  const total_submissions = "{{ total_submissions }}";
   const total_contests = "{{ total_contests }}";
 
   
@@ -109,9 +109,10 @@
   const counters = {
     users: active_coders,
     problems: total_problems,
-    submissions: total_submission,
+    submissions: total_submissions,
     contests: total_contests,
   };
+  
   for (const id in counters) {
     let el = document.getElementById(id);
     let target = counters[id];
