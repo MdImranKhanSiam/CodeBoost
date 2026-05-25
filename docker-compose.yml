@@ -7,7 +7,7 @@ services:
     build: .
     container_name: codeboost_web
     volumes:
-      - static_volume:/app/static
+      - /var/www/codeboost/static:/app/staticfiles
     expose:
       - 8000
     env_file:
@@ -107,4 +107,3 @@ networks:
 
 volumes:
   postgres_data:
-  static_volume:
