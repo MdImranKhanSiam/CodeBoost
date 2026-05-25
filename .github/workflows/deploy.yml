@@ -33,15 +33,15 @@ jobs:
             echo "📥 Pulling latest code..."
             git pull origin main
 
-            docker rm -f codeboost_web || true
+            docker compose down
+
+            docker rm -f codeboost_web
+
+            docker image prune -af
 
             docker compose build --no-cache web
 
-            docker compose up -d --no-deps web
-
-            # Clean up old unused Docker images to free disk space
-            echo "🧹 Cleaning up old images..."
-            docker image prune -f
+            docker compose up -d
 
             echo "──────────────────────────────────"
             echo "✅ Deployment successful!"
