@@ -1,4 +1,5 @@
 .problems-section{
+  min-height:100vh;
   max-width:1100px;
   margin:auto;
   padding:20px;

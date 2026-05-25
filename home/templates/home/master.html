@@ -198,9 +198,152 @@
 
     {% endblock %}
 
-    <footer class="footer">
-        © {% now "Y" %} CodeBoost — Built for Competitive Programmers. Developed by <a
-            href="https://www.mdimrankhansiam.pro.bd/">Imran Khan</a>.
+    <footer class="site-footer">
+        <div class="footer-inner">
+    
+            <!-- ── Row 1: Brand + Nav columns ────────────── -->
+            <div class="footer-nav-grid">
+    
+                <!-- Brand -->
+                <div class="footer-brand">
+                    <a href="{% url 'home' %}" class="footer-logo">
+                        <img src="{% static 'image/other/codeboost_150x150.png' %}" alt="CodeBoost">
+                        <span>CodeBoost</span>
+                    </a>
+                    <p class="footer-tagline">
+                        A competitive programming platform built to sharpen your skills — practice, compete, and grow.
+                    </p>
+                    <div class="footer-status">
+                        <span class="dot"></span>
+                        All systems operational
+                    </div>
+                    <div class="footer-socials">
+                        <a href="https://github.com/" target="_blank" rel="noopener" class="social-link" title="GitHub">
+                            <i class="fa-brands fa-github"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Discord">
+                            <i class="fa-brands fa-discord"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter / X">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <!-- Platform -->
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a></li>
+                        <li><a href="{% url 'problems' %}"><i class="fa-solid fa-code"></i> Problems</a></li>
+                        <li><a href="{% url 'submission' %}"><i class="fa-solid fa-file-code"></i> Submissions</a></li>
+                        <li>
+                            <a href="{% url 'contests' %}">
+                                <i class="fa-solid fa-trophy"></i> Contests
+                                <span class="badge-live">Live</span>
+                            </a>
+                        </li>
+                        <li><a href="#"><i class="fa-solid fa-ranking-star"></i> Leaderboard</a></li>
+                        <li><a href="#"><i class="fa-solid fa-graduation-cap"></i> Editorial</a></li>
+                    </ul>
+                </div>
+    
+                <!-- Resources -->
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#"><i class="fa-solid fa-book"></i> Documentation</a></li>
+                        <li><a href="#"><i class="fa-solid fa-circle-question"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fa-solid fa-rss"></i> Blog</a></li>
+                        <li><a href="#"><i class="fa-solid fa-code-branch"></i> Changelog</a></li>
+                        <li><a href="#"><i class="fa-solid fa-envelope"></i> Newsletter</a></li>
+                    </ul>
+                </div>
+    
+                <!-- Company -->
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#"><i class="fa-solid fa-circle-info"></i> About</a></li>
+                        <li>
+                            <a href="https://www.mdimrankhansiam.pro.bd/" target="_blank" rel="noopener">
+                                <i class="fa-solid fa-user"></i> Developer
+                            </a>
+                        </li>
+                        <li><a href="#"><i class="fa-solid fa-handshake"></i> Sponsor</a></li>
+                        <li><a href="#"><i class="fa-solid fa-at"></i> Contact Us</a></li>
+                        <li><a href="#"><i class="fa-solid fa-briefcase"></i> Careers</a></li>
+                    </ul>
+                </div>
+    
+            </div>
+    
+            <!-- ── Row 2: Support strip ───────────────────── -->
+            <div class="footer-support-strip">
+    
+                <div class="footer-support-label">
+                    <p>Need help?</p>
+                    <small>We're here for you</small>
+                </div>
+    
+                <div class="footer-support-divider"></div>
+    
+                <div class="footer-support-cards">
+    
+                    <a href="/support/submit-ticket/" class="support-card support-card-ticket">
+                        <div class="support-card-icon">
+                            <i class="fa-solid fa-ticket"></i>
+                        </div>
+                        <div class="support-card-body">
+                            <strong>Submit a Ticket</strong>
+                            <span>Report a bug or issue</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right support-card-arrow"></i>
+                    </a>
+    
+                    <a href="/support/feedback/" class="support-card support-card-feedback">
+                        <div class="support-card-icon">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <div class="support-card-body">
+                            <strong>Feedback & Suggestions</strong>
+                            <span>Share ideas to improve CodeBoost</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right support-card-arrow"></i>
+                    </a>
+    
+                </div>
+            </div>
+    
+            <!-- ── Row 3: Bottom legal bar ────────────────── -->
+            <div class="footer-bottom">
+    
+                <p class="footer-copyright">
+                    © {% now "Y" %} CodeBoost. Built for Competitive Programmers.
+                    Developed by <a href="https://www.mdimrankhansiam.pro.bd/" target="_blank" rel="noopener">Imran Khan</a>.
+                </p>
+    
+                <nav class="footer-legal" aria-label="Legal links">
+                    <a href="#">Terms of Service</a>
+                    <span class="sep">·</span>
+                    <a href="#">Privacy Policy</a>
+                    <span class="sep">·</span>
+                    <a href="#">Cookie Policy</a>
+                    <span class="sep">·</span>
+                    <a href="#">Acceptable Use</a>
+                    <span class="sep">·</span>
+                    <a href="#">Accessibility</a>
+                </nav>
+    
+            </div>
+    
+        </div>
     </footer>
 
 
