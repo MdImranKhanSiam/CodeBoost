@@ -1,0 +1,391 @@
+{% extends 'home/master.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    :root {
+        --legal-bg: #0d0f14;
+        --legal-card: #181c25;
+        --legal-border: #252a38;
+        --legal-accent: #4f8ef7;
+        --legal-accent-glow: rgba(79, 142, 247, 0.15);
+        --legal-green: #34d399;
+        --legal-green-glow: rgba(52, 211, 153, 0.1);
+        --legal-text: #e2e6f0;
+        --legal-muted: #7a8299;
+        --legal-heading: #ffffff;
+    }
+
+    .legal-page { min-height: 100vh; background: var(--legal-bg); padding: 60px 20px 100px; font-family: 'Georgia', 'Times New Roman', serif; }
+    .legal-container { max-width: 820px; margin: 0 auto; }
+
+    .legal-hero { text-align: center; padding: 48px 0 56px; border-bottom: 1px solid var(--legal-border); margin-bottom: 56px; position: relative; }
+    .legal-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 320px; height: 1px; background: linear-gradient(90deg, transparent, var(--legal-green), transparent); }
+
+    .legal-badge { display: inline-flex; align-items: center; gap: 7px; background: var(--legal-green-glow); border: 1px solid rgba(52,211,153,0.3); color: var(--legal-green); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 20px; }
+    .legal-badge i { font-size: 10px; }
+    .legal-hero h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; color: var(--legal-heading); margin: 0 0 14px; letter-spacing: -0.02em; font-family: 'Inter', sans-serif; line-height: 1.15; }
+    .legal-hero p { color: var(--legal-muted); font-size: 15px; font-family: 'Inter', sans-serif; margin: 0; line-height: 1.6; }
+    .legal-meta { display: flex; justify-content: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+    .legal-meta-item { display: flex; align-items: center; gap: 6px; color: var(--legal-muted); font-family: 'Inter', sans-serif; font-size: 12px; }
+    .legal-meta-item i { color: var(--legal-green); font-size: 11px; }
+
+    .privacy-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+    @media (max-width: 620px) { .privacy-summary { grid-template-columns: 1fr; } }
+    .summary-card { background: var(--legal-card); border: 1px solid var(--legal-border); border-radius: 12px; padding: 20px 18px; text-align: center; }
+    .summary-card-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 16px; }
+    .icon-green { background: var(--legal-green-glow); color: var(--legal-green); }
+    .icon-blue  { background: var(--legal-accent-glow); color: var(--legal-accent); }
+    .icon-red   { background: rgba(239,68,68,0.1); color: #f87171; }
+    .summary-card strong { display: block; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--legal-heading); margin-bottom: 4px; }
+    .summary-card span { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--legal-muted); line-height: 1.5; }
+
+    .legal-toc { background: var(--legal-card); border: 1px solid var(--legal-border); border-radius: 12px; padding: 28px 32px; margin-bottom: 48px; }
+    .legal-toc h3 { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--legal-muted); margin: 0 0 16px; }
+    .legal-toc ol { margin: 0; padding-left: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; }
+    .legal-toc li { margin: 0; }
+    .legal-toc a { color: var(--legal-accent); text-decoration: none; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 2; transition: opacity 0.2s; }
+    .legal-toc a:hover { opacity: 0.7; }
+    @media (max-width: 560px) { .legal-toc ol { grid-template-columns: 1fr; } }
+
+    .legal-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+    .legal-section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+    .section-num { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: var(--legal-green); background: var(--legal-green-glow); border: 1px solid rgba(52,211,153,0.2); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0; margin-top: 2px; }
+    .legal-section h2 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; color: var(--legal-heading); margin: 0; line-height: 1.3; }
+    .legal-section p { color: var(--legal-text); font-size: 15px; line-height: 1.8; margin: 0 0 14px; }
+    .legal-section p:last-child { margin-bottom: 0; }
+    .legal-section ul, .legal-section ol { color: var(--legal-text); font-size: 15px; line-height: 1.8; margin: 10px 0 14px; padding-left: 22px; }
+    .legal-section li { margin-bottom: 4px; }
+
+    .legal-sub { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--legal-muted); text-transform: uppercase; letter-spacing: 0.07em; margin: 20px 0 6px; }
+
+    .legal-callout { background: var(--legal-card); border-left: 3px solid var(--legal-green); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
+    .legal-callout p { margin: 0; font-size: 14px; color: var(--legal-text); }
+
+    .legal-no-sell { display: flex; align-items: center; gap: 12px; background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.2); border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    .legal-no-sell i { color: var(--legal-green); font-size: 18px; flex-shrink: 0; }
+    .legal-no-sell p { margin: 0; font-size: 14px; color: var(--legal-text); font-family: 'Inter', sans-serif; }
+
+    .legal-divider { height: 1px; background: var(--legal-border); margin: 40px 0; }
+
+    .rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    @media (max-width: 500px) { .rights-grid { grid-template-columns: 1fr; } }
+    .right-item { display: flex; align-items: center; gap: 10px; background: var(--legal-card); border: 1px solid var(--legal-border); border-radius: 8px; padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--legal-text); }
+    .right-item i { color: var(--legal-green); font-size: 12px; flex-shrink: 0; }
+
+    /* Cloudinary badge */
+    .provider-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--legal-card); border: 1px solid var(--legal-border); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--legal-text); }
+    .provider-badge i { color: var(--legal-accent); }
+    .provider-badge a { color: var(--legal-accent); text-decoration: none; }
+    .provider-badge a:hover { text-decoration: underline; }
+
+    .legal-footer-note { background: var(--legal-card); border: 1px solid var(--legal-border); border-radius: 12px; padding: 28px 32px; text-align: center; margin-top: 56px; }
+    .legal-footer-note p { color: var(--legal-muted); font-family: 'Inter', sans-serif; font-size: 13px; margin: 0 0 12px; line-height: 1.7; }
+    .legal-footer-note a { color: var(--legal-accent); text-decoration: none; }
+    .legal-footer-note a:hover { text-decoration: underline; }
+
+    .legal-links-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .legal-other-link { display: inline-flex; align-items: center; gap: 6px; background: var(--legal-accent-glow); border: 1px solid rgba(79,142,247,0.3); color: var(--legal-accent); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
+    .legal-other-link:hover { background: rgba(79,142,247,0.25); text-decoration: none; }
+</style>
+
+<div class="legal-page">
+    <div class="legal-container">
+
+        <div class="legal-hero">
+            <div class="legal-badge"><i class="fa-solid fa-shield-halved"></i> Privacy</div>
+            <h1>Privacy Policy</h1>
+            <p>We collect the minimum needed to run the platform — nothing more.</p>
+            <div class="legal-meta">
+                <span class="legal-meta-item"><i class="fa-regular fa-calendar"></i> Last updated: May 2025</span>
+                <span class="legal-meta-item"><i class="fa-solid fa-globe"></i> Applies globally</span>
+            </div>
+        </div>
+
+        <div class="privacy-summary">
+            <div class="summary-card">
+                <div class="summary-card-icon icon-green"><i class="fa-solid fa-check"></i></div>
+                <strong>Minimal Data</strong>
+                <span>Only what's needed to operate the platform</span>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-icon icon-red"><i class="fa-solid fa-ban"></i></div>
+                <strong>Never Sold</strong>
+                <span>Your data is never sold to third parties</span>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-icon icon-blue"><i class="fa-solid fa-lock"></i></div>
+                <strong>Secured</strong>
+                <span>Google OAuth, HTTPS &amp; server-side controls</span>
+            </div>
+        </div>
+
+        <div class="legal-toc">
+            <h3>Contents</h3>
+            <ol>
+                <li><a href="#data-collect">Information We Collect</a></li>
+                <li><a href="#profile-uploads">Profile Photos & Uploads</a></li>
+                <li><a href="#social-links">Social Media Links</a></li>
+                <li><a href="#how-use">How We Use Information</a></li>
+                <li><a href="#submissions">Code Submissions</a></li>
+                <li><a href="#cookies">Cookies &amp; Tracking</a></li>
+                <li><a href="#sharing">Data Sharing &amp; Providers</a></li>
+                <li><a href="#security">Data Security</a></li>
+                <li><a href="#children">Children's Privacy</a></li>
+                <li><a href="#retention">Data Retention</a></li>
+                <li><a href="#rights">Your Rights</a></li>
+                <li><a href="#pp-changes">Changes to Policy</a></li>
+            </ol>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="legal-section" id="data-collect">
+            <div class="legal-section-header"><span class="section-num">01</span><h2>Information We Collect</h2></div>
+
+            <p class="legal-sub">A. From Google Login</p>
+            <p>When you authenticate via Google OAuth, we receive:</p>
+            <ul>
+                <li>Your Google display name</li>
+                <li>Your email address (used as your account identifier)</li>
+                <li>Your Google profile picture (used as your default avatar)</li>
+                <li>A unique Google account identifier</li>
+            </ul>
+
+            <p class="legal-sub">B. Profile Information You Provide</p>
+            <p>Through the Edit Profile panel, you may optionally add:</p>
+            <ul>
+                <li>A custom display name and bio</li>
+                <li>A profile photo uploaded from your device</li>
+                <li>Gender, date of birth, and country</li>
+                <li>Personal website URL, social media link, and GitHub link</li>
+                <li>Preferred programming language</li>
+            </ul>
+            <p>All of this information is <strong>optional and entirely under your control</strong>. You can update or remove it at any time.</p>
+
+            <p class="legal-sub">C. Activity Data</p>
+            <ul>
+                <li>Code submissions and their automated judging results</li>
+                <li>Contest participation history and ratings</li>
+                <li>Problem-solving activity (used to generate your heatmap)</li>
+                <li>Session data (login timestamps, browser type)</li>
+            </ul>
+
+            <p class="legal-sub">D. What We Do NOT Collect</p>
+            <ul>
+                <li>Phone numbers or physical addresses</li>
+                <li>Payment information (CodeBoost is currently free)</li>
+                <li>Precise geolocation data</li>
+                <li>Any data from your contacts, microphone, or camera</li>
+            </ul>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 2 -->
+        <div class="legal-section" id="profile-uploads">
+            <div class="legal-section-header"><span class="section-num">02</span><h2>Profile Photos &amp; Image Uploads</h2></div>
+            <p>When you upload a custom profile photo, that image is:</p>
+            <ul>
+                <li>Transmitted securely to our cloud media storage provider</li>
+                <li>Stored under your account and displayed publicly on your profile page</li>
+                <li>Accessible by anyone who views your CodeBoost profile</li>
+            </ul>
+
+            <div class="legal-callout">
+                <p><strong>Cloud Storage Provider:</strong> Profile images are stored on Cloudinary. By uploading a photo, you also agree to be subject to Cloudinary's data handling practices. See <a href="https://cloudinary.com/privacy" target="_blank" rel="noopener" style="color:var(--legal-accent);">cloudinary.com/privacy</a>.</p>
+            </div>
+
+            <p>We retain your uploaded avatar as long as your account is active. If you upload a new photo, the previous one is replaced. If you delete your account, your uploaded images will be removed from storage.</p>
+            <p>You are solely responsible for the content of images you upload. Do not upload images that are offensive, illegal, or infringe on the rights of others. We reserve the right to remove any inappropriate images without notice.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 3 -->
+        <div class="legal-section" id="social-links">
+            <div class="legal-section-header"><span class="section-num">03</span><h2>Social Media Links &amp; External URLs</h2></div>
+            <p>You may optionally add external links to your public profile, including:</p>
+            <ul>
+                <li><strong>Personal website</strong> — any URL you choose</li>
+                <li><strong>Social media link</strong> — e.g. Facebook, Twitter, LinkedIn</li>
+                <li><strong>GitHub profile</strong> — link to your GitHub account</li>
+            </ul>
+
+            <div class="legal-no-sell">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>These links are <strong>publicly visible</strong> on your profile. We do not have any relationship with the social platforms you link to and are not responsible for their content or privacy practices.</p>
+            </div>
+
+            <p>We store these URLs as plain text in your profile record. We do not follow, scrape, or access the linked pages. You can remove or change these links at any time through the Edit Profile panel.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 4 -->
+        <div class="legal-section" id="how-use">
+            <div class="legal-section-header"><span class="section-num">04</span><h2>How We Use Your Information</h2></div>
+            <p>We use collected data exclusively to operate and improve CodeBoost:</p>
+            <ul>
+                <li>Creating and managing your user account</li>
+                <li>Displaying your profile name, avatar, and public profile information</li>
+                <li>Evaluating code submissions and calculating scores/ratings</li>
+                <li>Maintaining contest leaderboards and activity heatmaps</li>
+                <li>Sending important account-related emails (e.g. security notices)</li>
+                <li>Detecting and preventing abuse, cheating, or policy violations</li>
+                <li>Improving platform performance and reliability</li>
+            </ul>
+            <div class="legal-callout"><p><strong>No marketing.</strong> We do not use your data to send promotional emails or target you with advertisements. CodeBoost products are ad-free.</p></div>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 5 -->
+        <div class="legal-section" id="submissions">
+            <div class="legal-section-header">
+                <span class="section-num">03</span>
+                <h2>User Content &amp; Submissions</h2>
+            </div>
+            <p>Your code submissions are stored on our servers to:</p>
+            <ul>
+                <li>Evaluate correctness against test cases</li>
+                <li>Display your submission history on your profile</li>
+                <li>Track progress across problems and contests</li>
+            </ul>
+            <div class="legal-callout">
+                <p><strong>You own your code.</strong> We do not claim ownership over any code you write and submit to CodeBoost.</p>
+            </div>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 6 -->
+        <div class="legal-section" id="cookies">
+            <div class="legal-section-header"><span class="section-num">06</span><h2>Cookies &amp; Tracking</h2></div>
+            <p>CodeBoost uses minimal, essential cookies to:</p>
+            <ul>
+                <li>Keep you logged in during your session (session cookie)</li>
+                <li>Protect against CSRF attacks (Django CSRF token)</li>
+                <li>Remember basic preferences</li>
+            </ul>
+            <p>We do <strong>not</strong> use third-party advertising cookies, tracking pixels, Google Analytics, Facebook Pixel, or any behavioural analytics tools. 
+                <!-- See our full <a href="cookie-policy" style="color:var(--legal-accent);">Cookie Policy</a>.--> 
+            </p> 
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 7 -->
+        <div class="legal-section" id="sharing">
+            <div class="legal-section-header"><span class="section-num">07</span><h2>Data Sharing &amp; Third-Party Providers</h2></div>
+
+            <div class="legal-no-sell">
+                <i class="fa-solid fa-shield-halved"></i>
+                <p><strong>We do not sell, rent, or trade your personal data</strong> to any third party, ever.</p>
+            </div>
+
+            <p>We work with the following service providers who may process your data as part of normal platform operation:</p>
+
+            <div class="provider-badge">
+                <i class="fa-brands fa-google"></i>
+                <div><strong>Google (OAuth)</strong> — handles authentication. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></div>
+            </div>
+            <div class="provider-badge">
+                <i class="fa-solid fa-cloud"></i>
+                <div><strong>Cloudinary</strong> — stores your uploaded profile photos. <a href="https://cloudinary.com/privacy" target="_blank" rel="noopener">Cloudinary Privacy Policy</a></div>
+            </div>
+            <div class="provider-badge">
+                <i class="fa-solid fa-server"></i>
+                <div><strong>Hosting &amp; Database provider</strong> — hosts the platform infrastructure under strict confidentiality.</div>
+            </div>
+
+            <p style="margin-top: 16px;">We may also share data if required by law, court order, or to protect platform security.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 8 -->
+        <div class="legal-section" id="security">
+            <div class="legal-section-header"><span class="section-num">08</span><h2>Data Security</h2></div>
+            <p>We take reasonable measures to protect your data, including:</p>
+            <ul>
+                <li>Secure Google OAuth authentication (no passwords stored by us)</li>
+                <li>HTTPS encryption for all data in transit</li>
+                <li>CSRF protection on all forms</li>
+                <li>Server-side access controls and rate limiting (django-axes)</li>
+                <li>Secure, HttpOnly session cookies</li>
+                <li>Environment-based secrets management (no hardcoded credentials)</li>
+            </ul>
+            <p>No system is 100% secure. We encourage you to protect your Google account with a strong password and two-factor authentication.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 9 -->
+        <div class="legal-section" id="children">
+            <div class="legal-section-header">
+                <span class="section-num">07</span>
+                <h2>Children's Privacy</h2>
+            </div>
+            <p>CodeBoost is not directed at children under the age of 13. We do not knowingly collect personal data from anyone under 13.</p>
+            <p>If we become aware that a user under 13 has created an account, we will promptly delete their data and close the account. If you are a parent or guardian and believe your child has registered, please contact us immediately.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 10 -->
+        <div class="legal-section" id="retention">
+            <div class="legal-section-header"><span class="section-num">10</span><h2>Data Retention</h2></div>
+            <p>We retain your data for as long as your account is active or as needed to provide platform functionality. Upon account deletion:</p>
+            <ul>
+                <li>Your profile data and social links are removed from our database</li>
+                <li>Your uploaded avatar is deleted from Cloudinary storage</li>
+                <li>Your submission history is removed or anonymized</li>
+            </ul>
+            <p>Anonymized, aggregated data (e.g. platform-wide statistics) may be retained for analysis without personal identifiers.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 11 -->
+        <div class="legal-section" id="rights">
+            <div class="legal-section-header"><span class="section-num">11</span><h2>Your Rights</h2></div>
+            <p>You have the following rights regarding your personal data:</p>
+            <div class="rights-grid">
+                <div class="right-item"><i class="fa-solid fa-eye"></i> Access your profile and submission data</div>
+                <div class="right-item"><i class="fa-solid fa-pen"></i> Update or correct your profile at any time</div>
+                <div class="right-item"><i class="fa-solid fa-image"></i> Replace or remove your uploaded avatar</div>
+                <div class="right-item"><i class="fa-solid fa-link-slash"></i> Remove social media links from your profile</div>
+                <div class="right-item"><i class="fa-solid fa-trash"></i> Request full account deletion</div>
+                <div class="right-item"><i class="fa-solid fa-download"></i> Request a copy of your data</div>
+            </div>
+            <p style="margin-top: 16px;">To exercise any of these rights, contact us at <a href="mailto:support@codeboost.com" style="color:var(--legal-accent);">support@codeboost.com</a>.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <!-- Section 12 -->
+        <div class="legal-section" id="pp-changes">
+            <div class="legal-section-header">
+                <span class="section-num">10</span>
+                <h2>Changes to This Policy</h2>
+            </div>
+            <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page. For significant changes, we may notify you via the platform or email.</p>
+            <p>Continued use of CodeBoost after changes are posted constitutes your acceptance of the revised Privacy Policy.</p>
+        </div>
+
+        <div class="legal-footer-note">
+            <p>Privacy concerns? Contact us at <a href="mailto:support@codeboost.com">support@codeboost.com</a> — we respond within 48 hours.</p>
+            <p style="margin-bottom: 16px;">Also read our:</p>
+            <div class="legal-links-row">
+                <a href="{% url 'terms-of-service' %}" class="legal-other-link"><i class="fa-solid fa-file-contract"></i> Terms &amp; Conditions</a>
+                <!-- <a href="cookie-policy" class="legal-other-link"><i class="fa-solid fa-cookie-bite"></i> Cookie Policy</a> -->
+                <!-- <a href="acceptable-use" class="legal-other-link"><i class="fa-solid fa-scale-balanced"></i> Acceptable Use</a> -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

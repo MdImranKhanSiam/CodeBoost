@@ -218,16 +218,16 @@
                         All systems operational
                     </div>
                     <div class="footer-socials">
-                        <a href="https://github.com/" target="_blank" rel="noopener" class="social-link" title="GitHub">
+                        <a href="https://github.com/MdImranKhanSiam/CodeBoost" target="_blank" rel="noopener" class="social-link" title="GitHub">
                             <i class="fa-brands fa-github"></i>
                         </a>
-                        <a href="#" class="social-link" title="Discord">
+                        <a href="https://discord.gg/yAdq535yFV" target="_blank" class="social-link" title="Discord">
                             <i class="fa-brands fa-discord"></i>
                         </a>
                         <a href="#" class="social-link" title="Twitter / X">
                             <i class="fa-brands fa-x-twitter"></i>
                         </a>
-                        <a href="#" class="social-link" title="LinkedIn">
+                        <a href="#"  class="social-link" title="LinkedIn">
                             <i class="fa-brands fa-linkedin-in"></i>
                         </a>
                         <a href="#" class="social-link" title="YouTube">
@@ -278,7 +278,7 @@
                         </li>
                         <li><a href="#"><i class="fa-solid fa-handshake"></i> Sponsor</a></li>
                         <li><a href="#"><i class="fa-solid fa-at"></i> Contact Us</a></li>
-                        <li><a href="#"><i class="fa-solid fa-briefcase"></i> Careers</a></li>
+                        <!-- <li><a href="#"><i class="fa-solid fa-briefcase"></i> Careers</a></li> -->
                     </ul>
                 </div>
     
@@ -330,15 +330,15 @@
                 </p>
     
                 <nav class="footer-legal" aria-label="Legal links">
-                    <a href="#">Terms of Service</a>
+                    <a href="{% url 'terms-of-service' %}">Terms of Service</a>
                     <span class="sep">·</span>
-                    <a href="#">Privacy Policy</a>
+                    <a href="{% url 'privacy-policy' %}">Privacy Policy</a>
                     <span class="sep">·</span>
-                    <a href="#">Cookie Policy</a>
+                    <a href="{% url 'privacy-policy' %}?#cookies">Cookie Policy</a>
                     <span class="sep">·</span>
-                    <a href="#">Acceptable Use</a>
+                    <a href="{% url 'terms-of-service' %}#acceptable-use">Acceptable Use</a>
                     <span class="sep">·</span>
-                    <a href="#">Accessibility</a>
+                    <!-- <a href="#">Accessibility</a> -->
                 </nav>
     
             </div>

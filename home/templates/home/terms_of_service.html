@@ -1,0 +1,381 @@
+{% extends 'home/master.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    :root {
+        --legal-bg: #0d0f14;
+        --legal-surface: #13161d;
+        --legal-card: #181c25;
+        --legal-border: #252a38;
+        --legal-accent: #4f8ef7;
+        --legal-accent-glow: rgba(79, 142, 247, 0.15);
+        --legal-text: #e2e6f0;
+        --legal-muted: #7a8299;
+        --legal-heading: #ffffff;
+    }
+
+    .legal-page {
+        min-height: 100vh;
+        background: var(--legal-bg);
+        padding: 60px 20px 100px;
+        font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    .legal-container { max-width: 820px; margin: 0 auto; }
+
+    .legal-hero {
+        text-align: center;
+        padding: 48px 0 56px;
+        border-bottom: 1px solid var(--legal-border);
+        margin-bottom: 56px;
+        position: relative;
+    }
+
+    .legal-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 50%;
+        transform: translateX(-50%);
+        width: 320px; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--legal-accent), transparent);
+    }
+
+    .legal-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: var(--legal-accent-glow);
+        border: 1px solid rgba(79, 142, 247, 0.3);
+        color: var(--legal-accent);
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+    }
+
+    .legal-badge i { font-size: 10px; }
+
+    .legal-hero h1 {
+        font-size: clamp(2rem, 5vw, 3rem); font-weight: 700;
+        color: var(--legal-heading); margin: 0 0 14px;
+        letter-spacing: -0.02em; font-family: 'Inter', sans-serif; line-height: 1.15;
+    }
+
+    .legal-hero p {
+        color: var(--legal-muted); font-size: 15px;
+        font-family: 'Inter', sans-serif; margin: 0; line-height: 1.6;
+    }
+
+    .legal-meta {
+        display: flex; justify-content: center; gap: 24px;
+        margin-top: 24px; flex-wrap: wrap;
+    }
+
+    .legal-meta-item {
+        display: flex; align-items: center; gap: 6px;
+        color: var(--legal-muted); font-family: 'Inter', sans-serif; font-size: 12px;
+    }
+
+    .legal-meta-item i { color: var(--legal-accent); font-size: 11px; }
+
+    .legal-toc {
+        background: var(--legal-card);
+        border: 1px solid var(--legal-border);
+        border-radius: 12px; padding: 28px 32px; margin-bottom: 48px;
+    }
+
+    .legal-toc h3 {
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--legal-muted); margin: 0 0 16px;
+    }
+
+    .legal-toc ol {
+        margin: 0; padding-left: 20px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px;
+    }
+
+    .legal-toc li { margin: 0; }
+
+    .legal-toc a {
+        color: var(--legal-accent); text-decoration: none;
+        font-family: 'Inter', sans-serif; font-size: 13px;
+        line-height: 2; transition: opacity 0.2s;
+    }
+
+    .legal-toc a:hover { opacity: 0.7; }
+
+    @media (max-width: 560px) { .legal-toc ol { grid-template-columns: 1fr; } }
+
+    .legal-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+
+    .legal-section-header {
+        display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px;
+    }
+
+    .section-num {
+        font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+        color: var(--legal-accent); background: var(--legal-accent-glow);
+        border: 1px solid rgba(79, 142, 247, 0.2);
+        padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em;
+        flex-shrink: 0; margin-top: 2px;
+    }
+
+    .legal-section h2 {
+        font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600;
+        color: var(--legal-heading); margin: 0; line-height: 1.3;
+    }
+
+    .legal-section p {
+        color: var(--legal-text); font-size: 15px; line-height: 1.8; margin: 0 0 14px;
+    }
+
+    .legal-section p:last-child { margin-bottom: 0; }
+
+    .legal-section ul, .legal-section ol {
+        color: var(--legal-text); font-size: 15px; line-height: 1.8;
+        margin: 10px 0 14px; padding-left: 22px;
+    }
+
+    .legal-section li { margin-bottom: 4px; }
+
+    .legal-callout {
+        background: var(--legal-card);
+        border-left: 3px solid var(--legal-accent);
+        border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0;
+    }
+
+    .legal-callout p { margin: 0; font-size: 14px; color: var(--legal-text); }
+
+    .legal-warn {
+        background: rgba(245, 158, 11, 0.06);
+        border-left: 3px solid #f59e0b;
+        border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0;
+    }
+
+    .legal-warn p { margin: 0; font-size: 14px; color: #d4a847; }
+
+    .legal-divider { height: 1px; background: var(--legal-border); margin: 40px 0; }
+
+    .legal-footer-note {
+        background: var(--legal-card);
+        border: 1px solid var(--legal-border);
+        border-radius: 12px; padding: 28px 32px;
+        text-align: center; margin-top: 56px;
+    }
+
+    .legal-footer-note p {
+        color: var(--legal-muted); font-family: 'Inter', sans-serif;
+        font-size: 13px; margin: 0 0 12px; line-height: 1.7;
+    }
+
+    .legal-footer-note a { color: var(--legal-accent); text-decoration: none; }
+    .legal-footer-note a:hover { text-decoration: underline; }
+
+    .legal-links-row {
+        display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+
+    .legal-other-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--legal-accent-glow);
+        border: 1px solid rgba(79, 142, 247, 0.3);
+        color: var(--legal-accent); font-family: 'Inter', sans-serif;
+        font-size: 13px; font-weight: 500; padding: 8px 18px;
+        border-radius: 8px; text-decoration: none; transition: background 0.2s;
+    }
+
+    .legal-other-link:hover { background: rgba(79, 142, 247, 0.25); text-decoration: none; }
+</style>
+
+<div class="legal-page">
+    <div class="legal-container">
+
+        <div class="legal-hero">
+            <div class="legal-badge">
+                <i class="fa-solid fa-file-contract"></i> Legal
+            </div>
+            <h1>Terms &amp; Conditions</h1>
+            <p>Please read these terms carefully before using CodeBoost.</p>
+            <div class="legal-meta">
+                <span class="legal-meta-item"><i class="fa-regular fa-calendar"></i> Last updated: May 2025</span>
+                <span class="legal-meta-item"><i class="fa-solid fa-globe"></i> Applies globally</span>
+            </div>
+        </div>
+
+        <div class="legal-toc">
+            <h3>Contents</h3>
+            <ol>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#eligibility">Eligibility</a></li>
+                <li><a href="#accounts">Account Registration</a></li>
+                <li><a href="#user-content">User Content & Uploads</a></li>
+                <li><a href="#profile-data">Profile Data & Social Links</a></li>
+                <li><a href="#acceptable-use">Acceptable Use</a></li>
+                <li><a href="#contest-rules">Contest Rules</a></li>
+                <li><a href="#ip">Intellectual Property</a></li>
+                <li><a href="#termination">Termination</a></li>
+                <li><a href="#disclaimer">Disclaimer</a></li>
+                <li><a href="#changes">Changes to Terms</a></li>
+            </ol>
+        </div>
+
+        <div class="legal-section" id="introduction">
+            <div class="legal-section-header"><span class="section-num">01</span><h2>Introduction</h2></div>
+            <p>Welcome to CodeBoost. By accessing or using our platform, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you should not use the platform.</p>
+            <p>CodeBoost is a competitive programming and learning platform that allows users to solve coding problems, participate in contests, submit solutions for automated evaluation, and build a public profile.</p>
+            <div class="legal-callout"><p><strong>TL;DR:</strong> Using CodeBoost means you accept these rules. If something here doesn't sit right with you, please don't use the platform.</p></div>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="eligibility">
+            <div class="legal-section-header"><span class="section-num">02</span><h2>Eligibility</h2></div>
+            <p>You must be at least <strong>13 years old</strong> to create an account and use CodeBoost. By registering, you confirm that:</p>
+            <ul>
+                <li>You meet the minimum age requirement (13+)</li>
+                <li>You agree to comply with these Terms and Conditions</li>
+                <li>The information you provide is accurate and truthful</li>
+            </ul>
+            <p>If you are under 18, we recommend using the platform under the supervision of a parent or guardian.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="accounts">
+            <div class="legal-section-header">
+                <span class="section-num">03</span>
+                <h2>Account Registration (Google Login)</h2>
+            </div>
+            <p>CodeBoost uses Google OAuth for secure account creation. There is no separate username/password registration. When you sign in with Google, we may collect:</p>
+            <ul>
+                <li>Your Google display name</li>
+                <li>Your Google profile picture</li>
+                <li>A unique account identifier</li>
+            </ul>
+            <p>You are responsible for maintaining access to your Google account. You must not share your account with others or allow others to use your session to participate in contests.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="user-content">
+            <div class="legal-section-header"><span class="section-num">04</span><h2>User Content &amp; Uploads</h2></div>
+            <p>Users may submit and upload various types of content to CodeBoost, including:</p>
+            <ul>
+                <li><strong>Code submissions</strong> — solutions to problems and contest entries</li>
+                <li><strong>Profile avatar images</strong> — photos or images uploaded as your profile picture</li>
+                <li><strong>Profile text</strong> — display name, bio, country, and other profile fields</li>
+            </ul>
+            <p>You retain full ownership of all content you upload. By submitting content, you grant CodeBoost a non-exclusive, worldwide, royalty-free license to store, display, and process that content solely for platform operation.</p>
+            <div class="legal-callout">
+                <p><strong>Avatar uploads:</strong> Profile photos you upload are stored securely on Cloudinary (our cloud media provider) and displayed publicly on your profile page. By uploading an image, you confirm you have the right to use and share it.</p>
+            </div>
+            <p>You must not upload content that is:</p>
+            <ul>
+                <li>Illegal, defamatory, obscene, or violates the rights of others</li>
+                <li>Someone else's photo or likeness without their consent</li>
+                <li>Copyrighted material you do not have rights to distribute</li>
+            </ul>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="profile-data">
+            <div class="legal-section-header"><span class="section-num">05</span><h2>Profile Data &amp; Social Links</h2></div>
+            <p>Your CodeBoost profile is <strong>publicly visible</strong> to all visitors. It may display:</p>
+            <ul>
+                <li>Your display name and avatar</li>
+                <li>Your bio, gender (if set), country, and date of birth (if set)</li>
+                <li>Your preferred programming language</li>
+                <li>Your website URL, social media link, and GitHub profile link</li>
+                <li>Your solved problem count, contest participation count, and activity heatmap</li>
+            </ul>
+            <p>By adding social media links (Facebook, Twitter, LinkedIn, etc.) or a personal website to your profile, you acknowledge that these links are publicly visible. You are solely responsible for the content at any URLs you provide.</p>
+            <div class="legal-warn"><p><strong>⚠️</strong> Do not add links to harmful, illegal, or inappropriate external content in your profile. Doing so may result in account suspension.</p></div>
+            <p>You can update or remove any profile information at any time through the Edit Profile panel.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="acceptable-use">
+            <div class="legal-section-header"><span class="section-num">06</span><h2>Acceptable Use</h2></div>
+            <p>You agree to use CodeBoost fairly and honestly. The following are strictly prohibited:</p>
+            <ul>
+                <li>Cheating in contests or exploiting platform bugs for unfair advantage</li>
+                <li>Submitting plagiarized or AI-generated code where disallowed</li>
+                <li>Attempting to hack, scrape, or disrupt the platform</li>
+                <li>Creating multiple accounts to bypass rating penalties or bans</li>
+                <li>Abusing, spamming, or harassing other users</li>
+                <li>Uploading offensive, harmful, or illegal avatar images</li>
+                <li>Adding malicious or deceptive external links to your profile</li>
+            </ul>
+            <div class="legal-warn"><p><strong>⚠️ Violations may result in permanent suspension</strong> of your account without prior notice.</p></div>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="contest-rules">
+            <div class="legal-section-header"><span class="section-num">07</span><h2>Contest Rules</h2></div>
+            <ul>
+                <li>Rankings are determined by automated judging and are final unless an appeal is accepted</li>
+                <li>Results are subject to system validation after the contest ends</li>
+                <li>CodeBoost reserves the right to disqualify suspicious submissions at any time</li>
+                <li>Decisions made by the system and admins are final</li>
+                <li>Prize distribution (if any) is contingent on identity verification and eligibility</li>
+            </ul>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="ip">
+            <div class="legal-section-header"><span class="section-num">08</span><h2>Intellectual Property</h2></div>
+            <p>All platform components created by CodeBoost — including website design, problem statements, contest structures, scoring systems, and the "CodeBoost" brand name and logo — are the intellectual property of CodeBoost unless otherwise stated.</p>
+            <p>You may not reproduce, copy, or redistribute any part of the platform without explicit written permission.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="termination">
+            <div class="legal-section-header"><span class="section-num">09</span><h2>Termination</h2></div>
+            <p>We reserve the right to suspend or permanently terminate your account if:</p>
+            <ul>
+                <li>You violate any part of these Terms</li>
+                <li>Abuse, cheating, or fraudulent activity is detected</li>
+                <li>You upload inappropriate or harmful content</li>
+                <li>Required by applicable law or legal process</li>
+            </ul>
+            <p>You may delete your account at any time. Upon deletion, your profile data, avatar, and submissions will be removed in accordance with our Privacy Policy.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="disclaimer">
+            <div class="legal-section-header"><span class="section-num">10</span><h2>Disclaimer of Warranties</h2></div>
+            <p>CodeBoost is provided on an <strong>"as is"</strong> basis without warranties of any kind. We do not guarantee uninterrupted operation, absolute correctness of judging results, or permanent availability of data. To the extent permitted by law, CodeBoost and its developers will not be liable for any indirect or consequential damages.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-section" id="changes">
+            <div class="legal-section-header">
+                <span class="section-num">10</span>
+                <h2>Changes to These Terms</h2>
+            </div>
+            <p>We may update these Terms at any time. When significant changes are made, we will update the "Last updated" date at the top of this page. Continued use of CodeBoost after changes are posted constitutes your acceptance of the updated Terms.</p>
+            <p>We encourage you to review this page periodically to stay informed about the rules governing your use of the platform.</p>
+        </div>
+
+        <div class="legal-footer-note">
+            <p>Questions about these terms? Contact us at <a href="mailto:support@codeboost.com">support@codeboost.com</a>.</p>
+            <p style="margin-bottom: 16px;">Also read our:</p>
+            <div class="legal-links-row">
+                <a href="{% url 'privacy-policy' %}" class="legal-other-link"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+                <!-- <a href="acceptable-use" class="legal-other-link"><i class="fa-solid fa-scale-balanced"></i> Acceptable Use</a> -->
+                <!-- <a href="cookie-policy" class="legal-other-link"><i class="fa-solid fa-cookie-bite"></i> Cookie Policy</a> -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

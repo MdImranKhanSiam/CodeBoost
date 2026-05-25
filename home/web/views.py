@@ -38,8 +38,25 @@ def home(request):
     return render(request, 'home/home.html', context)
 
 
+
+def terms_of_service(request):
+    
+    return render(request, 'home/terms_of_service.html')
+
+
+def privacy_policy(request):
+    
+    return render(request, 'home/privacy_policy.html')
+
+
+
+
+
 @login_required(login_url='login')
 def logout_user(request):
     logout(request)
     return redirect('home')
+
+
+
 

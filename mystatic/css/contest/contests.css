@@ -3,6 +3,7 @@
    ================================================ */
 
 .contests-section {
+    min-height: 100vh;
     max-width: 1060px;
     margin: 0 auto;
     padding: 40px 22px 100px;
