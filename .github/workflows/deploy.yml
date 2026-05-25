@@ -33,12 +33,10 @@ jobs:
             echo "📥 Pulling latest code..."
             git pull origin main
 
-            # Rebuild only the web container (not redis/db/nginx)
-            echo "🐳 Rebuilding web container..."
+            docker rm -f codeboost_web || true
+
             docker compose build --no-cache web
 
-            # Restart web container with zero downtime approach
-            echo "♻️  Restarting web container..."
             docker compose up -d --no-deps web
 
             # Clean up old unused Docker images to free disk space
