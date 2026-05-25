@@ -14,6 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+
       # ── Step 2: SSH into VPS and deploy ───────────────────
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
