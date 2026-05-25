@@ -11,6 +11,7 @@ from problem.models import Problem, TestCase, Submission
 from problem.tasks import code_submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
+from home.web.cache import invalidate_homepage
 from . cache import get_problems_page, set_problems_page, invalidate_problems_page
 from . cache import get_submission_api, set_submission_api, invalidate_submission_api, invalidate_universal_submission_api
 from . cache import get_submission_details, set_submission_details, invalidate_universal_submission_details
@@ -87,6 +88,7 @@ def problem_detail(request, problem_id):
 
         code_submission.delay(current_submission.id)
 
+        invalidate_homepage()
         invalidate_submission_api(user.id)
 
         return redirect('submission')
@@ -166,6 +168,7 @@ def create_problem(request):
             TestCase.objects.bulk_create(testcase_objects)
 
         if problem:
+            invalidate_homepage()
             invalidate_problems_page()
             return redirect('problem-detail', problem.id)
         
@@ -262,6 +265,7 @@ def delete_problem(request, problem_id):
     if request.method == 'POST':
         problem.delete()
 
+        invalidate_homepage()
         invalidate_problems_page()
         invalidate_universal_submission_api()
         invalidate_universal_submission_details()

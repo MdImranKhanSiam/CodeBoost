@@ -15,6 +15,8 @@ from contest.models import Contest
 from contest.forms import ContestForm
 from contest.services import contest_rank
 
+from home.web.cache import invalidate_homepage
+
 
 @ratelimit(key='user', rate='10/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
@@ -110,6 +112,8 @@ def create_contest(request):
             contest_creation_form.created_by = request.user
             contest_creation_form.save()
 
+            invalidate_homepage()
+
             return redirect('contest-page', contest_creation_form.id)
 
     context = {
@@ -134,6 +138,8 @@ def create_private_contest(request):
             contest_creation_form.is_private = True
             contest_creation_form.private_key = request.POST.get('private_key')
             contest_creation_form.save()
+
+            invalidate_homepage()
 
             return redirect('contest-page', contest_creation_form.id)
 

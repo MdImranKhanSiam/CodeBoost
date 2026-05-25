@@ -5,6 +5,7 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from user_profile.models import UserProfile
 from . models import EmailTemplate
 from . tasks import send_welcome_email
+from . web.cache import invalidate_homepage
 
 
 
@@ -46,6 +47,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         )
 
         if created:
+            invalidate_homepage()
+            
             welcome_email = EmailTemplate.objects.get(email_type='welcome')
 
             if welcome_email.is_active:

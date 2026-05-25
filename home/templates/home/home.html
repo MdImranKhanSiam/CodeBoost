@@ -99,14 +99,18 @@
 </section> -->
 
 <script>
+  const active_coders = "{{ active_coders }}";
+  const total_problems = "{{ total_problems }}";
+  const total_submission = "{{ total_submission }}";
+  const total_contests = "{{ total_contests }}";
 
   
   // Animated Stats
   const counters = {
-    users: 184530,
-    problems: 5421,
-    submissions: 1282134,
-    contests: 142,
+    users: active_coders,
+    problems: total_problems,
+    submissions: total_submission,
+    contests: total_contests,
   };
   for (const id in counters) {
     let el = document.getElementById(id);
