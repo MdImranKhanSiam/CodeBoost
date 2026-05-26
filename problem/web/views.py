@@ -86,7 +86,12 @@ def problem_detail(request, problem_id):
             language=language_id
         )
 
-        code_submission.delay(current_submission.id)
+        # code_submission.delay(current_submission.id)
+
+        code_submission.apply_async(
+            args=[current_submission.id],
+            countdown=7
+        )
 
         invalidate_homepage()
         invalidate_submission_api(user.id)
