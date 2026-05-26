@@ -76,6 +76,9 @@ def problem_detail(request, problem_id):
     language_name = LANGUAGES[language_id]
 
     if request.method == 'POST':
+        invalidate_homepage()
+        invalidate_submission_api(user.id)
+
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
 
@@ -90,11 +93,8 @@ def problem_detail(request, problem_id):
 
         code_submission.apply_async(
             args=[current_submission.id],
-            countdown=7
+            countdown=5
         )
-
-        invalidate_homepage()
-        invalidate_submission_api(user.id)
 
         return redirect('submission')
         

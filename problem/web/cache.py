@@ -64,6 +64,7 @@ def set_submission_api(user_id, data):
 def invalidate_submission_api(user_id):
     try:
         cache.delete(SUBMISSION_API_CACHE_KEY.format(user_id=user_id))
+        logger.info(f"Submission API cache invalidated for user {user_id}")
     except Exception:
         logger.warning("Cache unavailable: invalidate_submission_api")
 
