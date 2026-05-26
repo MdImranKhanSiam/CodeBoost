@@ -122,12 +122,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     "socket_connect_timeout": 30,
     "retry_on_timeout": True,       # auto-retry on timeout errors
     "visibility_timeout": 3600,
-    # Linux-only keepalive tuning — safe to include, ignored on Windows
-    "socket_keepalive_options": {
-        "TCP_KEEPIDLE": 60,
-        "TCP_KEEPINTVL": 10,
-        "TCP_KEEPCNT": 6,
-    },
+    
 }
 
 # Redis
