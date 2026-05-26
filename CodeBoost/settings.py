@@ -110,11 +110,24 @@ CACHES = {
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_ACKS_LATE = True
-CELERY_BROKER_HEARTBEAT = 30
+CELERY_BROKER_HEARTBEAT = 10  # was 30 — check more frequently
+CELERY_BROKER_HEARTBEAT_CHECKRATE = 2
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = None  # retry forever
+
 
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     "socket_keepalive": True,
+    "socket_timeout": 30,          # detect dead socket within 30s
+    "socket_connect_timeout": 30,
+    "retry_on_timeout": True,       # auto-retry on timeout errors
     "visibility_timeout": 3600,
+    # Linux-only keepalive tuning — safe to include, ignored on Windows
+    "socket_keepalive_options": {
+        "TCP_KEEPIDLE": 60,
+        "TCP_KEEPINTVL": 10,
+        "TCP_KEEPCNT": 6,
+    },
 }
 
 # Redis
