@@ -1,7 +1,7 @@
 from celery import shared_task
 import requests
 from . models import Submission
-from . web.cache import invalidate_submission_api, invalidate_individual_current_submission_details
+from . web.cache import invalidate_submission_api, invalidate_individual_current_submission_details, invalidate_user_problems_page
 
 def normalize_line_endings(code):
     if code is None:
@@ -149,6 +149,7 @@ def invalidate_cache(self, user_id, submission_id):
     try:
         invalidate_submission_api(user_id)
         invalidate_individual_current_submission_details(user_id, submission_id)
+        invalidate_user_problems_page(user_id)
         pass
     except Exception as exc:
         raise self.retry(exc=exc)
