@@ -1,4 +1,4 @@
-import json
+import json, cloudinary.uploader
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
@@ -71,114 +71,99 @@ def privacy_policy(request):
 
 
 
+
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='login')
 def submit_ticket(request):
-    if request.method == 'GET':
-        return render(request, 'home/submit_ticket.html')
- 
+    submitted = False
+    ticket_id = None
+
     if request.method == 'POST':
-        return _handle_ticket_post(request)
- 
-    return JsonResponse({'message': 'Method not allowed'}, status=405)
- 
- 
-def _handle_ticket_post(request):
-    try:
-        data = json.loads(request.body)
-    except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'message': 'Invalid request body.'}, status=400)
- 
-    title   = data.get('title', '').strip()
-    details = data.get('details', '').strip()
-    photos  = data.get('photos', [])
- 
-    # Validation
-    if not title:
-        return JsonResponse({'message': 'Title is required.'}, status=400)
-    if not details:
-        return JsonResponse({'message': 'Details are required.'}, status=400)
-    if len(title) > 255:
-        return JsonResponse({'message': 'Title must be 255 characters or fewer.'}, status=400)
-    if len(details) > 5000:
-        return JsonResponse({'message': 'Details must be 5000 characters or fewer.'}, status=400)
-    if not isinstance(photos, list):
-        photos = []
- 
-    try:
+        title = request.POST.get('title')
+        details = request.POST.get('details')
+        photos = request.FILES.getlist('photos')[:5]
+
+        photo_urls = []
+
+        for photo in photos:
+            response = cloudinary.uploader.upload(
+                photo,
+                resource_type = "image"
+            )
+
+            url = response.get('secure_url')
+            photo_urls.append(url)
+
         ticket = SubmitTicket.objects.create(
             user=request.user,
             title=title,
             details=details,
-            photos=photos[:5],   # limit to 5 photos
-            status='pending',
+            photos=photo_urls
         )
-    except Exception:
-        return JsonResponse({'message': 'Failed to save ticket. Please try again.'}, status=500)
- 
-    return JsonResponse({
-        'message': 'Ticket submitted successfully.',
-        'ticket_id': ticket.id,
-    }, status=201)
- 
- 
-# ─── Feedback & Suggestions ──────────────────────────────────────
- 
+
+        if ticket:
+            submitted = True
+            ticket_id = ticket.id
+
+
+    context = {
+        'submitted': submitted,
+        'ticket_id': ticket_id,
+    }
+
+    return render(request, 'home/submit_ticket.html', context)
+
+
+
+
+
+
 @login_required(login_url='login')
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 def feedback_and_suggestions(request):
-    if request.method == 'GET':
-        return render(request, 'home/feedback_and_suggestions.html')
- 
+    submitted = False
+
     if request.method == 'POST':
-        return _handle_feedback_post(request)
- 
-    return JsonResponse({'message': 'Method not allowed'}, status=405)
- 
- 
-def _handle_feedback_post(request):
-    try:
-        data = json.loads(request.body)
-    except (json.JSONDecodeError, ValueError):
-        return JsonResponse({'message': 'Invalid request body.'}, status=400)
- 
-    details = data.get('details', '').strip()
-    rating  = data.get('rating', None)
-    photos  = data.get('photos', [])
- 
-    # Validation
-    if not details:
-        return JsonResponse({'message': 'Feedback details are required.'}, status=400)
-    if len(details) > 3000:
-        return JsonResponse({'message': 'Feedback must be 3000 characters or fewer.'}, status=400)
- 
-    # Rating: must be 1–5 or None
-    if rating is not None:
+        rating = request.POST.get('rating')
+
         try:
             rating = int(rating)
-            if not (1 <= rating <= 5):
+            if rating < 1 or rating > 5:
                 rating = None
-        except (ValueError, TypeError):
+        except (TypeError, ValueError):
             rating = None
- 
-    if not isinstance(photos, list):
-        photos = []
- 
-    try:
+
+        details = request.POST.get('details')
+        photos = request.FILES.getlist('photos')[:5]
+
+        photo_urls = []
+
+        for photo in photos:
+            response = cloudinary.uploader.upload(
+                photo,
+                resource_type = "image"
+            )
+
+            url = response.get('secure_url')
+            photo_urls.append(url)
+
         feedback = FeedbackAndSuggestions.objects.create(
             user=request.user,
-            details=details,
             rating=rating,
-            photos=photos[:3],
+            details=details,
+            photos=photo_urls
         )
-    except Exception:
-        return JsonResponse({'message': 'Failed to save feedback. Please try again.'}, status=500)
- 
-    return JsonResponse({
-        'message': 'Feedback submitted. Thank you!',
-        'feedback_id': feedback.id,
-    }, status=201)
- 
+
+        if feedback:
+            submitted = True
+
+
+    context = {
+        'submitted': submitted,
+    }
+
+    return render(request, 'home/feedback_and_suggestions.html', context)
+
 
 
 
