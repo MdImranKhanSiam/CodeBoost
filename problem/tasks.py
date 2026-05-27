@@ -130,8 +130,11 @@ def code_submission(self, submission_id):
 
         user_id = submission.user.id
 
-        invalidate_submission_api(user_id)
-        invalidate_individual_current_submission_details(user_id, submission.id)
+        invalidate_cache.apply_async(
+            args=[user_id, submission.id],
+            countdown=5
+        )
+
         pass
     except Exception as exc:
         raise self.retry(exc=exc)
@@ -139,6 +142,16 @@ def code_submission(self, submission_id):
     
 
 
+
+
+@shared_task(ignore_result=True, bind=True, max_retries=3, default_retry_delay=5, acks_late=True, reject_on_worker_lost=True,)
+def invalidate_cache(self, user_id, submission_id):
+    try:
+        invalidate_submission_api(user_id)
+        invalidate_individual_current_submission_details(user_id, submission_id)
+        pass
+    except Exception as exc:
+        raise self.retry(exc=exc)
 
 
 

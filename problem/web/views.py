@@ -93,7 +93,7 @@ def problem_detail(request, problem_id):
 
         code_submission.apply_async(
             args=[current_submission.id],
-            countdown=5
+            countdown=1
         )
 
         return redirect('submission')
