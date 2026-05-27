@@ -63,3 +63,49 @@ class Notification(models.Model):
         indexes = [
             models.Index(fields=['user', '-created_at']),
         ]
+
+
+
+
+
+class SubmitTicket(models.Model):
+    TICKET_STATUS = (
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('reviewed', 'Reviewed'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submitted_tickets')
+    # Get all submitted tickets of a user
+    # user.submitted_tickets.all()
+
+    title = models.CharField(max_length=255)
+    details = models.TextField()
+    photos = models.JSONField(default=list, blank=True)
+    status = models.CharField(max_length=30, choices=TICKET_STATUS, default='pending')
+    admin_reply = models.TextField(blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Ticket #{self.id} - {self.user.email}"
+    
+
+
+
+
+class FeedbackAndSuggestions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submitted_feedbacks')
+    # Get all submitted feedbacks of a user
+    # user.submitted_feedbacks.all()
+
+    details = models.TextField()
+    photos = models.JSONField(default=list, blank=True)
+    rating = models.PositiveSmallIntegerField(null=True, blank=True)
+    admin_reply = models.TextField(blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback #{self.id} - {self.user.email}"

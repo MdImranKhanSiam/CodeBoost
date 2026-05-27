@@ -1,0 +1,466 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/home/feedback_and_suggestions.css' %}" />
+
+<div class="feedback-page">
+  <div class="feedback-container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <div class="breadcrumb-sep"></div>
+        <span>Community</span>
+        <div class="breadcrumb-sep"></div>
+        <span>Feedback & Suggestions</span>
+      </div>
+      <div class="page-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Community Voice
+      </div>
+      <h1 class="page-title">Share Your <span>Feedback</span></h1>
+      <p class="page-subtitle">Your ideas shape CodeBoost. Every suggestion is read by the team and helps us build a better platform for competitive programmers.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card" id="feedbackFormCard">
+
+      <!-- Normal form state -->
+      <div id="formContent">
+
+        <!-- Card Header -->
+        <div class="form-card-header">
+          <div>
+            <div class="form-card-title">Share Your Thoughts</div>
+            <div class="form-card-desc">Be as specific as possible — the more detail, the more we can act on it</div>
+          </div>
+          <div class="anon-badge">Anonymous option available</div>
+        </div>
+
+        <!-- Star Rating -->
+        <div class="rating-section">
+          <div class="rating-label">How would you rate CodeBoost overall?</div>
+          <div class="rating-sublabel">Your overall experience so far</div>
+
+          <div class="stars-container" id="starsContainer" role="group" aria-label="Rating">
+            <button class="star-btn" type="button" data-value="1" aria-label="1 star">
+              <svg class="star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+              </svg>
+            </button>
+            <button class="star-btn" type="button" data-value="2" aria-label="2 stars">
+              <svg class="star-svg" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </button>
+            <button class="star-btn" type="button" data-value="3" aria-label="3 stars">
+              <svg class="star-svg" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </button>
+            <button class="star-btn" type="button" data-value="4" aria-label="4 stars">
+              <svg class="star-svg" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </button>
+            <button class="star-btn" type="button" data-value="5" aria-label="5 stars">
+              <svg class="star-svg" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </button>
+          </div>
+          <input type="hidden" id="ratingValue" name="rating" value="" />
+          <div class="rating-text" id="ratingText">Click a star to rate</div>
+        </div>
+
+        <!-- Feedback Type -->
+        <div class="feedback-types">
+          <div class="type-option">
+            <input type="radio" name="feedback_type" id="type-idea" value="idea" checked />
+            <label class="type-label" for="type-idea">
+              <span class="type-icon">💡</span>
+              <span class="type-name">Idea</span>
+              <span class="type-desc">Feature request or improvement</span>
+            </label>
+          </div>
+          <div class="type-option">
+            <input type="radio" name="feedback_type" id="type-ux" value="ux" />
+            <label class="type-label" for="type-ux">
+              <span class="type-icon">🎨</span>
+              <span class="type-name">UX / Design</span>
+              <span class="type-desc">Interface or usability feedback</span>
+            </label>
+          </div>
+          <div class="type-option">
+            <input type="radio" name="feedback_type" id="type-praise" value="praise" />
+            <label class="type-label" for="type-praise">
+              <span class="type-icon">🌟</span>
+              <span class="type-name">Praise</span>
+              <span class="type-desc">What's working great</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Form Fields -->
+        <form class="form-body" id="feedbackForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Area -->
+          <div class="form-group">
+            <label class="form-label" for="area">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+              Platform Area
+            </label>
+            <div class="select-wrapper">
+              <select class="form-select" id="area" name="area">
+                <option value="" disabled selected>Which area does this relate to?</option>
+                <option value="problems">Problems & Challenges</option>
+                <option value="editor">Code Editor</option>
+                <option value="judge">Judge / Evaluation</option>
+                <option value="contests">Contests</option>
+                <option value="leaderboard">Leaderboard</option>
+                <option value="editorial">Editorials</option>
+                <option value="profile">User Profile</option>
+                <option value="ui">General UI / UX</option>
+                <option value="performance">Performance / Speed</option>
+                <option value="mobile">Mobile Experience</option>
+                <option value="other">Other / General</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Current feeling -->
+          <div class="form-group">
+            <label class="form-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              How do you feel about this?
+            </label>
+            <div class="emotion-group">
+              <div class="emotion-option">
+                <input type="radio" name="emotion" id="em-excited" value="excited" />
+                <label class="emotion-label" for="em-excited">🚀 Excited</label>
+              </div>
+              <div class="emotion-option">
+                <input type="radio" name="emotion" id="em-happy" value="happy" />
+                <label class="emotion-label" for="em-happy">😊 Happy</label>
+              </div>
+              <div class="emotion-option">
+                <input type="radio" name="emotion" id="em-neutral" value="neutral" />
+                <label class="emotion-label" for="em-neutral">😐 Neutral</label>
+              </div>
+              <div class="emotion-option">
+                <input type="radio" name="emotion" id="em-frustrated" value="frustrated" />
+                <label class="emotion-label" for="em-frustrated">😤 Frustrated</label>
+              </div>
+              <div class="emotion-option">
+                <input type="radio" name="emotion" id="em-confused" value="confused" />
+                <label class="emotion-label" for="em-confused">😕 Confused</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feedback Details -->
+          <div class="form-group">
+            <label class="form-label" for="details">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Your Feedback <span style="color:var(--red);font-size:14px">*</span>
+            </label>
+            <textarea
+              class="form-textarea"
+              id="details"
+              name="details"
+              placeholder="Share your thoughts, ideas, or experiences…&#10;&#10;Examples:&#10;• 'I wish the code editor had vim keybindings'&#10;• 'The contest countdown timer is hard to see on mobile'&#10;• 'The editorial explanations are super clear and helpful!'"
+              maxlength="3000"
+              required
+            ></textarea>
+            <div class="input-meta">
+              <span class="input-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                Honest feedback is always welcome
+              </span>
+              <span class="char-counter" id="detailsCounter">0 / 3000</span>
+            </div>
+          </div>
+
+          <!-- Screenshots -->
+          <div class="form-group">
+            <label class="form-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Attachments <span style="font-size:11px;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400">(optional)</span>
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="photoInput" accept="image/*" multiple />
+              <div class="upload-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+              </div>
+              <div class="upload-title"><span>Upload screenshots</span> or drag & drop</div>
+              <div class="upload-sub">PNG, JPG up to 5MB · Max 3 files</div>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+          </div>
+
+          <!-- Anonymous Toggle -->
+          <div class="consent-row">
+            <label class="toggle-switch" for="anonymousToggle">
+              <input type="checkbox" id="anonymousToggle" name="anonymous" />
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="consent-text">
+              <strong>Submit anonymously</strong> — Your username won't be shared with the team when reviewing this feedback. We'll still be able to contact you via email if you opt in.
+            </div>
+          </div>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="form-footer">
+          <div class="footer-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            Every piece of feedback is personally read by our team
+          </div>
+          <div class="form-actions">
+            <a href="/" class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+              Cancel
+            </a>
+            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitFeedbackForm()">
+              <svg class="btn-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              <span class="btn-text">Send Feedback</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /formContent -->
+
+      <!-- Success State -->
+      <div class="success-overlay" id="successOverlay">
+        <div class="success-emoji">🎉</div>
+        <div class="success-title">Thank you for your feedback!</div>
+        <div class="success-desc">
+          Your thoughts have been shared with the CodeBoost team. We read every single submission and use it to make the platform better.
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+          <a href="/" class="btn btn-ghost">Go Home</a>
+          <button class="btn btn-primary" onclick="resetFeedbackForm()">Submit More</button>
+        </div>
+      </div>
+
+    </div><!-- /form-card -->
+
+    <!-- Bottom Panels -->
+    <div class="bottom-panels">
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>
+          Not sure what to write? Try these prompts
+        </div>
+        <div class="prompt-list">
+          <div class="prompt-item" onclick="usePrompt(this)">💡 What feature do you wish CodeBoost had?</div>
+          <div class="prompt-item" onclick="usePrompt(this)">🐢 What feels slow or frustrating to use?</div>
+          <div class="prompt-item" onclick="usePrompt(this)">✨ What's your favourite thing about CodeBoost?</div>
+          <div class="prompt-item" onclick="usePrompt(this)">📱 How's your experience on mobile?</div>
+          <div class="prompt-item" onclick="usePrompt(this)">🏆 How can contests be improved?</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <div class="dot"></div>
+          Feedback Stats
+        </div>
+        <div class="stat-grid">
+          <div class="stat-item">
+            <div class="stat-value purple">94%</div>
+            <div class="stat-label">Read rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value green">48h</div>
+            <div class="stat-label">Avg review</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--cyan)">312</div>
+            <div class="stat-label">Implemented</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color:var(--yellow)">4.7★</div>
+            <div class="stat-label">Avg rating</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /feedback-container -->
+</div><!-- /feedback-page -->
+
+<script>
+/* ── Star Rating ── */
+const stars = document.querySelectorAll('.star-btn');
+const ratingText = document.getElementById('ratingText');
+const ratingInput = document.getElementById('ratingValue');
+const ratingLabels = ['', 'Terrible', 'Poor', 'Average', 'Good', 'Excellent!'];
+let currentRating = 0;
+
+stars.forEach(star => {
+  star.addEventListener('mouseenter', () => {
+    const val = parseInt(star.dataset.value);
+    stars.forEach(s => {
+      const sv = parseInt(s.dataset.value);
+      s.classList.toggle('hovered', sv <= val);
+      s.classList.remove('active');
+    });
+    ratingText.textContent = ratingLabels[val];
+    ratingText.classList.add('active');
+  });
+
+  star.addEventListener('mouseleave', () => {
+    stars.forEach(s => s.classList.remove('hovered'));
+    if (currentRating) {
+      stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value) <= currentRating));
+      ratingText.textContent = ratingLabels[currentRating];
+    } else {
+      ratingText.textContent = 'Click a star to rate';
+      ratingText.classList.remove('active');
+    }
+  });
+
+  star.addEventListener('click', () => {
+    currentRating = parseInt(star.dataset.value);
+    ratingInput.value = currentRating;
+    stars.forEach(s => {
+      s.classList.remove('hovered');
+      s.classList.toggle('active', parseInt(s.dataset.value) <= currentRating);
+    });
+    ratingText.textContent = ratingLabels[currentRating];
+    ratingText.classList.add('active');
+  });
+});
+
+/* ── Char counter ── */
+const detailsEl = document.getElementById('details');
+const detailsCounter = document.getElementById('detailsCounter');
+detailsEl.addEventListener('input', () => {
+  const len = detailsEl.value.length;
+  detailsCounter.textContent = `${len} / 3000`;
+  detailsCounter.classList.toggle('warn', len > 2400);
+  detailsCounter.classList.toggle('error', len >= 3000);
+});
+
+/* ── Upload ── */
+const uploadZone = document.getElementById('uploadZone');
+const photoInput = document.getElementById('photoInput');
+const previewGrid = document.getElementById('previewGrid');
+let selectedFiles = [];
+
+['dragenter', 'dragover'].forEach(e =>
+  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.add('drag-over'); })
+);
+['dragleave', 'drop'].forEach(e =>
+  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.remove('drag-over'); })
+);
+uploadZone.addEventListener('drop', ev => {
+  const files = Array.from(ev.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  addFiles(files);
+});
+photoInput.addEventListener('change', () => { addFiles(Array.from(photoInput.files)); photoInput.value = ''; });
+
+function addFiles(newFiles) {
+  newFiles.forEach(file => {
+    if (selectedFiles.length >= 3 || file.size > 5 * 1024 * 1024) return;
+    selectedFiles.push(file);
+    const reader = new FileReader();
+    reader.onload = e => renderPreview(e.target.result, selectedFiles.length - 1);
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreview(src, index) {
+  const item = document.createElement('div');
+  item.className = 'preview-item';
+  item.innerHTML = `<img src="${src}" alt="preview"/><button class="preview-remove" onclick="removeFile(${index})">✕</button>`;
+  previewGrid.appendChild(item);
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  previewGrid.innerHTML = '';
+  selectedFiles.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => renderPreview(e.target.result, i);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Prompt helper ── */
+function usePrompt(el) {
+  const text = el.textContent.replace(/^[^\s]+\s/, '');
+  detailsEl.value = text;
+  detailsEl.focus();
+  const len = detailsEl.value.length;
+  detailsCounter.textContent = `${len} / 3000`;
+  detailsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ── Submit ── */
+async function submitFeedbackForm() {
+  const details = document.getElementById('details');
+  if (!details.value.trim()) {
+    details.classList.add('invalid');
+    details.focus();
+    setTimeout(() => details.classList.remove('invalid'), 2000);
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+
+  const feedbackType = document.querySelector('input[name="feedback_type"]:checked')?.value || 'idea';
+  const emotion = document.querySelector('input[name="emotion"]:checked')?.value || '';
+  const area = document.getElementById('area').value;
+  const rating = document.getElementById('ratingValue').value;
+  const anonymous = document.getElementById('anonymousToggle').checked;
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  try {
+    const res = await fetch('/feedback-and-suggestions/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,
+      },
+      body: JSON.stringify({
+        details: details.value.trim(),
+        rating: rating ? parseInt(rating) : null,
+        feedback_type: feedbackType,
+        emotion: emotion,
+        area: area,
+        anonymous: anonymous,
+        photos: [],
+      }),
+    });
+
+    if (res.ok) {
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successOverlay').classList.add('visible');
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || 'Something went wrong. Please try again.');
+    }
+  } catch (err) {
+    alert('Network error. Please check your connection and try again.');
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+function resetFeedbackForm() {
+  document.getElementById('feedbackForm').reset();
+  detailsCounter.textContent = '0 / 3000';
+  previewGrid.innerHTML = '';
+  selectedFiles = [];
+  currentRating = 0;
+  ratingInput.value = '';
+  stars.forEach(s => { s.classList.remove('active', 'hovered'); });
+  ratingText.textContent = 'Click a star to rate';
+  ratingText.classList.remove('active');
+  document.getElementById('formContent').style.display = '';
+  document.getElementById('successOverlay').classList.remove('visible');
+}
+</script>
+
+{% endblock %}

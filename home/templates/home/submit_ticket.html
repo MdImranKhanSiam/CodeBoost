@@ -1,0 +1,465 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/home/submit_ticket.css' %}" />
+
+<div class="ticket-page">
+  <div class="ticket-container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <div class="breadcrumb-sep"></div>
+        <span>Support</span>
+        <div class="breadcrumb-sep"></div>
+        <span>Submit a Ticket</span>
+      </div>
+      <div class="page-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91"/>
+        </svg>
+        Support Center
+      </div>
+      <h1 class="page-title">Submit a <span>Ticket</span></h1>
+      <p class="page-subtitle">Report a bug, request a feature, or get help with anything on CodeBoost. We respond within 24 hours.</p>
+    </div>
+
+    <!-- System Status Bar -->
+    <div class="status-bar">
+      <div class="status-item">
+        <div class="status-dot"></div>
+        <span class="status-label">All systems operational</span>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        Avg. response time:
+        <strong style="color: var(--text-primary); margin-left:4px;">Under 24 hours</strong>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        </svg>
+        Support team online
+      </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="form-card" id="ticketFormCard">
+
+      <!-- Form state: normal -->
+      <div id="formContent">
+        <div class="form-card-header">
+          <div class="form-card-title-group">
+            <div class="form-card-title">New Support Ticket</div>
+            <div class="form-card-desc">Fill out all required fields to submit your request</div>
+          </div>
+          <div class="ticket-id-badge">#<span id="generatedId">TKT-XXXXXX</span></div>
+        </div>
+
+        <form class="form-body" id="ticketForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Row: Category + Priority -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="category">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
+                Category <span class="label-required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select class="form-select" id="category" name="category" required>
+                  <option value="" disabled selected>Select a category…</option>
+                  <option value="bug">🐛 Bug Report</option>
+                  <option value="feature">✨ Feature Request</option>
+                  <option value="account">👤 Account Issue</option>
+                  <option value="billing">💳 Billing</option>
+                  <option value="performance">⚡ Performance</option>
+                  <option value="judge">⚖️ Judge / Submissions</option>
+                  <option value="contest">🏆 Contest Related</option>
+                  <option value="security">🔒 Security Concern</option>
+                  <option value="other">💬 Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="sub_category">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+                Affected Area
+              </label>
+              <div class="select-wrapper">
+                <select class="form-select" id="sub_category" name="sub_category">
+                  <option value="" disabled selected>Select area…</option>
+                  <option value="editor">Code Editor</option>
+                  <option value="ui">User Interface</option>
+                  <option value="api">API / Backend</option>
+                  <option value="auth">Authentication</option>
+                  <option value="profile">User Profile</option>
+                  <option value="leaderboard">Leaderboard</option>
+                  <option value="editorial">Editorials</option>
+                  <option value="other">Other / General</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <label class="form-label" for="title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Title <span class="label-required">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="title"
+              name="title"
+              placeholder="e.g. Submission judged incorrectly on Problem #142"
+              maxlength="255"
+              required
+              autocomplete="off"
+            />
+            <div class="input-meta">
+              <span class="input-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                Be specific — a clear title helps us respond faster
+              </span>
+              <span class="char-counter" id="titleCounter">0 / 255</span>
+            </div>
+          </div>
+
+          <!-- Priority -->
+          <div class="form-group">
+            <label class="form-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+              Priority Level <span class="label-required">*</span>
+            </label>
+            <div class="priority-group">
+              <div class="priority-option">
+                <input type="radio" name="priority" id="prio-low" value="low" />
+                <label class="priority-label" for="prio-low">
+                  <span class="priority-icon">🟢</span>
+                  <span class="priority-name">Low</span>
+                </label>
+              </div>
+              <div class="priority-option">
+                <input type="radio" name="priority" id="prio-medium" value="medium" checked />
+                <label class="priority-label" for="prio-medium">
+                  <span class="priority-icon">🔵</span>
+                  <span class="priority-name">Medium</span>
+                </label>
+              </div>
+              <div class="priority-option">
+                <input type="radio" name="priority" id="prio-high" value="high" />
+                <label class="priority-label" for="prio-high">
+                  <span class="priority-icon">🟡</span>
+                  <span class="priority-name">High</span>
+                </label>
+              </div>
+              <div class="priority-option">
+                <input type="radio" name="priority" id="prio-critical" value="critical" />
+                <label class="priority-label" for="prio-critical">
+                  <span class="priority-icon">🔴</span>
+                  <span class="priority-name">Critical</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="form-group">
+            <label class="form-label" for="details">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+              Details <span class="label-required">*</span>
+            </label>
+            <textarea
+              class="form-textarea"
+              id="details"
+              name="details"
+              placeholder="Describe your issue in detail. Include:&#10;• What you were doing when the issue occurred&#10;• What you expected to happen&#10;• What actually happened&#10;• Steps to reproduce (if applicable)"
+              maxlength="5000"
+              required
+            ></textarea>
+            <div class="input-meta">
+              <span class="input-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                More detail = faster resolution
+              </span>
+              <span class="char-counter" id="detailsCounter">0 / 5000</span>
+            </div>
+          </div>
+
+          <!-- Screenshots -->
+          <div class="form-group">
+            <label class="form-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Screenshots / Attachments
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="photoInput" name="photos" accept="image/*" multiple />
+              <div class="upload-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+              </div>
+              <div class="upload-title"><span>Click to upload</span> or drag & drop</div>
+              <div class="upload-sub">PNG, JPG, GIF up to 5MB each · Max 5 files</div>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+          </div>
+
+        </form>
+
+        <div class="form-footer">
+          <div class="footer-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Your data is encrypted and handled securely
+          </div>
+          <div class="form-actions">
+            <a href="/" class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+              Cancel
+            </a>
+            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitTicketForm()">
+              <svg class="btn-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9 22,2"/></svg>
+              <span class="btn-text">Submit Ticket</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <div class="success-overlay" id="successOverlay">
+        <div class="success-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
+        </div>
+        <div class="success-title">Ticket Submitted!</div>
+        <div class="success-id">Ticket ID: <span id="successId">#TKT-XXXXXX</span></div>
+        <div class="success-desc">
+          We've received your ticket and will get back to you within 24 hours. Check your email for confirmation.
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+          <a href="/" class="btn btn-ghost">Go Home</a>
+          <button class="btn btn-primary" onclick="resetTicketForm()">Submit Another</button>
+        </div>
+      </div>
+
+    </div><!-- /form-card -->
+
+    <!-- Info Cards -->
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-icon cyan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="info-card-title">Fast Response</div>
+        <div class="info-card-desc">We aim to respond to all tickets within 24 hours on business days.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon green">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="info-card-title">Secure & Private</div>
+        <div class="info-card-desc">All ticket data is encrypted. Only authorized team members can access it.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon yellow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/></svg>
+        </div>
+        <div class="info-card-title">Track Status</div>
+        <div class="info-card-desc">Check your ticket status anytime from your profile dashboard.</div>
+      </div>
+    </div>
+
+  </div><!-- /ticket-container -->
+</div><!-- /ticket-page -->
+
+<script>
+/* ── Generate a random ticket ID on load ── */
+(function () {
+  const id = 'TKT-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+  document.getElementById('generatedId').textContent = id;
+  document.getElementById('successId').textContent = '#' + id;
+})();
+
+/* ── Character counters ── */
+function initCounter(inputId, counterId, max) {
+  const input = document.getElementById(inputId);
+  const counter = document.getElementById(counterId);
+  input.addEventListener('input', () => {
+    const len = input.value.length;
+    counter.textContent = `${len} / ${max}`;
+    counter.classList.toggle('warn', len > max * 0.8);
+    counter.classList.toggle('error', len >= max);
+  });
+}
+initCounter('title', 'titleCounter', 255);
+initCounter('details', 'detailsCounter', 5000);
+
+/* ── Drag & drop upload ── */
+const uploadZone = document.getElementById('uploadZone');
+const photoInput = document.getElementById('photoInput');
+const previewGrid = document.getElementById('previewGrid');
+let selectedFiles = [];
+
+['dragenter', 'dragover'].forEach(e => {
+  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.add('drag-over'); });
+});
+['dragleave', 'drop'].forEach(e => {
+  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.remove('drag-over'); });
+});
+uploadZone.addEventListener('drop', ev => {
+  const files = Array.from(ev.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  addFiles(files);
+});
+photoInput.addEventListener('change', () => {
+  addFiles(Array.from(photoInput.files));
+  photoInput.value = '';
+});
+
+function addFiles(newFiles) {
+  newFiles.forEach(file => {
+    if (selectedFiles.length >= 5) return;
+    if (file.size > 5 * 1024 * 1024) return;
+    selectedFiles.push(file);
+    const reader = new FileReader();
+    reader.onload = e => renderPreview(e.target.result, selectedFiles.length - 1);
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreview(src, index) {
+  const item = document.createElement('div');
+  item.className = 'preview-item';
+  item.dataset.index = index;
+  item.innerHTML = `
+    <img src="${src}" alt="preview" />
+    <button class="preview-remove" onclick="removeFile(${index})" title="Remove">✕</button>
+  `;
+  previewGrid.appendChild(item);
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  previewGrid.innerHTML = '';
+  selectedFiles.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => renderPreview(e.target.result, i);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Validation ── */
+function validateField(el) {
+  const errId = el.id + 'Error';
+  let existing = document.getElementById(errId);
+  if (el.required && !el.value.trim()) {
+    el.classList.add('invalid');
+    if (!existing) {
+      const err = document.createElement('div');
+      err.className = 'field-error';
+      err.id = errId;
+      err.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> This field is required`;
+      el.parentNode.insertBefore(err, el.nextSibling);
+    }
+    return false;
+  }
+  el.classList.remove('invalid');
+  if (existing) existing.remove();
+  return true;
+}
+
+['title', 'details', 'category'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('blur', () => validateField(el));
+  el.addEventListener('input', () => { el.classList.remove('invalid'); const e = document.getElementById(id + 'Error'); if (e) e.remove(); });
+});
+
+/* ── Submit ── */
+async function submitTicketForm() {
+  const title = document.getElementById('title');
+  const details = document.getElementById('details');
+  const category = document.getElementById('category');
+
+  const v1 = validateField(title);
+  const v2 = validateField(details);
+  const v3 = validateField(category);
+  if (!v1 || !v2 || !v3) return;
+
+  const priority = document.querySelector('input[name="priority"]:checked')?.value || 'medium';
+  const sub_category = document.getElementById('sub_category').value;
+
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+
+  // Upload photos to Cloudinary first (or skip if none)
+  const photoUrls = [];
+  for (const file of selectedFiles) {
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      // Cloudinary upload or your own endpoint:
+      // const res = await fetch('/api/upload-photo/', { method: 'POST', body: fd });
+      // const data = await res.json();
+      // photoUrls.push(data.url);
+      // For now we'll skip actual upload and just pass empty
+    } catch (e) { /* continue */ }
+  }
+
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  try {
+    const res = await fetch('/submit-ticket/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,
+      },
+      body: JSON.stringify({
+        title: title.value.trim(),
+        details: details.value.trim(),
+        category: category.value,
+        sub_category: sub_category,
+        priority: priority,
+        photos: photoUrls,
+      }),
+    });
+
+    if (res.ok) {
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successOverlay').classList.add('visible');
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || 'Something went wrong. Please try again.');
+    }
+  } catch (err) {
+    alert('Network error. Please check your connection and try again.');
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+function resetTicketForm() {
+  document.getElementById('ticketForm').reset();
+  previewGrid.innerHTML = '';
+  selectedFiles = [];
+  document.getElementById('titleCounter').textContent = '0 / 255';
+  document.getElementById('detailsCounter').textContent = '0 / 5000';
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+  document.querySelectorAll('.field-error').forEach(el => el.remove());
+  const newId = 'TKT-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+  document.getElementById('generatedId').textContent = newId;
+  document.getElementById('successId').textContent = '#' + newId;
+  document.getElementById('formContent').style.display = '';
+  document.getElementById('successOverlay').classList.remove('visible');
+}
+</script>
+
+{% endblock %}
