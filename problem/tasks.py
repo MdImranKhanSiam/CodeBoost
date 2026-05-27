@@ -132,7 +132,7 @@ def code_submission(self, submission_id):
 
         invalidate_cache.apply_async(
             args=[user_id, submission.id],
-            countdown=5
+            countdown=10
         )
 
         pass
