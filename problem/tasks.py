@@ -132,7 +132,7 @@ def code_submission(self, submission_id):
 
         invalidate_cache.apply_async(
             args=[user_id, submission.id],
-            countdown=10
+            countdown=1
         )
 
         pass
@@ -149,6 +149,7 @@ def invalidate_cache(self, user_id, submission_id):
     try:
         invalidate_submission_api(user_id)
         invalidate_individual_current_submission_details(user_id, submission_id)
+        invalidate_submission_api(user_id)
         invalidate_user_problems_page(user_id)
         pass
     except Exception as exc:
