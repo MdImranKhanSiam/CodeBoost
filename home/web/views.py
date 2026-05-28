@@ -73,7 +73,7 @@ def privacy_policy(request):
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
-@login_required(login_url='login')
+@login_required(login_url='/accounts/google/login/')
 def submit_ticket(request):
     submitted = False
     ticket_id = None
@@ -118,8 +118,9 @@ def submit_ticket(request):
 
 
 
-@login_required(login_url='login')
+
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
 def feedback_and_suggestions(request):
     submitted = False
 
@@ -168,7 +169,7 @@ def feedback_and_suggestions(request):
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
-@login_required(login_url='login')
+@login_required(login_url='/accounts/google/login/')
 def logout_user(request):
     logout(request)
     return redirect('home')
