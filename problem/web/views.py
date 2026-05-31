@@ -15,7 +15,7 @@ from home.web.cache import invalidate_homepage
 from . cache import get_problems_page, set_problems_page, invalidate_problems_page
 from . cache import get_submission_api, set_submission_api, invalidate_submission_api, invalidate_universal_submission_api
 from . cache import get_submission_details, set_submission_details, invalidate_universal_submission_details
-
+from . cache import get_edit_problem, set_edit_problem, invalidate_edit_problem
 
 
 
@@ -175,6 +175,7 @@ def create_problem(request):
         if problem:
             invalidate_homepage()
             invalidate_problems_page()
+
             return redirect('problem-detail', problem.id)
         
 
@@ -192,14 +193,31 @@ def create_problem(request):
 @permission_required('problem.change_problem', raise_exception=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_problem(request, problem_id):
-    current_problem = Problem.objects.get(id=problem_id)
+    context = get_edit_problem(problem_id)
+
+    if not context:
+        current_problem = Problem.objects.get(id=problem_id)
+
+        if not current_problem.is_public:
+            return HttpResponse('Permission Denied')
+
+        problem_type = 'public'
+
+        current_testcases = current_problem.testcases.all()
+
+        context = {
+            'problem_type': problem_type,
+            'current_problem': current_problem,
+            'current_testcases': current_testcases,
+        }
+
+        set_edit_problem(problem_id, context)
+    
+    current_problem = context['current_problem']
 
     if not current_problem.is_public:
         return HttpResponse('Permission Denied')
 
-    problem_type = 'public'
-
-    current_testcases = current_problem.testcases.all()
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -243,15 +261,10 @@ def edit_problem(request, problem_id):
 
         if current_problem:
             invalidate_problems_page()
+            invalidate_edit_problem(problem_id)
 
             return redirect('problem-detail', current_problem.id)
         
-
-    context = {
-        'problem_type': problem_type,
-        'current_problem': current_problem,
-        'current_testcases': current_testcases,
-    }
 
     return render(request, 'problem/edit_problem.html', context)
 
