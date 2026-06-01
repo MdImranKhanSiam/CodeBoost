@@ -101,6 +101,30 @@ services:
     networks:
       - internal
 
+
+# ─────────────────────────────────────────────────────────
+  # PostgreSQL Backup Service
+  # Runs a cron job every day at 4:00 AM
+  # Keeps last 30 days of backups
+  # Backups stored at: /var/www/codeboost/backups/ on VPS
+  # ─────────────────────────────────────────────────────────
+
+  db_backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    container_name: codeboost_backup
+    env_file:
+      - .env
+    volumes:
+      - ./backups:/backups    # Backups go directly to VPS filesystem
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - internal
+
+
 networks:
   internal:
     driver: bridge

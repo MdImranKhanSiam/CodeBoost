@@ -1,0 +1,22 @@
+FROM alpine:3.19
+
+# Install postgresql client for pg_dump and dcron for cron jobs
+# bash is needed for the scripts
+RUN apk add --no-cache \
+    postgresql16-client \
+    dcron \
+    bash \
+    gzip
+
+# Copy scripts into container
+COPY scripts/backup.sh /backup.sh
+COPY scripts/backup-entrypoint.sh /entrypoint.sh
+
+# Make both scripts executable
+RUN chmod +x /backup.sh /entrypoint.sh
+
+# Create backups directory inside container
+RUN mkdir -p /backups
+
+# Run entrypoint which sets up cron then starts crond
+CMD ["/entrypoint.sh"]
