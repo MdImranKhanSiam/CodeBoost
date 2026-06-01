@@ -69,7 +69,7 @@ fi
 echo ""
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Restoring from: $BACKUP_FILE"
 
-gunzip -c "$BACKUP_FILE" | docker exec -i "$DB_CONTAINER" \
+gunzip -c "$BACKUP_FILE" | docker exec -i -e PGPASSWORD="$DB_PASSWORD" "$DB_CONTAINER" \
     psql -U "$DB_USER" -d "$DB_NAME"
 
 if [ $? -eq 0 ]; then

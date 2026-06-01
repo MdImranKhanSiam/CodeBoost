@@ -57,7 +57,7 @@ BACKUP_FILE="${BACKUP_DIR}/codeboost_db_${TIMESTAMP}.sql.gz"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting backup → $BACKUP_FILE" | tee -a "$LOG_FILE"
 
-docker exec "$DB_CONTAINER" \
+docker exec -e PGPASSWORD="$DB_PASSWORD" "$DB_CONTAINER" \
     pg_dump -U "$DB_USER" "$DB_NAME" \
     | gzip > "$BACKUP_FILE"
 
