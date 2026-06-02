@@ -152,6 +152,7 @@ def create_private_contest(request):
 
 
 @ratelimit(key='user', rate='30/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def edit_contest(request, contest_id):
     user = request.user
@@ -165,6 +166,41 @@ def edit_contest(request, contest_id):
 
             if received_form.is_valid():
                 contest_update_form = received_form.save(commit=False)
+                contest_update_form.save()
+
+                return redirect('contest-page', contest_update_form.id)
+
+        context = {
+            'contest': contest,
+            'contest_form': contest_form,
+        }
+
+        return render(request, 'contest/edit_contest.html', context)
+    else:
+        return HttpResponse('Permission Denied')
+    
+
+
+@ratelimit(key='user', rate='30/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def edit_private_contest(request, contest_id):
+    user = request.user
+    contest = get_object_or_404(Contest, id=contest_id)
+
+    if (user.is_staff or user.has_perm('contest.change_contest') or user == contest.created_by or user in contest.moderators.all()):
+        contest_form = ContestForm(instance=contest)
+
+        if request.method == 'POST':
+            received_form = ContestForm(request.POST, instance=contest)
+            private_key = request.POST.get('private_key')
+
+            if received_form.is_valid():
+                contest_update_form = received_form.save(commit=False)
+
+                if private_key:
+                    contest_update_form.private_key = private_key
+
                 contest_update_form.save()
 
                 return redirect('contest-page', contest_update_form.id)

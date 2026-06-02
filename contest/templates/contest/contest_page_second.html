@@ -10,7 +10,15 @@
 <div class="search-modal" id="contestSettingsModal">
     <div class="search-modal-content">
         <h3>Contest Settings</h3>
-        <button class="edit-contest-btn" id="editContestBtn" onclick="window.location.href='{% url 'edit-contest' contest.id %}'">
+
+        <button class="edit-contest-btn" id="editContestBtn"
+            {% if contest.is_private %}
+                onclick="window.location.href='{% url 'edit-private-contest' contest.id %}'"
+            {% else %}
+                onclick="window.location.href='{% url 'edit-contest' contest.id %}'"
+            {% endif %}
+        >
+
             <span class="icon"><i class="fa-solid fa-pen-to-square"></i></span>
             <span class="text">Edit Contest</span>
         </button>
