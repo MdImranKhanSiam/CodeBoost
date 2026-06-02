@@ -10,6 +10,7 @@ from problem.models import Problem, TestCase, Submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 from problem.tasks import code_submission
 from django.utils import timezone
+from datetime import timezone as dt_timezone, timedelta
 from django_ratelimit.decorators import ratelimit
 from contest.models import Contest
 from contest.forms import ContestForm
@@ -109,6 +110,22 @@ def create_contest(request):
 
         if received_form.is_valid():
             contest_creation_form = received_form.save(commit=False)
+
+            # Convert user's local time to UTC
+            try:
+                offset_minutes = int(request.POST.get('timezone_offset', 0))
+            except (ValueError, TypeError):
+                offset_minutes = 0
+
+            user_tz = dt_timezone(timedelta(minutes=-offset_minutes))
+
+            for field in ['start_time', 'end_time', 'registration_deadline']:
+                local_dt = getattr(contest_creation_form, field)
+                if local_dt:
+                    utc_dt = local_dt.replace(tzinfo=user_tz).astimezone(dt_timezone.utc)
+                    setattr(contest_creation_form, field, utc_dt)
+            # Convert user's local time to UTC
+
             contest_creation_form.created_by = request.user
             contest_creation_form.save()
 
@@ -134,6 +151,22 @@ def create_private_contest(request):
 
         if received_form.is_valid():
             contest_creation_form = received_form.save(commit=False)
+
+            # Convert user's local time to UTC
+            try:
+                offset_minutes = int(request.POST.get('timezone_offset', 0))
+            except (ValueError, TypeError):
+                offset_minutes = 0
+
+            user_tz = dt_timezone(timedelta(minutes=-offset_minutes))
+
+            for field in ['start_time', 'end_time', 'registration_deadline']:
+                local_dt = getattr(contest_creation_form, field)
+                if local_dt:
+                    utc_dt = local_dt.replace(tzinfo=user_tz).astimezone(dt_timezone.utc)
+                    setattr(contest_creation_form, field, utc_dt)
+            # Convert user's local time to UTC
+
             contest_creation_form.created_by = request.user
             contest_creation_form.is_private = True
             contest_creation_form.private_key = request.POST.get('private_key')
@@ -166,6 +199,22 @@ def edit_contest(request, contest_id):
 
             if received_form.is_valid():
                 contest_update_form = received_form.save(commit=False)
+
+                # Convert user's local time to UTC
+                try:
+                    offset_minutes = int(request.POST.get('timezone_offset', 0))
+                except (ValueError, TypeError):
+                    offset_minutes = 0
+
+                user_tz = dt_timezone(timedelta(minutes=-offset_minutes))
+
+                for field in ['start_time', 'end_time', 'registration_deadline']:
+                    local_dt = getattr(contest_update_form, field)
+                    if local_dt:
+                        utc_dt = local_dt.replace(tzinfo=user_tz).astimezone(dt_timezone.utc)
+                        setattr(contest_update_form, field, utc_dt)
+                # Convert user's local time to UTC
+
                 contest_update_form.save()
 
                 return redirect('contest-page', contest_update_form.id)
@@ -197,6 +246,21 @@ def edit_private_contest(request, contest_id):
 
             if received_form.is_valid():
                 contest_update_form = received_form.save(commit=False)
+
+                # Convert user's local time to UTC
+                try:
+                    offset_minutes = int(request.POST.get('timezone_offset', 0))
+                except (ValueError, TypeError):
+                    offset_minutes = 0
+
+                user_tz = dt_timezone(timedelta(minutes=-offset_minutes))
+
+                for field in ['start_time', 'end_time', 'registration_deadline']:
+                    local_dt = getattr(contest_update_form, field)
+                    if local_dt:
+                        utc_dt = local_dt.replace(tzinfo=user_tz).astimezone(dt_timezone.utc)
+                        setattr(contest_update_form, field, utc_dt)
+                # Convert user's local time to UTC
 
                 if private_key:
                     contest_update_form.private_key = private_key

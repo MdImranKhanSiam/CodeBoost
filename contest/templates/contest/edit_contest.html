@@ -131,6 +131,9 @@
             </div>
         </div>
 
+        <!-- For converting users local time to UTC time in the backend server -->
+        <input type="hidden" name="timezone_offset" id="timezone_offset">
+
         <!-- SUBMIT -->
         <button type="submit" class="cc-submit-btn" id="ccSubmitBtn">
             <span class="cc-submit-bg"></span>
@@ -215,6 +218,9 @@
                 <span id="durationText">Set start and end time to see duration</span>
             </div>
         </div>
+
+        <!-- For converting users local time to UTC time in the backend server -->
+        <input type="hidden" name="timezone_offset" id="timezone_offset">
 
         <!-- SUBMIT -->
         <button type="submit" class="cc-submit-btn cc-submit-public" id="ccSubmitBtn">
@@ -335,6 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (txt) txt.textContent = 'Creating…';
     });
 });
+
+document.getElementById('timezone_offset').value = new Date().getTimezoneOffset();
+
 </script>
 
 {% endblock %}
