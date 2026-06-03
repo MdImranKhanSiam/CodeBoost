@@ -342,6 +342,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const fields = ['id_start_time', 'id_end_time', 'id_registration_deadline'];
+
+    fields.forEach(function (fieldId) {
+        const input = document.getElementById(fieldId);
+        if (input && input.value) {
+            // Django renders as "2026-06-03T02:34" — append Z to treat as UTC
+            const localDate = new Date(input.value + ':00Z');
+
+            // Format back to "YYYY-MM-DDTHH:MM" in user's local time
+            const local = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+            input.value = local.toISOString().slice(0, 16);
+        }
+    });
+
+    // Set timezone offset for backend conversion
+    document.getElementById('timezone_offset').value = new Date().getTimezoneOffset();
+});
+
 document.getElementById('timezone_offset').value = new Date().getTimezoneOffset();
 
 </script>
