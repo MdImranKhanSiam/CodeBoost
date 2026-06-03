@@ -236,14 +236,18 @@
                         <i class="fa-solid fa-fingerprint"></i>
                         <span>ID: {{ contest.id }}</span>
                     </div>
+
+
                     <div class="info-chip">
                         <i class="fa-regular fa-calendar-days"></i>
-                        <span>{{ contest.start_time|date:"M d, Y" }}</span>
+                        <span class="local-date"></span>
                     </div>
                     <div class="info-chip">
                         <i class="fa-regular fa-clock"></i>
-                        <span>{{ contest.start_time|date:"H:i" }} — {{ contest.end_time|date:"H:i" }}</span>
+                        <span class="local-time"></span>
                     </div>
+
+
                     <div class="info-chip">
                         <i class="fa-solid fa-users"></i>
                         <span>{{ contest.participants.count }} participants</span>
@@ -315,9 +319,30 @@
 </section>
 
 <script>
-// =====================================================
-// ORIGINAL JS — COMPLETELY UNTOUCHED
-// =====================================================
+
+function utcToLocal() {
+    // Converts Start & End Time Of All Contests From UTC To User's Local Time
+
+    document.querySelectorAll('.contest-card').forEach(function (card) {
+        const startUTC = card.getAttribute('data-start');
+        const endUTC = card.getAttribute('data-end');
+
+        const start = new Date(startUTC);
+        const end = new Date(endUTC);
+
+        // "Jun 03, 2026"
+        card.querySelector('.local-date').textContent = start.toLocaleDateString(undefined, {
+            month: 'short', day: '2-digit', year: 'numeric'
+        });
+
+        // "08:34 — 11:31"
+        const timeFormat = { hour: '2-digit', minute: '2-digit', hour12: false };
+        card.querySelector('.local-time').textContent =
+            start.toLocaleTimeString(undefined, timeFormat) + ' — ' +
+            end.toLocaleTimeString(undefined, timeFormat);
+    });
+}
+
 
 const errorBox = document.getElementById("floatingError");
 
@@ -537,8 +562,12 @@ function updateContests() {
     });
 }
 
+
+
+utcToLocal();
 // Run every second
 setInterval(updateContests, 1000);
+    
 updateContests();
 
 // =====================================================

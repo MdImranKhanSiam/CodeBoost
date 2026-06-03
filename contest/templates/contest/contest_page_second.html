@@ -111,9 +111,11 @@
             <p class="contest-description">{{ contest.description }}</p>
             {% endif %}
         <div class="contest-meta-row">
-            <span class="meta-item">
+            <span class="meta-item local-datetime"
+                data-start="{{ contest.start_time|date:'c' }}"
+                data-end="{{ contest.end_time|date:'c' }}">
                 <i class="fa-regular fa-clock"></i>
-                {{ contest.start_time|date:"M d, Y · H:i" }} — {{ contest.end_time|date:"H:i" }}
+                <span class="local-datetime-text">Loading...</span>
             </span>
         </div>
 
@@ -331,6 +333,22 @@ problemsData = [];
 
 standingsData = [];
 
+
+function utcToLocal() {
+    const el = document.querySelector('.local-datetime');
+    const start = new Date(el.getAttribute('data-start'));
+    const end = new Date(el.getAttribute('data-end'));
+
+    const dateStr = start.toLocaleDateString(undefined, {
+        month: 'short', day: '2-digit', year: 'numeric'
+    });
+
+    const timeFormat = { hour: '2-digit', minute: '2-digit', hour12: false };
+
+    el.querySelector('.local-datetime-text').textContent = `${dateStr} · ${start.toLocaleTimeString(undefined, timeFormat)} — ${end.toLocaleTimeString(undefined, timeFormat)}`;
+}
+
+utcToLocal();
 
 async function fetchStandings() {
     try {

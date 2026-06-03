@@ -19,7 +19,7 @@ from contest.services import contest_rank
 from home.web.cache import invalidate_homepage
 
 
-@ratelimit(key='user', rate='10/m', method='GET', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contests(request):
     now = timezone.now()
@@ -324,7 +324,9 @@ def contest_registration(request, id):
     if request.method == "POST":
         if request.POST.get("agree"):
             contest.participants.add(request.user)
-            del request.session['private_key']
+            
+            if 'private_key' in request.session:
+                del request.session['private_key']
 
             if now >= contest.start_time:
                 return redirect('contest-page', contest.id)
