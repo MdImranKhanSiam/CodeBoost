@@ -5,7 +5,38 @@
 <link rel="stylesheet" href="{% static 'css/contest/contest_page_second.css' %}" />
 <link rel="stylesheet" href="{% static 'css/contest/leaderboard.css' %}" />
 
+{% include 'home/flip_clock.html' %}
+
 <div class="leaderboard-section">
+    <div class="contest-header">
+        <div class="header-left">
+            <div class="header-top-row">
+                <span class="contest-status-pill" id="statusPill"></span>
+            </div>
+            <h1 class="contest-title"></h1>
+            
+        <div class="contest-meta-row">
+            <span class="meta-item local-datetime">
+                <i class="fa-regular fa-clock"></i>
+                <span class="local-datetime-text">Loading...</span>
+            </span>
+        </div>
+
+        
+        </div>
+
+        <div class="header-right">
+            <div class="timer-card">
+                <div class="timer-label-text" id="timerLabel">Time Remaining</div>
+                <div class="timer-digits" id="timer">--:--:--</div>
+                <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar"></div></div>
+            </div>
+        </div>
+
+    </div>
+
+
+
     <div class="standings-toolbar">
         <div class="standings-info">
             <i class="fa-solid fa-trophy"></i>
@@ -55,6 +86,10 @@ contest_id = "{{ contest_id }}";
 
 problemsData = [];
 standingsData = [];
+getStartTime = null;
+getEndTime = null;
+getContestName = null;
+
 
 async function fetchStandings() {
     try {
@@ -66,6 +101,9 @@ async function fetchStandings() {
             const data = await response.json();
 
             problemsData = data['problems'];
+            contest_details = data['contest_details'];
+
+            setContestDetails(contest_details);
 
             data['standings'].forEach(participant => {
                 const problems = {}
@@ -93,6 +131,32 @@ async function fetchStandings() {
     } catch (error) {
         console.error('Error Fetching Standings', error);
     }
+}
+
+
+function utcToLocal() {
+    const el = document.querySelector('.local-datetime');
+    const start = new Date(getStartTime);
+    const end = new Date(getEndTime);
+
+    const dateStr = start.toLocaleDateString(undefined, {
+        month: 'short', day: '2-digit', year: 'numeric'
+    });
+
+    const timeFormat = { hour: '2-digit', minute: '2-digit', hour12: false };
+
+    el.querySelector('.local-datetime-text').textContent = `${dateStr} · ${start.toLocaleTimeString(undefined, timeFormat)} — ${end.toLocaleTimeString(undefined, timeFormat)}`;
+}
+
+function setContestDetails(contest_details) {
+    getStartTime = contest_details.start_time;
+    getEndTime = contest_details.end_time;
+    getContestName = contest_details.name;
+    document.querySelector('.contest-title').textContent = getContestName;
+
+    utcToLocal();
+    setInterval(updateTimer, 1000);
+    updateTimer();
 }
 
 
@@ -244,6 +308,54 @@ function start() {
 
 fetchStandings();
 
+
+// ==================== TIMER ====================
+function updateTimer() {
+    console.log('Here');
+    const now   = new Date();
+    const label = document.getElementById("timerLabel");
+    const disp  = document.getElementById("timer");
+    const bar   = document.getElementById("timerBar");
+    const startTime = new Date(getStartTime);
+    const endTime = new Date(getEndTime);
+
+    console.log(now);
+    console.log(startTime);
+    console.log(endTime);
+
+    const totalDuration = endTime - startTime;
+
+    if (now < startTime) {
+        label.textContent = "Starts In";
+        disp.textContent = formatTime(startTime - now);
+        const pct = 100 - ((startTime - now) / (startTime - new Date(startTime - 7*86400000)) * 100);
+        bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+        bar.style.background = "#f59e0b";
+        console.log('Not started');
+    } else if (now < endTime) {
+        label.textContent = "Time Remaining";
+        disp.textContent = formatTime(endTime - now);
+        const elapsed = now - startTime;
+        const pct = 100 - (elapsed / totalDuration * 100);
+        bar.style.width = Math.max(0, pct) + "%";
+        bar.style.background = pct > 25 ? "#22c55e" : "#ef4444";
+        console.log('running');
+    } else {
+        label.textContent = "";
+        disp.textContent = "Contest Ended";
+        bar.style.width = "0%";
+        console.log('finished');
+    }
+}
+
+function formatTime(ms) {
+    let total = Math.floor(ms / 1000);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+// ==================== TIMER ====================
 
 </script>
 

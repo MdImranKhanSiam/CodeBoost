@@ -86,7 +86,14 @@ def contest_leaderboard(request):
 
     # print(standings_data)
 
+    contest_details = {}
+    contest_details['name'] = contest.name
+    contest_details['start_time'] = contest.start_time
+    contest_details['end_time'] = contest.end_time
+
+
     data['standings'] = standings_data
     data['problems'] = problems_data
+    data['contest_details'] = contest_details
 
     return Response(data)
