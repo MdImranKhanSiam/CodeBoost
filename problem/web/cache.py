@@ -19,8 +19,6 @@ TTL_PROBLEM_DETAILS = 60 * 60 * 24
 
 
 
-
-
 # PROBLEMS_PAGE
 def get_problems_page(user_id):
     try:
