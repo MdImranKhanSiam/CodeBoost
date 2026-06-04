@@ -16,7 +16,7 @@ from . cache import get_problems_page, set_problems_page, invalidate_problems_pa
 from . cache import get_submission_api, set_submission_api, invalidate_submission_api, invalidate_universal_submission_api
 from . cache import get_submission_details, set_submission_details, invalidate_universal_submission_details
 from . cache import get_edit_problem, set_edit_problem, invalidate_edit_problem
-
+from . cache import get_problem_details, set_problem_details, invalidate_problem_details
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
@@ -50,22 +50,37 @@ def problems(request):
 @ratelimit(key='user', rate='10/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problem_detail(request, problem_id):
-    user = request.user
-    problem = get_object_or_404(Problem, id=problem_id)
+    problem_details = get_problem_details(problem_id)
+
+    if not problem_details:
+        problem = get_object_or_404(Problem, id=problem_id)
+        testcases = problem.testcases.filter(is_hidden=False)
+
+        problem_details = {
+            'problem': problem,
+            'testcases': testcases,
+        }
+
+        set_problem_details(problem_id, problem_details)
+
+    problem = problem_details['problem']
+    testcases = problem_details['testcases']
 
     if not problem.is_public:
-        contest = problem.contests.first()
+        # contest = problem.contests.first()
 
-        if contest:
-            if (not user == contest.created_by and not user in contest.moderators.all()):
-                now = timezone.now()
+        # if contest:
+        #     if (not user == contest.created_by and not user in contest.moderators.all()):
+        #         now = timezone.now()
                 
-                if now <= contest.end_time:
-                    return HttpResponse('Permission Denied To View Contest Problem')
-        else:
-            return HttpResponse('Not Found')
+        #         if now <= contest.end_time:
+        #             return HttpResponse('Permission Denied To View Contest Problem')
+        # else:
+        #     return HttpResponse('Not Found')
 
-    testcases = problem.testcases.filter(is_hidden=False)
+        return HttpResponse('Permission Denied To View Contest Problem')
+    
+    user = request.user
 
     is_admin = False
 
@@ -262,6 +277,7 @@ def edit_problem(request, problem_id):
         if current_problem:
             invalidate_problems_page()
             invalidate_edit_problem(problem_id)
+            invalidate_problem_details(problem_id)
 
             return redirect('problem-detail', current_problem.id)
         
@@ -287,6 +303,7 @@ def delete_problem(request, problem_id):
         invalidate_problems_page()
         invalidate_universal_submission_api()
         invalidate_universal_submission_details()
+        invalidate_problem_details(problem_id)
 
         return redirect('problems')
    

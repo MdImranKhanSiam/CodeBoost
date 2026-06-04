@@ -8,14 +8,14 @@ PROBLEMS_PAGE_CACHE_KEY = "problems:page:{user_id}"
 SUBMISSION_API_CACHE_KEY = "submission:api:{user_id}"
 SUBMISSION_DETAILS_CACHE_KEY = "submission:details:{user_id}:{submission_id}"
 EDIT_PROBLEM_CACHE_KEY = "edit:problem:{problem_id}"
-
+PROBLEM_DETAILS_CACHE_KEY = "problem:details:{problem_id}"
 
 
 TTL_PROBLEMS_PAGE = 60 * 60 * 24
 TTL_SUBMISSION_API = 60 * 60 * 12
 TTL_SUBMISSION_DETAILS = 60 * 60 * 12
 TTL_EDIT_PROBLEM = 60 * 60 * 24 * 7
-
+TTL_PROBLEM_DETAILS = 60 * 60 * 24
 
 
 
@@ -155,3 +155,29 @@ def invalidate_edit_problem(problem_id):
     except Exception:
         logger.warning(f"Cache unavailable: invalidate_edit_problem For Problem ID: {problem_id}")
 
+
+
+
+
+
+# PROBLEM_DETAILS
+def get_problem_details(problem_id):
+    try:
+        return cache.get(PROBLEM_DETAILS_CACHE_KEY.format(problem_id=problem_id))
+    except Exception:
+        logger.warning("Cache unavailable: get_problem_details")
+        return None
+    
+
+def set_problem_details(problem_id, data):
+    try:
+        cache.set(PROBLEM_DETAILS_CACHE_KEY.format(problem_id=problem_id), data, TTL_PROBLEM_DETAILS)
+    except Exception:
+        logger.warning("Cache unavailable: set_problem_details")
+
+
+def invalidate_problem_details(problem_id):
+    try:
+        cache.delete(PROBLEM_DETAILS_CACHE_KEY.format(problem_id=problem_id))
+    except Exception:
+        logger.warning("Cache unavailable: invalidate_problem_details")
