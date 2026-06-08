@@ -10,6 +10,7 @@ from home.models import CodeSnippet, SubmitTicket, FeedbackAndSuggestions
 from problem.models import Problem, Submission
 from contest.models import Contest
 from user_profile.models import UserProfile
+from home.tasks import check_rate_limit
 
 
 from . cache import get_homepage, set_homepage, invalidate_homepage
@@ -118,7 +119,6 @@ def submit_ticket(request):
 
 
 
-
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def feedback_and_suggestions(request):
@@ -164,6 +164,26 @@ def feedback_and_suggestions(request):
     }
 
     return render(request, 'home/feedback_and_suggestions.html', context)
+
+
+
+
+@ratelimit(key='user', rate='20/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def check_limit(request):
+    if not request.user.has_perm("axes.add_accessattempt"):
+        return HttpResponse('Not Found')
+
+    api = str(request.GET.get("api"))
+    limit = int(request.GET.get("limit"))
+    delay = int(request.GET.get("delay"))
+    
+    check_rate_limit.apply_async(
+            args=[api,limit],
+            countdown=delay
+        )
+    
+    return redirect('home')
 
 
 

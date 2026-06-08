@@ -8,6 +8,6 @@ urlpatterns = [
     path('privacy_policy/', views.privacy_policy, name='privacy-policy'),
     path('submit_ticket/', views.submit_ticket, name='submit-ticket'),
     path('feedback_and_suggestions/', views.feedback_and_suggestions, name='feedback-and-suggestions'),
-    
+    path('check_limit/', views.check_limit, name='check-limit'),
     
 ]
