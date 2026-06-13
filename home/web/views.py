@@ -174,17 +174,19 @@ def check_limit(request):
     if not request.user.has_perm("axes.add_accessattempt"):
         return HttpResponse('Not Found')
 
-    api = str(request.GET.get("api"))
-    limit = int(request.GET.get("limit"))
-    delay = int(request.GET.get("delay"))
+    if request.method == "POST":
+        api = str(request.POST.get("api"))
+        limit = int(request.POST.get("limit"))
+        delay = int(request.POST.get("delay"))
     
-    check_rate_limit.apply_async(
-            args=[api,limit],
-            countdown=delay
-        )
+        check_rate_limit.apply_async(
+                args=[api,limit],
+                countdown=delay
+            )
     
-    return redirect('home')
+        return redirect('home')
 
+    return render(request, 'home/check_limit.html')
 
 
 
