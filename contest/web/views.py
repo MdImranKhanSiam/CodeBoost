@@ -329,7 +329,8 @@ def edit_private_contest(request, contest_id):
 
 
 
-@ratelimit(key='user', rate='30/m', block=True)
+@ratelimit(key='user', rate='15/m', method='POST', block=True)
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contest_registration(request, id):
     user = request.user
@@ -373,6 +374,11 @@ def contest_registration(request, id):
     if request.method == "POST":
         if request.POST.get("agree"):
             contest.participants.add(request.user)
+
+            if contest.is_private:
+                invalidate_private_contests()
+            else:
+                invalidate_contests_page()
             
             if 'private_key' in request.session:
                 del request.session['private_key']
@@ -624,7 +630,7 @@ def contest_submission_details(request, contest_id, submission_id):
         'execution_time': submission.execution_time,
         'memory_used': submission.memory_used,
         'verdict': submission.verdict,
-        # 'testcase_details': submission.testcase_details,
+        'testcase_details': submission.testcase_details,
         'passed_testcases': submission.passed_testcases,
         'total_testcases': submission.total_testcases,
     }
@@ -759,7 +765,7 @@ def edit_contest_problem(request, problem_id):
                 TestCase.objects.bulk_create(testcase_objects)
 
             if current_problem:
-                return redirect('problem-detail', current_problem.id)
+                return redirect('contest-problem-detail', contest.id, current_problem.id)
             
 
         context = {

@@ -44,7 +44,6 @@ def invalidate_problems_page():
 
 def invalidate_user_problems_page(user_id):
     try:
-        cache.delete_pattern("problems:page:*")
         cache.delete(PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id))
         logger.info(f"Problems Page Cache Invalidated For User {user_id}")
     except Exception:
