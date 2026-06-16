@@ -21,6 +21,7 @@ from contest.web.cache import get_private_contests, set_private_contests, invali
 from home.web.cache import invalidate_homepage
 
 
+
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contests(request):
@@ -58,6 +59,7 @@ def contests(request):
     }
 
     return render(request, 'contest/contests.html', context)
+
 
 
 @ratelimit(key='user', rate='15/m', method='POST', block=True)
