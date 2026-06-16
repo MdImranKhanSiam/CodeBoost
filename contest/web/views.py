@@ -16,19 +16,42 @@ from contest.models import Contest
 from contest.forms import ContestForm
 from contest.services import contest_rank
 
+from contest.web.cache import get_contests_page, set_contests_page, invalidate_contests_page
+from contest.web.cache import get_private_contests, set_private_contests, invalidate_private_contests
 from home.web.cache import invalidate_homepage
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def contests(request):
+    public_contests = get_contests_page()
+
+    if not public_contests:
+        public_contests = list(Contest.objects.filter(is_private=False)
+            .prefetch_related('problems', 'participants', 'moderators')
+            .select_related('created_by')
+        )
+
+        set_contests_page(public_contests)
+
     now = timezone.now()
 
-    upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=False).order_by("start_time"))
-    running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now,  is_private=False).order_by("end_time"))
-    ended = list(Contest.objects.filter(end_time__lt=now,  is_private=False).order_by("-end_time"))
-    
+
+    # upcoming = list(Contest.objects.filter(start_time__gt=now, is_private=False).order_by("start_time"))
+    # running = list(Contest.objects.filter(start_time__lte=now, end_time__gte=now, is_private=False).order_by("end_time"))
+    # ended = list(Contest.objects.filter(end_time__lt=now, is_private=False).order_by("-end_time"))
+
+    running  = sorted([contest for contest in public_contests if contest.start_time <= now <= contest.end_time], key=lambda contest: contest.end_time)
+    upcoming = sorted([contest for contest in public_contests if contest.start_time > now], key=lambda contest: contest.start_time)
+    ended    = sorted([contest for contest in public_contests if contest.end_time < now], key=lambda contest: contest.end_time, reverse=True)
+
+        
     contests = running + upcoming + ended
+
+
+    print(f"Running: {running}")
+    print(f"upcoming: {upcoming}")
+    print(f"ended: {ended}")
 
     context = {
         'contests': contests,
@@ -65,29 +88,48 @@ def private_contests(request):
 
         return redirect('contest-registration', contest.id)
 
+    user_id = user.id
+
+    all_private_contests = get_private_contests(user_id)
+
+    if not all_private_contests:
+        all_private_contests = list(Contest.objects.filter(is_private=True)
+            .filter(
+                Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+            ).distinct()
+            .prefetch_related('problems', 'participants', 'moderators')
+            .select_related('created_by')
+        )
+
+        set_private_contests(user_id, all_private_contests)
+
     now = timezone.now()
 
-    upcoming = list(Contest.objects.filter(
-        start_time__gt=now,
-        is_private=True
-        ).filter(
-            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
-        ).distinct().order_by("start_time"))
+    running = sorted([contest for contest in all_private_contests if contest.start_time <= now <= contest.end_time], key=lambda contest: contest.end_time)
+    upcoming = sorted([contest for contest in all_private_contests if contest.start_time > now], key=lambda contest: contest.start_time)
+    ended    = sorted([contest for contest in all_private_contests if contest.end_time < now], key=lambda contest: contest.end_time, reverse=True)
+
+    # upcoming = list(Contest.objects.filter(
+    #     start_time__gt=now,
+    #     is_private=True
+    #     ).filter(
+    #         Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+    #     ).distinct().order_by("start_time"))
     
-    running = list(Contest.objects.filter(
-        start_time__lte=now,
-        end_time__gte=now,
-        is_private=True
-        ).filter(
-            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
-        ).distinct().order_by("end_time"))
+    # running = list(Contest.objects.filter(
+    #     start_time__lte=now,
+    #     end_time__gte=now,
+    #     is_private=True
+    #     ).filter(
+    #         Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+    #     ).distinct().order_by("end_time"))
     
-    ended = list(Contest.objects.filter(
-        end_time__lt=now,
-        is_private=True
-        ).filter(
-            Q(participants=user) | Q(moderators=user) | Q(created_by=user)
-        ).distinct().order_by("-end_time"))
+    # ended = list(Contest.objects.filter(
+    #     end_time__lt=now,
+    #     is_private=True
+    #     ).filter(
+    #         Q(participants=user) | Q(moderators=user) | Q(created_by=user)
+    #     ).distinct().order_by("-end_time"))
     
     contests = running + upcoming + ended
 
@@ -130,6 +172,7 @@ def create_contest(request):
             contest_creation_form.save()
 
             invalidate_homepage()
+            invalidate_contests_page()
 
             return redirect('contest-page', contest_creation_form.id)
 
@@ -173,6 +216,7 @@ def create_private_contest(request):
             contest_creation_form.save()
 
             invalidate_homepage()
+            invalidate_private_contests()
 
             return redirect('contest-page', contest_creation_form.id)
 
@@ -216,6 +260,7 @@ def edit_contest(request, contest_id):
                 # Convert user's local time to UTC
 
                 contest_update_form.save()
+                invalidate_contests_page()
 
                 return redirect('contest-page', contest_update_form.id)
 
@@ -266,6 +311,8 @@ def edit_private_contest(request, contest_id):
                     contest_update_form.private_key = private_key
 
                 contest_update_form.save()
+                
+                invalidate_private_contests()
 
                 return redirect('contest-page', contest_update_form.id)
 

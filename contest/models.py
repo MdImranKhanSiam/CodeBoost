@@ -45,3 +45,10 @@ class Contest(models.Model):
     # user.moderator_of_contests.all()
     
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['is_private']),
+            # public_contests = list(Contest.objects.filter(is_private=False))
+            # private_contests = list(Contest.objects.filter(is_private=True))
+        ]
