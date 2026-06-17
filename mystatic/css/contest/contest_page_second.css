@@ -753,8 +753,43 @@
 }
 
 /* Penalty */
-.std-penalty { color: #64748b; font-size: 13px; }
+/* .std-penalty { color: #64748b; font-size: 13px; }
+.penalty-unit { font-size: 10px; color: #334155; margin-left: 2px; } */
+
+.std-penalty {
+    position: relative;
+    cursor: default;
+    color: #64748b;
+    font-size: 13px;
+}
+
 .penalty-unit { font-size: 10px; color: #334155; margin-left: 2px; }
+
+.std-penalty::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #1e2a3a;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.std-penalty:hover::after { opacity: 1; }
+
+
 
 /* Problem result cells */
 .prob-result-cell {

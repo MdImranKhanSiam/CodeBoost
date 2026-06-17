@@ -455,6 +455,10 @@ def contest_page(request, id):
                 active_participants = json.loads(request.POST.get('active_participants'))
                 contest.participants.set(active_participants)
 
+            if request.POST.get('active_problems'):
+                active_problems = json.loads(request.POST.get('active_problems'))
+                contest.problems.set(active_problems)
+
         problems = contest.problems.all().order_by('id')
 
         serial = 'A'
@@ -596,7 +600,7 @@ def contest_problem_detail(request, contest_id, problem_id):
 def contest_submissions_api(request, contest_id):
     user=request.user
     contest = get_object_or_404(Contest, id=contest_id)
-    submissions = Submission.objects.filter(user=user, contest=contest).order_by('-submitted_at')
+    submissions = Submission.objects.filter(user=user, contest=contest, problem__in=contest.problems.all()).order_by('-submitted_at')
     
     data = []
 

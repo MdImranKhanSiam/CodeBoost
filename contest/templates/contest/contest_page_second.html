@@ -42,6 +42,10 @@
             <span class="icon"><i class="fa-solid fa-circle-plus"></i></span>
             <span class="text">Create New Problem</span>
         </button>
+        <button class="edit-contest-btn" id="removeProblemsBtn">
+            <span class="icon"><i class="fa-solid fa-circle-minus"></i></span>
+            <span class="text">Remove Problems</span>
+        </button>
     </div>
 </div>
 
@@ -85,6 +89,20 @@
             </div>
             <input type="hidden" name="active_participants" id="participantsInput">
             <button type="submit" class="moderator-submit-btn">Update Participants</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="removeProblemsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+            <div class="modal-header"><h3>Remove Problems</h3></div>
+            <div class="moderator-scroll">
+                <div class="moderator-list" id="problemList"></div>
+            </div>
+            <input type="hidden" name="active_problems" id="problemsInput">
+            <button type="submit" class="moderator-submit-btn">Update Problems</button>
         </form>
     </div>
 </div>
@@ -381,6 +399,8 @@ async function fetchStandings() {
 
             problemsData = data['problems'];
 
+            console.log(data['standings']);
+
             data['standings'].forEach(participant => {
                 const problems = {}
 
@@ -397,6 +417,7 @@ async function fetchStandings() {
                     display_name: participant['participant_name'],
                     avatar: participant['participant_avatar'],
                     total_solved: participant['total_solved'],
+                    total_penalty: participant['total_penalty'],
                     total_penalty_minutes: participant['total_penalty_in_minutes'],
                     problems: problems,
                 });
@@ -555,7 +576,7 @@ function buildStandings() {
                 </div>
             </td>
             <td class="std-solved"><span class="solved-num-badge">${s.total_solved}</span></td>
-            <td class="std-penalty">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
+            <td class="std-penalty" data-tooltip="Total Penalty: ${s.total_penalty}">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
 
         problemsData.forEach(p => {
             const pd = s.problems ? s.problems[String(p.id)] : null;
@@ -653,6 +674,9 @@ function reloadStandings() {
 function start() {
     buildProblemStatus();
     buildStandings();
+
+    console.log(standingsData);
+    
 }
 
 fetchStandings();
@@ -664,11 +688,14 @@ if (isAdmin) {
     const contestSettingsModal  = document.getElementById("contestSettingsModal");
     const addModeratorsModal    = document.getElementById("addModeratorsModal");
     const removeModeratorsModal = document.getElementById("removeModeratorsModal");
+    const removeParticipantsModal = document.getElementById("removeParticipantsModal");
+    const removeProblemsModal = document.getElementById("removeProblemsModal");
     const addProblemsModal      = document.getElementById("addProblemsModal");
     const contestSettingsBtn    = document.getElementById("contestSettingsBtn");
     const addModeratorsBtn      = document.getElementById("addModeratorsBtn");
     const removeModeratorsBtn   = document.getElementById("removeModeratorsBtn");
     const removeParticipantsBtn   = document.getElementById("removeParticipantsBtn");
+    const removeProblemsBtn   = document.getElementById("removeProblemsBtn");
     const addProblemsBtn        = document.getElementById("addProblemsBtn");
 
     contestSettingsBtn.onclick  = () => contestSettingsModal.classList.add("active");
@@ -679,6 +706,8 @@ if (isAdmin) {
     removeModeratorsModal.onclick = e => { if (e.target === removeModeratorsModal) removeModeratorsModal.classList.remove("active"); };
     removeParticipantsBtn.onclick = () => removeParticipantsModal.classList.add("active");
     removeParticipantsModal.onclick = e => { if (e.target === removeParticipantsModal) removeParticipantsModal.classList.remove("active"); };
+    removeProblemsBtn.onclick = () => removeProblemsModal.classList.add("active");
+    removeProblemsModal.onclick = e => { if (e.target === removeProblemsModal) removeProblemsModal.classList.remove("active"); };
     addProblemsBtn.onclick      = () => addProblemsModal.classList.add("active");
     addProblemsModal.onclick    = e => { if (e.target === addProblemsModal)  addProblemsModal.classList.remove("active"); };
 
@@ -834,6 +863,45 @@ if (isAdmin) {
     renderParticipants();
     updateParticipantHiddenInput();
     // Remove Participants
+
+
+    // Remove Problems
+    let Problems = [];
+    {% for problem in problems %}
+        Problems.push({ id: {{ problem.id }}, title: "{{ problem.title|escapejs }}", serial: "{{ problem.serial }}" });
+    {% endfor %}
+
+    let activeProblems = Problems.map(m => m.id);
+    const problemList = document.getElementById("problemList");
+
+    function renderProblems() {
+        problemList.innerHTML = "";
+        Problems.forEach(mod => {
+            if (!activeProblems.includes(mod.id)) return;
+            const row = document.createElement("div");
+            row.className = "moderator-item";
+            row.innerHTML = `
+                <div class="moderator-info">
+                    <span class="moderator-name">${mod.serial}. ${mod.title}</span>
+                </div>
+                <button type="button" class="moderator-remove-btn" onclick="removeProblem(${mod.id})">Remove</button>`;
+            problemList.appendChild(row);
+        });
+    }
+
+    function updateProblemHiddenInput() {
+        document.getElementById("problemsInput").value = JSON.stringify(activeProblems);
+    }
+
+    function removeProblem(id) {
+        activeProblems = activeProblems.filter(modId => modId !== id);
+        renderProblems();
+        updateProblemHiddenInput();
+    }
+
+    renderProblems()();
+    updateProblemHiddenInput();
+    // Remove Problems
 
 }
 

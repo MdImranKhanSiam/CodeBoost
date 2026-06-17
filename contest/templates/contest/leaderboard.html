@@ -121,6 +121,7 @@ async function fetchStandings() {
                     display_name: participant['participant_name'],
                     avatar: participant['participant_avatar'],
                     total_solved: participant['total_solved'],
+                    total_penalty: participant['total_penalty'],
                     total_penalty_minutes: participant['total_penalty_in_minutes'],
                     problems: problems,
                 });
@@ -207,7 +208,7 @@ function buildStandings() {
                 </div>
             </td>
             <td class="std-solved"><span class="solved-num-badge">${s.total_solved}</span></td>
-            <td class="std-penalty">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
+            <td class="std-penalty" data-tooltip="Total Penalty: ${s.total_penalty}">${s.total_penalty_minutes}<span class="penalty-unit">min</span></td>`;
 
         problemsData.forEach(p => {
             const pd = s.problems ? s.problems[String(p.id)] : null;
