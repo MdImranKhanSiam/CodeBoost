@@ -459,6 +459,10 @@ def contest_page(request, id):
                 active_problems = json.loads(request.POST.get('active_problems'))
                 contest.problems.set(active_problems)
 
+            invalidate_contests_page()
+            invalidate_private_contests()
+            
+
         problems = contest.problems.all().order_by('id')
 
         serial = 'A'
