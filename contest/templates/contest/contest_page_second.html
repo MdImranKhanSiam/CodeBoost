@@ -30,6 +30,10 @@
             <span class="icon"><i class="fa-solid fa-user-minus"></i></span>
             <span class="text">Remove Moderators</span>
         </button>
+        <button class="edit-contest-btn" id="removeParticipantsBtn">
+            <span class="icon"><i class="fa-solid fa-user-minus"></i></span>
+            <span class="text">Remove Participants</span>
+        </button>
         <button class="edit-contest-btn" id="addProblemsBtn">
             <span class="icon"><i class="fa-solid fa-circle-plus"></i></span>
             <span class="text">Add Problems</span>
@@ -67,6 +71,20 @@
             </div>
             <input type="hidden" name="active_moderators" id="moderatorsInput">
             <button type="submit" class="moderator-submit-btn">Update Moderators</button>
+        </form>
+    </div>
+</div>
+
+<div class="search-modal" id="removeParticipantsModal">
+    <div class="search-modal-content">
+        <form method="post">
+            {% csrf_token %}
+            <div class="modal-header"><h3>Remove Participants</h3></div>
+            <div class="moderator-scroll">
+                <div class="moderator-list" id="participantList"></div>
+            </div>
+            <input type="hidden" name="active_participants" id="participantsInput">
+            <button type="submit" class="moderator-submit-btn">Update Participants</button>
         </form>
     </div>
 </div>
@@ -650,6 +668,7 @@ if (isAdmin) {
     const contestSettingsBtn    = document.getElementById("contestSettingsBtn");
     const addModeratorsBtn      = document.getElementById("addModeratorsBtn");
     const removeModeratorsBtn   = document.getElementById("removeModeratorsBtn");
+    const removeParticipantsBtn   = document.getElementById("removeParticipantsBtn");
     const addProblemsBtn        = document.getElementById("addProblemsBtn");
 
     contestSettingsBtn.onclick  = () => contestSettingsModal.classList.add("active");
@@ -658,6 +677,8 @@ if (isAdmin) {
     addModeratorsModal.onclick  = e => { if (e.target === addModeratorsModal)  addModeratorsModal.classList.remove("active"); };
     removeModeratorsBtn.onclick = () => removeModeratorsModal.classList.add("active");
     removeModeratorsModal.onclick = e => { if (e.target === removeModeratorsModal) removeModeratorsModal.classList.remove("active"); };
+    removeParticipantsBtn.onclick = () => removeParticipantsModal.classList.add("active");
+    removeParticipantsModal.onclick = e => { if (e.target === removeParticipantsModal) removeParticipantsModal.classList.remove("active"); };
     addProblemsBtn.onclick      = () => addProblemsModal.classList.add("active");
     addProblemsModal.onclick    = e => { if (e.target === addProblemsModal)  addProblemsModal.classList.remove("active"); };
 
@@ -735,6 +756,7 @@ if (isAdmin) {
     initSearch({ inputId: "userSearch", dropdownId: "userDropdown", selectedBoxId: "selectedUsers", data: users, selectedArray: selectedUsers, labelKey: "display_name", hasAvatar: true });
     initSearch({ inputId: "problemSearch", dropdownId: "problemDropdown", selectedBoxId: "selectedProblems", data: problems, selectedArray: selectedProblems, labelKey: "title" });
 
+    // Remove Moderators
     let Moderators = [];
     {% for moderator in moderators %}
         Moderators.push({ id: {{ moderator.id }}, display_name: "{{ moderator.userprofile.display_name|escapejs }}", avatar: "{{ moderator.userprofile.avatar }}" });
@@ -771,6 +793,48 @@ if (isAdmin) {
 
     renderModerators();
     updateHiddenInput();
+    // Remove Moderators
+
+
+    // Remove Participants
+    let Participants = [];
+    {% for participant in participants %}
+        Participants.push({ id: {{ participant.id }}, display_name: "{{ participant.userprofile.display_name|escapejs }}", avatar: "{{ participant.userprofile.avatar }}" });
+    {% endfor %}
+
+    let activeParticipants = Participants.map(m => m.id);
+    const participantList = document.getElementById("participantList");
+
+    function renderParticipants() {
+        participantList.innerHTML = "";
+        Participants.forEach(mod => {
+            if (!activeParticipants.includes(mod.id)) return;
+            const row = document.createElement("div");
+            row.className = "moderator-item";
+            row.innerHTML = `
+                <div class="moderator-info">
+                    <img class="moderator-avatar" src="${mod.avatar}" />
+                    <span class="moderator-name">${mod.display_name}</span>
+                </div>
+                <button type="button" class="moderator-remove-btn" onclick="removeParticipant(${mod.id})">Remove</button>`;
+            participantList.appendChild(row);
+        });
+    }
+
+    function updateParticipantHiddenInput() {
+        document.getElementById("participantsInput").value = JSON.stringify(activeParticipants);
+    }
+
+    function removeParticipant(id) {
+        activeParticipants = activeParticipants.filter(modId => modId !== id);
+        renderParticipants();
+        updateParticipantHiddenInput();
+    }
+
+    renderParticipants();
+    updateParticipantHiddenInput();
+    // Remove Participants
+
 }
 
 // ==================== SUBMISSIONS ====================

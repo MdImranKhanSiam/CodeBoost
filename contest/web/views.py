@@ -451,6 +451,10 @@ def contest_page(request, id):
                 active_moderators = json.loads(request.POST.get('active_moderators'))
                 contest.moderators.set(active_moderators)
 
+            if request.POST.get('active_participants'):
+                active_participants = json.loads(request.POST.get('active_participants'))
+                contest.participants.set(active_participants)
+
         problems = contest.problems.all().order_by('id')
 
         serial = 'A'
@@ -475,6 +479,7 @@ def contest_page(request, id):
             'unincluded_problems': unincluded_problems,
             'moderators': moderators,
             'non_moderator_users': non_moderator_users,
+            'participants': participants,
         }
         
         return render(request, 'contest/contest_page_second.html', context)
