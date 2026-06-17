@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+
 class Contest(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -29,7 +30,7 @@ class Contest(models.Model):
     # .add(*problems) → adds multiple problems at once.
 
     # .set(problems) → replaces existing problems with the new list.
-
+    
     # .remove(problem) → removes a problem.
 
     # All problems of this contest

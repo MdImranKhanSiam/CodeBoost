@@ -414,23 +414,26 @@ function updateStatus(problemId, status) {
     }
 }
 
-standingsData.forEach(participant => {
-    if (participant.participant_id == currentUserId) {
-        problemsData.forEach(problem => {
-            const currentProblemStatus = participant.problems[problem.id];
+function buildProblemStatus() {
+    standingsData.forEach(participant => {
+        if (participant.participant_id == currentUserId) {
+            problemsData.forEach(problem => {
+                const currentProblemStatus = participant.problems[problem.id];
 
-            if (currentProblemStatus.solved) {
-                updateStatus(problem.id, "solved");
-            }
-            else if (currentProblemStatus.attempts > 0) {
-                updateStatus(problem.id, "tried")
-            }
-            else {
-                updateStatus(problem.id, "none")
-            }
-        });
-    }
-});
+                if (currentProblemStatus.solved) {
+                    updateStatus(problem.id, "solved");
+                }
+                else if (currentProblemStatus.attempts > 0) {
+                    updateStatus(problem.id, "tried")
+                }
+                else {
+                    updateStatus(problem.id, "none")
+                }
+            });
+        }
+    });
+}
+
 // console.log(solvedProblems);
 
 // ==================== TAB SWITCH ====================
@@ -630,6 +633,7 @@ function reloadStandings() {
 }
 
 function start() {
+    buildProblemStatus();
     buildStandings();
 }
 
