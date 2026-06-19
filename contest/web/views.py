@@ -49,11 +49,6 @@ def contests(request):
         
     contests = running + upcoming + ended
 
-
-    print(f"Running: {running}")
-    print(f"upcoming: {upcoming}")
-    print(f"ended: {ended}")
-
     context = {
         'contests': contests,
     }

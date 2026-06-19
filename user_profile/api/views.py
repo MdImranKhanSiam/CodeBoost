@@ -17,6 +17,8 @@ from user_profile.models import UserProfile
 from problem.models import Submission
 from . serializers import UserProfileSerializer
 
+from home.cache import invalidate_user_data
+
 # Logic for getting the dates (2026-09-16) and number of problems solved on that day
 # First get all the submissions from oldest to newest with distinct problems where verdict is Accepted
 # Submission.objects.filter(user=user, verdict='Accepted').order_by('problem_id', 'submitted_at').distinct('problem_id')
@@ -68,6 +70,8 @@ def user_profile_update(request):
 
     if data_serializer.is_valid():
         data_serializer.save()
+        
+        invalidate_user_data(request.user.id)
 
         return Response({"success": True, "data": data_serializer.data}, status=status.HTTP_200_OK)
 

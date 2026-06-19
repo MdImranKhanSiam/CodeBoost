@@ -101,7 +101,7 @@
             <div class="moderator-scroll">
                 <div class="moderator-list" id="problemList"></div>
             </div>
-            <input type="hidden" name="active_problems" id="problemsInput">
+            <input type="hidden" name="active_problems" id="activeProblemsInput">
             <button type="submit" class="moderator-submit-btn">Update Problems</button>
         </form>
     </div>
@@ -399,8 +399,6 @@ async function fetchStandings() {
 
             problemsData = data['problems'];
 
-            console.log(data['standings']);
-
             data['standings'].forEach(participant => {
                 const problems = {}
 
@@ -674,9 +672,6 @@ function reloadStandings() {
 function start() {
     buildProblemStatus();
     buildStandings();
-
-    console.log(standingsData);
-    
 }
 
 fetchStandings();
@@ -890,7 +885,7 @@ if (isAdmin) {
     }
 
     function updateProblemHiddenInput() {
-        document.getElementById("problemsInput").value = JSON.stringify(activeProblems);
+        document.getElementById("activeProblemsInput").value = JSON.stringify(activeProblems);
     }
 
     function removeProblem(id) {
