@@ -2,6 +2,9 @@ from celery import shared_task
 import requests
 from . models import Submission
 from . web.cache import invalidate_submission_api, invalidate_individual_current_submission_details, invalidate_user_problems_page
+from user_profile.api.cache import invalidate_user_progress_heatmap
+
+
 
 def normalize_line_endings(code):
     if code is None:
@@ -120,15 +123,16 @@ def code_submission(self, submission_id):
         submission.memory_used = memory_used
         submission.verdict = final_verdict
 
+        user_id = submission.user.id
+
         if final_verdict == 'Accepted':
             users_profile = submission.user.userprofile
             users_profile.solved_problems.add(submission.problem)
             users_profile.solved_count=users_profile.solved_problems.count()
             users_profile.save()
+            invalidate_user_progress_heatmap(user_id)
 
         submission.save()
-
-        user_id = submission.user.id
 
         invalidate_cache.apply_async(
             args=[user_id, submission.id],
