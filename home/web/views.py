@@ -199,3 +199,8 @@ def logout_user(request):
 
 
 
+@ratelimit(key='user_or_ip', rate='100/m', method='GET', block=True)
+def extension1_privacy(request):
+
+    return render(request, 'home/extension1-privacy.html')
+

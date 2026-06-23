@@ -9,5 +9,6 @@ urlpatterns = [
     path('submit_ticket/', views.submit_ticket, name='submit-ticket'),
     path('feedback_and_suggestions/', views.feedback_and_suggestions, name='feedback-and-suggestions'),
     path('check_limit/', views.check_limit, name='check-limit'),
+    path('extension1_privacy/', views.extension1_privacy),
     
 ]
