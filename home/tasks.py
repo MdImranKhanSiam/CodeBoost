@@ -53,7 +53,6 @@ def send_welcome_email(self,subject,message,sender,receiver):
 
 
 
-
 # ── Module-level imports (top of your tasks.py) ───────────────────────────────
 import asyncio
 import random
@@ -78,8 +77,6 @@ if sys.platform == "win32":
 @shared_task(
     ignore_result=True,
     bind=True,
-    max_retries=3,
-    default_retry_delay=5,
     acks_late=True,
     reject_on_worker_lost=True,
 )
@@ -99,7 +96,7 @@ def check_rate_limit(self, api: str, limit: int) -> None:
         # ── Tunables ──────────────────────────────────────────────────────────
         # Windows IOCP can handle thousands of sockets, but stay conservative.
         # 200 simultaneous connections is safe and fast on Windows.
-        CONCURRENCY: int = min(limit, 200)
+        CONCURRENCY: int = min(limit, 1000)
 
         TIMEOUT = aiohttp.ClientTimeout(
             total     = 15,
@@ -242,5 +239,5 @@ def check_rate_limit(self, api: str, limit: int) -> None:
         # level, so the loop it creates uses IOCP — no select() FD cap.
         asyncio.run(main())
 
-    except Exception as exc:
-        raise self.retry(exc=exc)
+    except Exception:
+        raise
