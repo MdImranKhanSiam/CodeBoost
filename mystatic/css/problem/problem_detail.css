@@ -365,10 +365,75 @@
 
 
 
+/* Source Code File Upload */
+.upload-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 9px;
+    background: rgba(255,255,255,0.03);
+    font-size: 14px;
+    transition: border-color 0.15s, background 0.15s;
+}
 
+.upload-chip:hover {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+}
 
+.upload-chip.has-file {
+    border-color: rgba(59,130,246,0.45);
+    background: rgba(59,130,246,0.08);
+}
 
+.upload-chip-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    color: inherit;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
+.upload-icon {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.clear-upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    padding: 0;
+    margin-left: 2px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    color: inherit;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.clear-upload-btn:hover {
+    opacity: 1;
+    background: rgba(239,68,68,0.35);
+}
+
+.clear-upload-btn[hidden] {
+    display: none;
+}
+
+/* Source Code File Upload */
 
 
 
