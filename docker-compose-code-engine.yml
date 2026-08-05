@@ -1,0 +1,9 @@
+services:
+  celery_worker:
+    build: .
+    container_name: codeboost_celery_worker
+    entrypoint: []
+    command: celery -A CodeBoost worker --loglevel=info --pool=threads
+    env_file:
+      - .env
+    restart: always
