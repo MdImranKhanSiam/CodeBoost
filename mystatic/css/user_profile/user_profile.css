@@ -460,6 +460,11 @@
   font-weight: 600;
 }
 
+
+#date_of_birth::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
 .lang-list {
   width: 100%;
   height: 136px;
