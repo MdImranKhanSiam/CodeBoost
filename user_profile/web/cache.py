@@ -16,7 +16,7 @@ def get_authored_problems_page(user_id):
     try:
         return cache.get(AUTHORED_PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id))
     except Exception:
-        logger.warning("Cache unavailable: get_problems_page")
+        logger.warning("Cache unavailable: get_authored_problems_page")
         return None
     
 
@@ -24,14 +24,14 @@ def set_authored_problems_page(user_id, data):
     try:
         cache.set(AUTHORED_PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id), data, TTL_PROBLEMS_PAGE)
     except Exception:
-        logger.warning("Cache unavailable: set_problems_page")
+        logger.warning("Cache unavailable: set_authored_problems_page")
 
 
-def invalidate_authored_problems_page():
+def invalidate_authored_problems_page(user_id):
     try:
-        cache.delete_pattern("problems:page:*")
+        cache.delete(AUTHORED_PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id))
     except Exception:
-        logger.warning("Cache unavailable: invalidate_problems_page")
+        logger.warning("Cache unavailable: invalidate_authored_problems_page")
 
 
 # def invalidate_user_authored_problems_page(user_id):

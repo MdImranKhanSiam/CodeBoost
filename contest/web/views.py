@@ -19,6 +19,7 @@ from contest.services import contest_rank
 from contest.web.cache import get_contests_page, set_contests_page, invalidate_contests_page
 from contest.web.cache import get_private_contests, set_private_contests, invalidate_private_contests
 from home.web.cache import invalidate_homepage
+from user_profile.web.cache import invalidate_authored_problems_page
 
 
 
@@ -707,6 +708,9 @@ def create_contest_problem(request, contest_id):
 
             if problem:
                 contest.problems.add(problem)
+
+                invalidate_authored_problems_page(user.id)
+                
                 return redirect('contest-page', contest.id)
         
 
