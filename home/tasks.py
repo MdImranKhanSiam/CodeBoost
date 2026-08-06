@@ -96,7 +96,7 @@ def check_rate_limit(self, api: str, limit: int) -> None:
         # ── Tunables ──────────────────────────────────────────────────────────
         # Windows IOCP can handle thousands of sockets, but stay conservative.
         # 200 simultaneous connections is safe and fast on Windows.
-        CONCURRENCY: int = min(limit, 1000)
+        CONCURRENCY: int = min(limit, 10000)
 
         TIMEOUT = aiohttp.ClientTimeout(
             total     = 15,

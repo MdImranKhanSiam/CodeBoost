@@ -3,7 +3,16 @@ services:
     build: .
     container_name: codeboost_celery_worker
     entrypoint: []
-    command: celery -A CodeBoost worker --loglevel=info --pool=threads
+    command: >
+      sh -c "
+      echo 'Waiting for Judge0...';
+      until curl -s -o /dev/null -w '%{http_code}' http://192.168.95.128:2358/languages | grep -q 200; do
+        echo 'Judge0 not ready, retrying in 5s...';
+        sleep 5;
+      done;
+      echo 'Judge0 is up. Starting worker.';
+      celery -A CodeBoost worker --loglevel=info --pool=threads
+      "
     env_file:
       - .env
     restart: always
