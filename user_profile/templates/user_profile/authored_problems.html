@@ -1,0 +1,163 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/problems.css' %}" />
+
+
+<section class="problems-section">
+
+<div class="problems-header">
+  <h1>Authored Problems</h1>
+
+
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search problems..." />
+
+    <!-- Difficulty Filter -->
+    
+    <div class="custom-select" id="difficultyFilter">
+      <div class="cs-selected">
+        <div class="cs-left">
+          <div class="cs-dot" id="csDot"></div>
+          <span class="cs-label" id="csLabel">All Difficulty</span>
+        </div>
+        <svg class="cs-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="cs-options">
+        <div class="cs-header">Difficulty</div>
+        <div class="cs-option opt-all active" data-value="" data-label="All Difficulty" data-dot="">
+          <span class="opt-dot"></span><span class="opt-label">All</span>
+          <svg class="opt-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="cs-divider"></div>
+        <div class="cs-option opt-easy" data-value="easy" data-label="Easy" data-dot="easy">
+          <span class="opt-dot"></span><span class="opt-label">Easy</span>
+          <svg class="opt-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="cs-option opt-medium" data-value="medium" data-label="Medium" data-dot="medium">
+          <span class="opt-dot"></span><span class="opt-label">Medium</span>
+          <svg class="opt-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="cs-option opt-hard" data-value="hard" data-label="Hard" data-dot="hard">
+          <span class="opt-dot"></span><span class="opt-label">Hard</span>
+          <svg class="opt-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="cs-option opt-challenging" data-value="challenging" data-label="Challenging" data-dot="challenging">
+          <span class="opt-dot"></span><span class="opt-label">Challenging</span>
+          <svg class="opt-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Difficulty Filter -->
+
+  </div>
+</div>
+
+<div class="problems-wrapper" id="problemsContainer">
+
+  <div class="problem-row header">
+    <div>ID</div>
+    <div>Title</div>
+    <div>Difficulty</div>
+    <!-- <div>Solved</div> -->
+  </div>
+
+</div>
+
+</section>
+
+<script>
+const problems = [
+  {% for problem in problems %}
+  {
+    id: {{ problem.id }},
+    title: "{{ problem.title|escapejs }}",
+    difficulty: "{{ problem.difficulty }}",
+    // solved: {% if problem.id in solved_ids %}true{% else %}false{% endif %}
+  },
+  {% endfor %}
+];
+
+// console.log(problems)
+
+const container = document.getElementById('problemsContainer');
+const searchInput = document.getElementById('searchInput');
+const difficultyFilter = document.getElementById('difficultyFilter');
+
+function renderProblems(list){
+  container.innerHTML = `
+    <div class="problem-row header">
+      <div>ID</div>
+      <div>Title</div>
+      <div>Difficulty</div>
+
+    </div>
+  `;
+
+  list.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'problem-row';
+    row.onclick = () => {
+      window.location.href = `/problems/problem_detail/${p.id}/`;
+    };
+
+    row.innerHTML = `
+      <div class="col-id">#${p.id}</div>
+      <div class="col-title">${p.title}</div>
+      <div class="col-difficulty">
+        <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
+      </div>
+      
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+function filterProblems(){
+  const search = searchInput.value.toLowerCase();
+  const difficulty = document.querySelector('.cs-options .cs-option.active').dataset.value;
+
+  const filtered = problems.filter(p => {
+    const matchSearch = p.title.toLowerCase().includes(search);
+    const matchDifficulty = difficulty ? p.difficulty === difficulty : true;
+    return matchSearch && matchDifficulty;
+  });
+
+  renderProblems(filtered);
+}
+
+searchInput.addEventListener('input', filterProblems);
+difficultyFilter.addEventListener('change', filterProblems);
+
+renderProblems(problems);
+
+// Difficulty Filter
+
+const dd = document.getElementById('difficultyFilter');
+const dot = document.getElementById('csDot');
+const lbl = document.getElementById('csLabel');
+
+dd.querySelector('.cs-selected').addEventListener('click', () => dd.classList.toggle('open'));
+
+dd.querySelectorAll('.cs-option').forEach(o => {
+  o.addEventListener('click', () => {
+    dd.querySelectorAll('.cs-option').forEach(x => x.classList.remove('active'));
+    o.classList.add('active');
+    lbl.textContent = o.dataset.label;
+    dot.className = 'cs-dot ' + (o.dataset.dot || '');
+    dd.classList.remove('open');
+    filterProblems();
+  });
+});
+
+document.addEventListener('click', e => { if (!dd.contains(e.target)) dd.classList.remove('open'); });
+
+// Difficulty Filter
+
+</script>
+
+{% endblock %}

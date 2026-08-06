@@ -50,6 +50,7 @@ def problems(request):
 @ratelimit(key='user', rate='10/m', method='POST', block=True)
 @login_required(login_url='/accounts/google/login/')
 def problem_detail(request, problem_id):
+    user = request.user
     problem_details = get_problem_details(problem_id)
 
     if not problem_details:
@@ -66,7 +67,7 @@ def problem_detail(request, problem_id):
     problem = problem_details['problem']
     testcases = problem_details['testcases']
 
-    if not problem.is_public:
+    if not problem.is_public and user != problem.created_by:
         # contest = problem.contests.first()
 
         # if contest:
@@ -80,7 +81,6 @@ def problem_detail(request, problem_id):
 
         return HttpResponse('Permission Denied To View Contest Problem')
     
-    user = request.user
 
     is_admin = False
 

@@ -421,6 +421,12 @@ def contest_page(request, id):
             id__in=contest.problems.all()
         )
 
+        unincluded_problems = Problem.objects.filter(
+            Q(is_public=True) | Q(created_by=user)
+        ).exclude(
+            id__in=contest.problems.all()
+        ).distinct()
+
         moderators = contest.moderators.all()
         
         non_moderator_users = User.objects.filter(is_staff=False).exclude(
