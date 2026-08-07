@@ -135,7 +135,7 @@ function filterProblems(){
   const difficulty = document.querySelector('.cs-options .cs-option.active').dataset.value;
 
   const filtered = problems.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(search);
+    const matchSearch = p.title.toLowerCase().includes(search) || String(p.id).includes(search);
     const matchDifficulty = difficulty ? p.difficulty === difficulty : true;
     return matchSearch && matchDifficulty;
   });
