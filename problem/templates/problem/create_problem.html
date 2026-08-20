@@ -4,7 +4,6 @@
 
 <link rel="stylesheet" href="{% static 'css/problem/create_problem.css' %}" />
 
-
 <div class="create-problem-container">
 
 <form id="createProblemForm"
@@ -89,6 +88,30 @@
 
     <h3 class="section-title">Test Cases</h3>
 
+    <div class="tc-upload-row">
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('zipUpload').click()">
+            <p>Drop a .zip here or click to upload test cases</p>
+            <input type="file" id="zipUpload" accept=".zip" style="display:none">
+        </div>
+
+        <a href="{% static 'zip/sample_testcases.zip' %}" download class="sample-download">
+            <span class="sample-icon">⬇</span>
+            <span>
+                <strong>Download example zip</strong>
+                <small>see the expected folder structure</small>
+            </span>
+        </a>
+    </div>
+
+    <div class="zip-result" id="zipResult">
+        <div class="zip-result-icon">✓</div>
+        <div class="zip-result-body">
+            <strong id="zipFileName">sample_testcases.zip</strong>
+            <span id="zipCountText">12 test cases loaded</span>
+        </div>
+        <button type="button" class="zip-clear" id="zipClearBtn" title="Remove uploaded zip">✕</button>
+    </div>
+
     <input type="hidden" name="testcases" id="testcasesInput">
 
     <div id="testcases-container"></div>
@@ -114,11 +137,13 @@ function addTestcase(){
 
     const inputId = `testcaseInput-${testcaseCounter++}`;
     const outputId = `testcaseOutput-${testcaseCounter++}`;
+    const testcaseNumber = document.querySelectorAll(".testcase").length + 1;
 
     const div = document.createElement("div")
     div.classList.add("testcase")
 
     div.innerHTML = `
+        <div class="testcase-number">Test Case #${testcaseNumber}</div>
 
         <div class="form-group">
             <textarea class="form-input form-textarea testcase_input" id="${inputId}" placeholder=" " required></textarea>
@@ -138,13 +163,19 @@ function addTestcase(){
             </label>
 
             <button type="button" class="btn btn-remove"
-                onclick="this.parentElement.parentElement.remove()">
+                onclick="this.parentElement.parentElement.remove(); renumberTestcases();">
                 Remove
             </button>
         </div>
     `
 
     container.appendChild(div)
+}
+
+function renumberTestcases(){
+    document.querySelectorAll(".testcase").forEach((block, i) => {
+        block.querySelector(".testcase-number").textContent = `Test Case #${i + 1}`;
+    });
 }
 
 function collectTestcases() {
@@ -164,11 +195,103 @@ function collectTestcases() {
         });
     });
 
-    return storeTestcases;
+    return storeTestcases.concat(zipTestcases);
 }
 
 
 addTestcase();
+
+
+
+
+
+// Testcase Zip
+let zipTestcases = [];
+
+const dropzone = document.getElementById('dropzone');
+const zipInput = document.getElementById('zipUpload');
+
+['dragover','dragleave','drop'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropzone.classList.toggle('drag', evt === 'dragover');
+        if (evt === 'drop' && e.dataTransfer.files[0]) handleZipFile(e.dataTransfer.files[0]);
+    });
+});
+
+zipInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleZipFile(e.target.files[0]);
+    e.target.value = '';
+});
+
+const MAX_ZIP_SIZE = 50 * 1024 * 1024; // keep in sync with DATA_UPLOAD_MAX_MEMORY_SIZE
+
+async function handleZipFile(file) {
+    if (file.size > MAX_ZIP_SIZE) {
+        alert(`This zip is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max allowed is ${MAX_ZIP_SIZE / 1024 / 1024}MB.`);
+        return;
+    }
+
+    try {
+        const zip = await JSZip.loadAsync(file);
+        const pairs = {};
+
+        for (const relPath in zip.files) {
+            const entry = zip.files[relPath];
+            if (entry.dir) continue;
+
+            const inMatch = relPath.match(/input[\/\\](?:input)?(\d+)\.txt$/i);
+            const outMatch = relPath.match(/output[\/\\](?:output)?(\d+)\.txt$/i);
+
+            if (inMatch) {
+                const k = inMatch[1];
+                pairs[k] = pairs[k] || {};
+                pairs[k].inputEntry = entry;
+            } else if (outMatch) {
+                const k = outMatch[1];
+                pairs[k] = pairs[k] || {};
+                pairs[k].outputEntry = entry;
+            }
+        }
+
+        const nums = Object.keys(pairs).sort((a, b) => parseInt(a) - parseInt(b));
+        zipTestcases = []; // reset in case of re-upload
+
+        for (const num of nums) {
+            const { inputEntry, outputEntry } = pairs[num];
+            if (!inputEntry || !outputEntry) continue;
+
+            const testcase_input = await inputEntry.async("string");
+            const testcase_output = await outputEntry.async("string");
+
+            zipTestcases.push({ testcase_input, testcase_output, hidden_testcase: true });
+        }
+
+        if (zipTestcases.length === 0) {
+            alert('No matching input/output pairs found in this zip.');
+            return;
+        }
+
+        document.getElementById('zipFileName').textContent = file.name;
+        document.getElementById('zipCountText').textContent =
+            `${zipTestcases.length} test case${zipTestcases.length !== 1 ? 's' : ''} loaded`;
+        document.getElementById('zipResult').classList.add('show');
+    } catch (err) {
+        console.error(err);
+        alert('Could not read the uploaded zip file.');
+    }
+}
+
+document.getElementById('zipClearBtn').addEventListener('click', () => {
+    zipTestcases = [];
+    document.getElementById('zipResult').classList.remove('show');
+});
+
+// Testcase Zip
+
+
+
+
 
 document.getElementById("createProblemForm").addEventListener("submit", function () {
     const collectedTestcases = collectTestcases();

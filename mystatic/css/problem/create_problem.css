@@ -373,3 +373,142 @@ input[type="number"] {
 .rules {
     color: red;
 }
+
+.testcase-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8b95a7;
+    margin-bottom: 8px;
+}
+
+/* Testcase Zip */
+.tc-upload-row {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 14px;
+    margin: 20px 0;
+}
+
+.dropzone {
+    border: 2px dashed #3a4560;
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    color: #cddcff;
+    font-size: 15px;
+    font-weight: 500;
+    background: rgba(79,140,255,.04);
+    transition: border-color .15s, background .15s;
+}
+.dropzone:hover, .dropzone.drag {
+    border-color: #4f8cff;
+    background: rgba(79,140,255,.1);
+    color: #fff;
+}
+.dropzone p { margin: 0; }
+
+.sample-download {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #2a3345;
+    border-radius: 12px;
+    padding: 16px;
+    text-decoration: none;
+    background: #10151f;
+    transition: border-color .15s, background .15s, transform .1s;
+}
+.sample-download:hover {
+    border-color: #4f8cff;
+    background: rgba(79,140,255,.08);
+    transform: translateY(-1px);
+}
+.sample-icon {
+    font-size: 18px;
+    color: #4f8cff;
+    flex-shrink: 0;
+}
+.sample-download strong {
+    display: block;
+    font-size: 13px;
+    color: #e7ebf3;
+    font-weight: 600;
+}
+.sample-download small {
+    display: block;
+    font-size: 11px;
+    color: #8b95a7;
+    margin-top: 2px;
+}
+
+.zip-result {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(61,220,132,.08), rgba(61,220,132,.03));
+    border: 1px solid rgba(61,220,132,.3);
+    margin: 20px 0;
+    animation: zipResultIn .25s ease;
+}
+.zip-result.show { display: flex; }
+
+@keyframes zipResultIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.zip-result-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(61,220,132,.15);
+    color: #3ddc84;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zip-result-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.zip-result-body strong {
+    font-size: 13.5px;
+    color: #e7ebf3;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zip-result-body span {
+    font-size: 12px;
+    color: #a4f0c4;
+}
+
+.zip-clear {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: 1px solid #2a3345;
+    background: transparent;
+    color: #8b95a7;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+}
+.zip-clear:hover {
+    border-color: #ff5f7e;
+    color: #ff5f7e;
+    background: rgba(255,95,126,.08);
+}
+/* Testcase Zip */
