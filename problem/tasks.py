@@ -29,6 +29,8 @@ def code_submission(self, submission_id):
         final_verdict = 'Invalid'
         testcase_details = []
 
+        # http://192.168.95.128:2358/docs
+
         url = f'http://192.168.95.128:2358/submissions/?base64_encoded=false&wait=true'
 
         headers = {
