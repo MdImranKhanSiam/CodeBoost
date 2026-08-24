@@ -38,11 +38,11 @@ jobs:
 
             # docker rm -f codeboost_web
 
-            docker image prune -af
-
             docker compose build --no-cache web
 
             docker compose up -d
+
+            docker image prune -af
 
             echo "──────────────────────────────────"
             echo "✅ Deployment successful!"
