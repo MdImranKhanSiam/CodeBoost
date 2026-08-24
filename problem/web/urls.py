@@ -8,7 +8,9 @@ urlpatterns = [
     path('delete_problem/<str:problem_id>', views.delete_problem, name='delete-problem'),
     path('problem_detail/<str:problem_id>/', views.problem_detail, name='problem-detail'),
     path('submission/', views.submission, name='submission'),
+    path('submission_problem/<str:problem_id>/', views.submission_problem, name='submission-problem'),
     path('api/submission/', views.submissions_api, name='submission-api'),
+    path('api/submission/<str:problem_id>/', views.submission_problem_api, name='submission-problem-api'),
     path('submission_details/<str:id>/', views.submission_details, name='submission-details'),
     path('language_snippet/', views.language_snippet, name='language-snippet'),
 ]

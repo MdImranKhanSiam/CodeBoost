@@ -52,6 +52,14 @@
         <br><br>
     {% endif %}
 
+    <button class="problem-settings-btn" onclick="window.location.href='{% url 'submission-problem' problem.id %}'">
+        <span class="icon">
+            <i class="fa-solid fa-code"></i>
+        </span>
+        <span class="text">Submissions</span>
+    </button>
+    <br><br>
+
     <h1>{{ problem.title }}</h1>
 
     <div class="problem-meta">

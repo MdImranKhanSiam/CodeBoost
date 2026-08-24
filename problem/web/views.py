@@ -14,9 +14,11 @@ from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 from home.web.cache import invalidate_homepage
 from . cache import get_problems_page, set_problems_page, invalidate_problems_page
 from . cache import get_submission_api, set_submission_api, invalidate_submission_api, invalidate_universal_submission_api
+from . cache import get_submission_problem_api, set_submission_problem_api, invalidate_submission_problem_api, invalidate_universal_submission_problem_api
 from . cache import get_submission_details, set_submission_details, invalidate_universal_submission_details
 from . cache import get_edit_problem, set_edit_problem, invalidate_edit_problem
 from . cache import get_problem_details, set_problem_details, invalidate_problem_details
+
 
 
 @ratelimit(key='user', rate='30/m', method='GET', block=True)
@@ -93,6 +95,7 @@ def problem_detail(request, problem_id):
     if request.method == 'POST':
         invalidate_homepage()
         invalidate_submission_api(user.id)
+        invalidate_submission_problem_api(user.id, problem_id)
 
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
@@ -303,6 +306,7 @@ def delete_problem(request, problem_id):
         invalidate_problems_page()
         invalidate_universal_submission_api()
         invalidate_universal_submission_details()
+        invalidate_universal_submission_problem_api()
         invalidate_problem_details(problem_id)
 
         return redirect('problems')
@@ -358,6 +362,55 @@ def submissions_api(request):
         }
 
         set_submission_api(user.id, context)
+        
+    return JsonResponse(context)
+
+
+
+
+@ratelimit(key='user', rate='40/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def submission_problem(request, problem_id):
+    context = {
+        'problem_id': problem_id,
+    }
+
+    return render(request, 'problem/submission_problem.html', context)
+
+
+
+
+@ratelimit(key='user', rate='30/m', method='GET', block=True)
+@login_required(login_url='/accounts/google/login/')
+def submission_problem_api(request, problem_id):
+    user = request.user
+
+    context = get_submission_problem_api(user.id, problem_id)
+
+    if not context:
+        submissions = Submission.objects.filter(user=user, problem_id=problem_id, contest__isnull=True).order_by('-submitted_at')
+        
+        data = []
+
+        for sub in submissions:
+            data.append({
+                "submission_id": sub.id,
+                "problem_title": sub.problem.title,
+                "problem_id": sub.problem.id,
+                "status": sub.verdict,
+                "language": LANGUAGES[sub.language],
+                "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "execution_time": sub.execution_time,
+                "memory_used": sub.memory_used,
+                "total_testcases": sub.total_testcases,
+                "passed_testcases": sub.passed_testcases
+            })
+
+        context = {
+            "submissions": data,
+        }
+
+        set_submission_problem_api(user.id, problem_id, context)
         
     return JsonResponse(context)
 

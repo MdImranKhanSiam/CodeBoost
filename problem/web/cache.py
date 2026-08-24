@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 PROBLEMS_PAGE_CACHE_KEY = "problems:page:{user_id}"
 SUBMISSION_API_CACHE_KEY = "submission:api:{user_id}"
+SUBMISSION_PROBLEM_API_CACHE_KEY = "submission:problem:api:{user_id}:{problem_id}"
 SUBMISSION_DETAILS_CACHE_KEY = "submission:details:{user_id}:{submission_id}"
 EDIT_PROBLEM_CACHE_KEY = "edit:problem:{problem_id}"
 PROBLEM_DETAILS_CACHE_KEY = "problem:details:{problem_id}"
@@ -13,6 +14,7 @@ PROBLEM_DETAILS_CACHE_KEY = "problem:details:{problem_id}"
 
 TTL_PROBLEMS_PAGE = 60 * 60 * 24
 TTL_SUBMISSION_API = 60 * 60 * 12
+TTL_SUBMISSION_PROBLEM_API = 60 * 60 * 12
 TTL_SUBMISSION_DETAILS = 60 * 60 * 12
 TTL_EDIT_PROBLEM = 60 * 60 * 24 * 7
 TTL_PROBLEM_DETAILS = 60 * 60 * 24
@@ -84,6 +86,40 @@ def invalidate_universal_submission_api():
     except Exception:
         logger.warning("Cache unavailable: invalidate_submission_api")
 
+
+
+
+
+
+# SUBMISSION_PROBLEM_API
+def get_submission_problem_api(user_id, problem_id):
+    try:
+        return cache.get(SUBMISSION_PROBLEM_API_CACHE_KEY.format(user_id=user_id, problem_id=problem_id))
+    except Exception:
+        logger.warning("Cache unavailable: get_submission_problem_api")
+        return None
+    
+
+def set_submission_problem_api(user_id, problem_id, data):
+    try:
+        cache.set(SUBMISSION_PROBLEM_API_CACHE_KEY.format(user_id=user_id, problem_id=problem_id), data, TTL_SUBMISSION_PROBLEM_API)
+    except Exception:
+        logger.warning("Cache unavailable: set_submission_problem_api")
+
+
+def invalidate_submission_problem_api(user_id, problem_id):
+    try:
+        cache.delete(SUBMISSION_PROBLEM_API_CACHE_KEY.format(user_id=user_id, problem_id=problem_id))
+        logger.info(f"Submission Problem API cache invalidated for user {user_id}, problem id {problem_id}")
+    except Exception:
+        logger.warning("Cache unavailable: invalidate_submission_problem_api")
+
+
+def invalidate_universal_submission_problem_api():
+    try:
+        cache.delete_pattern(f"submission:problem:api:*")
+    except Exception:
+        logger.warning("Cache unavailable: invalidate_universal_submission_problem_api")
 
 
 
