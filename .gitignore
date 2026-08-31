@@ -11,3 +11,5 @@ data.json
 temp.py
 temp.html
 docker-compose-dev.yml
+*.sql
+*.gz

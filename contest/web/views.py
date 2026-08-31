@@ -468,11 +468,11 @@ def contest_page(request, id):
 
         problems = contest.problems.all().order_by('id')
 
-        serial = 'A'
+        start = 0
 
         for problem in problems:
-            problem.serial = serial
-            serial = chr(ord(serial) + 1)
+            start += 1
+            problem.serial = get_serial(start)
             getOverallStatus = overallStatus.get(problem.id, None)
 
             if getOverallStatus:

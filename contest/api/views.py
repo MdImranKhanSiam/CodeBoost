@@ -12,6 +12,7 @@ from contest.services import contest_rank
 
 from contest.api.cache import get_contest_leaderboard, set_contest_leaderboard, invalidate_contest_leaderboard
 
+from contest.services import get_serial
 
 
 @api_view(["GET"])
@@ -41,17 +42,16 @@ def contest_leaderboard(request):
 
         problems_data = []
 
-        serial = 'A'
+        start = 0
 
         for problem in problems:
+            start += 1
             current3 = {}
 
             current3['id'] = problem.id
-            current3['serial'] = serial
+            current3['serial'] = get_serial(start)
             current3['title'] = problem.title
             
-            serial = chr(ord(serial) + 1)
-
             problems_data.append(current3)
 
         standings, overallStatus = contest_rank(contest, problems, participants)

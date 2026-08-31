@@ -82,11 +82,7 @@ def contest_rank(contest, problems, participants):
 
 
 def get_serial(num):
-    serial = ""
+    length = (num - 1) // 26 + 1
+    letter = chr(ord('A') + (num - 1) % 26)
 
-    while num > 0:
-        num -= 1
-        serial = chr(ord('A') + num % 26) + serial
-        num //= 26
-
-    return serial
+    return letter * length
