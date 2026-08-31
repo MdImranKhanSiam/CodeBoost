@@ -77,3 +77,16 @@ def contest_rank(contest, problems, participants):
     rank = sorted(rank, key=lambda x: (-x["total_solved"], x["total_penalty"]))
 
     return rank, overallStatus
+
+
+
+
+def get_serial(num):
+    serial = ""
+
+    while num > 0:
+        num -= 1
+        serial = chr(ord('A') + num % 26) + serial
+        num //= 26
+
+    return serial

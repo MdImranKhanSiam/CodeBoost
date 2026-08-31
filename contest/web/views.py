@@ -14,7 +14,7 @@ from datetime import timezone as dt_timezone, timedelta
 from django_ratelimit.decorators import ratelimit
 from contest.models import Contest
 from contest.forms import ContestForm
-from contest.services import contest_rank
+from contest.services import contest_rank, get_serial
 
 from contest.web.cache import get_contests_page, set_contests_page, invalidate_contests_page
 from contest.web.cache import get_private_contests, set_private_contests, invalidate_private_contests
@@ -406,13 +406,14 @@ def contest_page(request, id):
 
     standings, overallStatus = contest_rank(contest, problems, participants)
 
-    serial = 'A'
+    start = 0
 
     for problem in problems:
-        problem.serial = serial
-        serial = chr(ord(serial) + 1)
+        start += 1
+        problem.serial = get_serial(start)
         problem.solved = overallStatus[problem.id]['solved']
         problem.attempted = overallStatus[problem.id]['attempted']
+
 
 
     if (user.is_staff or user == contest.created_by or user in contest.moderators.all()):
