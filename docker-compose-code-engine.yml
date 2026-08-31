@@ -6,7 +6,7 @@ services:
     command: >
       sh -c "
       echo 'Waiting for Judge0...';
-      until curl -s -o /dev/null -w '%{http_code}' http://192.168.95.128:2358/languages | grep -q 200; do
+      until curl -s -o /dev/null -w '%{http_code}' http://${LINUX_JUDGE0_IP}:2358/languages | grep -q 200; do
         echo 'Judge0 not ready, retrying in 5s...';
         sleep 5;
       done;

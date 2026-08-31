@@ -1,5 +1,5 @@
+import requests, os
 from celery import shared_task
-import requests
 from . models import Submission
 from . web.cache import invalidate_submission_api, invalidate_individual_current_submission_details, invalidate_user_problems_page, invalidate_submission_problem_api
 from user_profile.api.cache import invalidate_user_progress_heatmap
@@ -31,7 +31,7 @@ def code_submission(self, submission_id):
 
         # http://192.168.95.128:2358/docs
 
-        url = f'http://192.168.95.128:2358/submissions/?base64_encoded=false&wait=true'
+        url = f'http://{os.getenv('LINUX_JUDGE0_IP')}:2358/submissions/?base64_encoded=false&wait=true'
 
         headers = {
             "Content-Type": "application/json"

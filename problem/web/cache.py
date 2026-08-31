@@ -47,7 +47,7 @@ def invalidate_problems_page():
 def invalidate_user_problems_page(user_id):
     try:
         cache.delete(PROBLEMS_PAGE_CACHE_KEY.format(user_id=user_id))
-        logger.info(f"Problems Page Cache Invalidated For User {user_id}")
+        # logger.info(f"Problems Page Cache Invalidated For User {user_id}")
     except Exception:
         logger.warning("Cache unavailable: invalidate_user_problems_page")
 
@@ -110,7 +110,7 @@ def set_submission_problem_api(user_id, problem_id, data):
 def invalidate_submission_problem_api(user_id, problem_id):
     try:
         cache.delete(SUBMISSION_PROBLEM_API_CACHE_KEY.format(user_id=user_id, problem_id=problem_id))
-        logger.info(f"Submission Problem API cache invalidated for user {user_id}, problem id {problem_id}")
+        # logger.info(f"Submission Problem API cache invalidated for user {user_id}, problem id {problem_id}")
     except Exception:
         logger.warning("Cache unavailable: invalidate_submission_problem_api")
 
