@@ -84,12 +84,20 @@ const problems = [
     id: {{ problem.id }},
     title: "{{ problem.title|escapejs }}",
     difficulty: "{{ problem.difficulty }}",
-    solved: {% if problem.id in solved_ids %}true{% else %}false{% endif %}
+    solved: {% if problem.id in solved_ids %}true{% else %}false{% endif %},
+
+    tags: [
+      {% for tag in problem.tags.all %}
+      {
+        tag: "{{ tag.name|escapejs }}",
+      },
+      {% endfor %}
+    ],
   },
   {% endfor %}
 ];
 
-console.log(problems)
+// console.log(problems)
 
 const container = document.getElementById('problemsContainer');
 const searchInput = document.getElementById('searchInput');
@@ -114,7 +122,10 @@ function renderProblems(list){
 
     row.innerHTML = `
       <div class="col-id">#${p.id}</div>
-      <div class="col-title">${p.title}</div>
+      <div class="col-title">
+        ${p.title}
+        ${p.tags && p.tags.length ? `<div class="col-tags">${p.tags.map(t => `<span class="tag-chip">${t.tag}</span>`).join('')}</div>` : ''}
+      </div>
       <div class="col-difficulty">
         <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
       </div>
@@ -135,7 +146,7 @@ function filterProblems(){
   const difficulty = document.querySelector('.cs-options .cs-option.active').dataset.value;
 
   const filtered = problems.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(search) || String(p.id).includes(search);
+    const matchSearch = p.title.toLowerCase().includes(search) || String(p.id).includes(search) || p.tags.some(t => t.tag.toLowerCase().includes(search));
     const matchDifficulty = difficulty ? p.difficulty === difficulty : true;
     return matchSearch && matchDifficulty;
   });
