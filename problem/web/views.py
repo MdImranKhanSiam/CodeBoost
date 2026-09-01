@@ -229,11 +229,13 @@ def edit_problem(request, problem_id):
         problem_type = 'public'
 
         current_testcases = current_problem.testcases.all()
+        all_tags = Tags.objects.all()
 
         context = {
             'problem_type': problem_type,
             'current_problem': current_problem,
             'current_testcases': current_testcases,
+            'all_tags': all_tags,
         }
 
         set_edit_problem(problem_id, context)
@@ -254,6 +256,10 @@ def edit_problem(request, problem_id):
         time_limit = request.POST.get('time_limit')
         memory_limit = request.POST.get('memory_limit')
 
+        tags_json = request.POST.get("tags")
+        tags_ids = json.loads(tags_json)
+        selected_tags = Tags.objects.filter(id__in=tags_ids)
+        
         testcases = json.loads(request.POST.get('testcases'))
 
         # All actions are discarded if the creation of either the problem or the testcase object fails.
@@ -284,13 +290,14 @@ def edit_problem(request, problem_id):
 
             TestCase.objects.bulk_create(testcase_objects)
 
+            current_problem.tags.set(selected_tags)
+
         if current_problem:
             invalidate_problems_page()
             invalidate_edit_problem(problem_id)
             invalidate_problem_details(problem_id)
 
             return redirect('problem-detail', current_problem.id)
-        
 
     return render(request, 'problem/edit_problem.html', context)
 
