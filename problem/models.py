@@ -4,6 +4,13 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Tags(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+
 class Problem(models.Model):
     DIFFICULTY_LEVEL = [
         ('easy', 'Easy'),
@@ -14,6 +21,7 @@ class Problem(models.Model):
 
     title = models.CharField(max_length=255)
     # slug = models.SlugField(unique=True)
+    tags = models.ManyToManyField(Tags, related_name='problems', null=True, blank=True)
     statement = models.TextField()
     problem_input = models.TextField()
     problem_output = models.TextField()
@@ -30,6 +38,9 @@ class Problem(models.Model):
             models.Index(fields=['difficulty']),
             models.Index(fields=['created_at']),
         ]
+
+
+
 
 
 

@@ -3,6 +3,7 @@
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/problem/create_problem.css' %}" />
+<link rel="stylesheet" href="{% static 'css/contest/contest_page_second.css' %}">
 
 <div class="create-problem-container">
 
@@ -62,7 +63,20 @@
         <textarea class="form-input form-textarea" name="note" id="note" placeholder=" "></textarea>
         <label for="note" class="form-label">Note (optional)</label>
     </div>
-    
+
+     
+    <div class="selector">
+        <div class="form-group">
+            <input class="form-input" type="text" name="tags" id="tagSearch" placeholder=" ">
+            <label class="form-label" for="tags">Tags</label>
+        </div>
+        <div class="dropdown" id="tagsDropdown"></div>
+        <div class="selected" id="selectedTags"></div>
+    </div>
+    <input type="hidden" name="tags" id="tagsInput">
+        
+    <br>
+
 
     <label for="difficulty">Difficulty:</label>
     <select name="difficulty">
@@ -289,6 +303,72 @@ document.getElementById('zipClearBtn').addEventListener('click', () => {
 
 // Testcase Zip
 
+
+
+//Tags
+let tags = [];
+
+{% for tag in all_tags %}
+    tags.push({ 
+        id: {{ tag.id }}, 
+        name: "{{ tag.name|escapejs }}" 
+    });
+{% endfor %}
+
+let selectedTags = [];
+
+function initSearch({ inputId, dropdownId, selectedBoxId, data, selectedArray, labelKey }) {
+    const input = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    const selectedBox = document.getElementById(selectedBoxId);
+    input.addEventListener("input", function () {
+        const value = input.value.toLowerCase();
+        dropdown.innerHTML = "";
+        if (!value) return;
+        const filtered = data.filter(item => (item[labelKey] || "").toLowerCase().includes(value));
+        filtered.forEach(item => {
+            if (selectedArray.includes(item.id)) return;
+            const option = document.createElement("div");
+            option.className = "dropdown-item";
+            option.textContent = item[labelKey];
+            
+            option.onclick = () => {
+                selectedArray.push(item.id);
+                renderSelected(selectedBox, selectedArray, data, labelKey);
+                dropdown.innerHTML = "";
+                input.value = "";
+                updateHiddenInputs();
+            };
+            dropdown.appendChild(option);
+        });
+    });
+}
+
+function renderSelected(container, selectedArray, data, labelKey) {
+    container.innerHTML = "";
+    selectedArray.forEach(id => {
+        const item = data.find(x => x.id === id);
+        if (!item) return;
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.innerHTML = `<span>${item[labelKey]}</span><span class="remove-btn">✖</span>`;
+        
+        tag.querySelector(".remove-btn").onclick = () => {
+            const index = selectedArray.indexOf(id);
+            if (index > -1) selectedArray.splice(index, 1);
+            renderSelected(container, selectedArray, data, labelKey);
+            updateHiddenInputs();
+        };
+        container.appendChild(tag);
+    });
+}
+
+function updateHiddenInputs() {
+    document.getElementById("tagsInput").value = JSON.stringify(selectedTags);
+}
+
+initSearch({ inputId: "tagSearch", dropdownId: "tagsDropdown", selectedBoxId: "selectedTags", data: tags, selectedArray: selectedTags, labelKey: "name"});
+//Tags
 
 
 

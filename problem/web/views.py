@@ -7,7 +7,7 @@ from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from django.core.cache import cache
 
-from problem.models import Problem, TestCase, Submission
+from problem.models import Problem, Tags, TestCase, Submission
 from problem.tasks import code_submission
 from problem.languages import LANGUAGES, LANGUAGE_SNIPPETS
 
@@ -148,6 +148,7 @@ def language_snippet(request):
 @login_required(login_url='/accounts/google/login/')
 def create_problem(request):
     problem_type = 'public'
+    all_tags = Tags.objects.all()
     problem = None
 
     if request.method == 'POST':
@@ -159,6 +160,10 @@ def create_problem(request):
         difficulty = request.POST.get('difficulty')
         time_limit = request.POST.get('time_limit')
         memory_limit = request.POST.get('memory_limit')
+
+        tags_json = request.POST.get("tags")
+        tags_ids = json.loads(tags_json)
+        selected_tags = Tags.objects.filter(id__in=tags_ids)
 
         testcases = json.loads(request.POST.get('testcases'))
 
@@ -191,6 +196,7 @@ def create_problem(request):
             TestCase.objects.bulk_create(testcase_objects)
 
         if problem:
+            problem.tags.add(*selected_tags)
             invalidate_homepage()
             invalidate_problems_page()
 
@@ -199,6 +205,7 @@ def create_problem(request):
 
     context = {
         'problem_type': problem_type,
+        'all_tags': all_tags,
     }
 
     return render(request, 'problem/create_problem.html', context)
