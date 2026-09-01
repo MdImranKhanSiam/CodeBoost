@@ -112,7 +112,6 @@ def code_submission(self, submission_id):
                 }
             )
                 
-            
 
         if final_verdict == 'Accepted':
             if passed_testcases < total_testcases:
@@ -135,32 +134,21 @@ def code_submission(self, submission_id):
             invalidate_user_progress_heatmap(user_id)
 
         submission.save()
-
-        invalidate_cache.apply_async(
-            args=[user_id, submission.id, submission.problem.id],
-            countdown=1
-        )
-
+        
+        
         pass
     except Exception as exc:
         raise self.retry(exc=exc)
+
+
+    invalidate_submission_api(user_id)
+    invalidate_individual_current_submission_details(user_id, submission.id)
+    invalidate_submission_api(user_id)
+    invalidate_user_problems_page(user_id)
+    invalidate_submission_problem_api(user_id, problem.id)
     
     
 
-
-
-
-@shared_task(ignore_result=True, bind=True, max_retries=3, default_retry_delay=5, acks_late=True, reject_on_worker_lost=True,)
-def invalidate_cache(self, user_id, submission_id, problem_id):
-    try:
-        invalidate_submission_api(user_id)
-        invalidate_individual_current_submission_details(user_id, submission_id)
-        invalidate_submission_api(user_id)
-        invalidate_user_problems_page(user_id)
-        invalidate_submission_problem_api(user_id, problem_id)
-        pass
-    except Exception as exc:
-        raise self.retry(exc=exc)
 
 
 
