@@ -268,8 +268,7 @@
 
 
 
-
-
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
 
@@ -542,32 +541,15 @@ function closeAiModal() {
 }
 
 let revealTimeouts = [];
-
-function parseAiBlocks(raw) {
-    // returns an array of { tag: 'p'|'li', html: '...' } blocks
-    let text = raw
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/`(.+?)`/g, '<code>$1</code>');
-
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    const blocks = [];
-
-    for (const line of lines) {
-        if (line.startsWith('- ')) {
-            blocks.push({ tag: 'li', html: line.slice(2) });
-        } else {
-            blocks.push({ tag: 'p', html: line });
-        }
-    }
-    return blocks;
-}
+let scrollInterval = null;
 
 function clearReveal() {
     revealTimeouts.forEach(t => clearTimeout(t));
     revealTimeouts = [];
+    if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+    }
 }
 
 function showAiResult(text) {
@@ -578,39 +560,51 @@ function showAiResult(text) {
     aiContent.style.display = 'block';
     aiContent.innerHTML = '';
 
-    const blocks = parseAiBlocks(text);
+    // Parse full markdown (bold, italic, lists, tables, code blocks, headers, etc.)
+    const html = marked.parse(text, { breaks: true, gfm: true });
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
 
-    let container = aiContent;
-    let openList = null;
     let delay = 0;
+    let idx = 0;
 
-    blocks.forEach((block, idx) => {
-        if (block.tag === 'li') {
-            if (!openList) {
-                openList = document.createElement('ul');
-                aiContent.appendChild(openList);
-            }
-        } else {
-            openList = null;
-        }
-
-        const el = document.createElement(block.tag);
-        el.classList.add('ai-line');
-        el.innerHTML = block.html;
-        el.style.animationDelay = `${delay}ms`;
-
-        (block.tag === 'li' ? openList : aiContent).appendChild(el);
-
-        // wave stagger: slightly uneven timing feels more organic than a fixed interval
-        const step = 90 + Math.sin(idx * 0.7) * 25; // varies ~65-115ms
+    const nextDelay = () => {
+        const step = 90 + Math.sin(idx * 0.7) * 25; // wave stagger, ~65-115ms
         delay += step;
+        idx++;
+        return delay;
+    };
 
-        // auto-scroll as each line becomes visible
-        const t = setTimeout(() => {
-            aiContent.scrollTop = aiContent.scrollHeight;
-        }, delay);
-        revealTimeouts.push(t);
+    Array.from(temp.children).forEach(node => {
+        if (node.tagName === 'UL' || node.tagName === 'OL') {
+            // reveal each list item individually for the wave effect
+            const list = document.createElement(node.tagName);
+            aiContent.appendChild(list);
+            Array.from(node.children).forEach(li => {
+                const item = document.createElement('li');
+                item.classList.add('ai-line');
+                item.innerHTML = li.innerHTML;
+                item.style.animationDelay = `${nextDelay()}ms`;
+                list.appendChild(item);
+            });
+        } else {
+            // paragraphs, headers, tables, code blocks, blockquotes — one block each
+            const clone = node.cloneNode(true);
+            clone.classList.add('ai-line');
+            clone.style.animationDelay = `${nextDelay()}ms`;
+            aiContent.appendChild(clone);
+        }
     });
+
+    // auto-scroll while lines are revealing
+    scrollInterval = setInterval(() => {
+        aiContent.scrollTop = aiContent.scrollHeight;
+    }, 150);
+    const stopScroll = setTimeout(() => {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+    }, delay + 300);
+    revealTimeouts.push(stopScroll);
 }
 
 function showAiError(message) {
