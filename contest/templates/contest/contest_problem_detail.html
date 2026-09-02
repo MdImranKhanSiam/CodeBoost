@@ -1,0 +1,461 @@
+{% extends 'home/master.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+<div id="floatingError" class="floating-error"></div>
+
+{% if is_admin %}
+    <div class="problem-settings-modal" id="problemSettingsModal">
+        <div class="problem-settings-modal-content">
+            <h3>Problem Settings</h3>
+            <button class="problem-settings-btn" id="editProblemBtn" onclick="window.location.href='{% if problem.is_public %}{% url 'edit-problem' problem.id %}{% else %}{% url 'edit-contest-problem' problem.id %}{% endif %}'">
+                <span class="icon">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </span>
+                <span class="text">Edit Problem</span>
+            </button>
+
+            <button class="problem-settings-btn" id="deleteProblemBtn" onclick="window.location.href='{% if problem.is_public %}{% url 'delete-problem' problem.id %}{% else %}{% url 'delete-contest-problem' problem.id %}{% endif %}?next={{ request.get_full_path }}'">
+                <span class="icon">
+                    <i class="fa-solid fa-trash"></i>
+                </span>
+                <span class="text">Delete Problem</span>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+<!-- LEFT SIDE -->
+<div class="problem-section">
+    {% if is_admin %}
+        <button class="problem-settings-btn" id="problemSettingsBtn">
+            <span class="icon">
+                <i class="fa-solid fa-gear"></i>
+            </span>
+            <span class="text">Problem Settings</span>
+        </button>
+        <br><br>
+    {% endif %}
+
+
+    {% if contest_id %}
+        <button class="problem-settings-btn" onclick="window.location.href='{% url 'contest-page' contest_id %}'">
+            <span class="icon">
+                <i class="fa-solid fa-eye"></i>
+            </span>
+            <span class="text">View Contest</span>
+        </button>
+        <br><br>
+    {% endif %}
+
+    <button class="problem-settings-btn" onclick="window.location.href='{% url 'submission-problem' problem.id %}'">
+        <span class="icon">
+            <i class="fa-solid fa-code"></i>
+        </span>
+        <span class="text">Submissions</span>
+    </button>
+    <br><br>
+
+    <h1>{{ problem.title }}</h1>
+
+    <div class="problem-meta">
+        <span>Problem ID: #{{ problem.id }}</span>
+        <span>{{ problem.difficulty|capfirst }}</span>
+        <span>Time Limit: {{ problem.time_limit }}s</span>
+        <span>Memory: {{ problem.memory_limit }}MB</span>
+        
+    </div>
+
+    <section>
+        <h2>Description</h2>
+        <p>{{ problem.statement }}</p>
+    </section>
+
+    <section>
+        <h2>Input</h2>
+        <p>{{ problem.problem_input }}</p>
+    </section>
+
+    <section>
+        <h2>Output</h2>
+        <p>{{ problem.problem_output }}</p>
+    </section>
+
+    {% if problem.note %}
+        <section>
+            <h2>Note</h2>
+            <p>{{ problem.note }}</p>
+        </section>
+    {% endif %}
+
+    <!-- SAMPLE TESTCASES -->
+
+    <section>
+
+        <h2>Examples</h2>
+
+        {% for testcase in testcases %}
+
+        <div class="example-box">
+
+            <h4>Example {{ forloop.counter }}</h4>
+
+            <div class="example-io">
+
+                <div>
+                    <strong>Input</strong>
+                    <pre>{{ testcase.input_data }}</pre>
+                </div>
+
+                <div>
+                    <strong>Output</strong>
+                    <pre>{{ testcase.expected_output }}</pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+</div>
+
+
+<div class="code_editor_container">
+
+<form method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+    {% csrf_token %}
+
+    <div class="topbar">
+        <div style="font-weight:600">Submit Solution</div>
+
+        <div class="upload-chip" id="uploadChip">
+            <label for="fileUpload" class="upload-chip-label">
+                <svg class="upload-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span id="uploadLabel">Upload file</span>
+            </label>
+            <button type="button" id="clearUpload" class="clear-upload-btn" hidden>✕</button>
+        </div>
+        <input type="file" id="fileUpload" name="source_code_file" hidden>
+
+        <div class="language-select">
+            <div class="language-btn" onclick="toggleDropdown()">
+            <span id="selectedLang"></span>
+            ▼
+            </div>
+
+            <div class="language-dropdown" id="dropdown">
+            <div onclick="selectLang('Assembly (NASM 2.14.02)',45)">Assembly (NASM 2.14.02)</div>
+            <div onclick="selectLang('Bash (5.0.0)',46)">Bash (5.0.0)</div>
+            <div onclick="selectLang('Basic (FBC 1.07.1)',47)">Basic (FBC 1.07.1)</div>
+            <div onclick="selectLang('C (Clang 7.0.1)',75)">C (Clang 7.0.1)</div>
+            <div onclick="selectLang('C++ (Clang 7.0.1)',76)">C++ (Clang 7.0.1)</div>
+            <div onclick="selectLang('C (GCC 7.4.0)',48)">C (GCC 7.4.0)</div>
+            <div onclick="selectLang('C++ (GCC 7.4.0)',52)">C++ (GCC 7.4.0)</div>
+            <div onclick="selectLang('C (GCC 8.3.0)',49)">C (GCC 8.3.0)</div>
+            <div onclick="selectLang('C++ (GCC 8.3.0)',53)">C++ (GCC 8.3.0)</div>
+            <div onclick="selectLang('C (GCC 9.2.0)',50)">C (GCC 9.2.0)</div>
+            <div onclick="selectLang('C++ (GCC 9.2.0)',54)">C++ (GCC 9.2.0)</div>
+            <div onclick="selectLang('Clojure (1.10.1)',86)">Clojure (1.10.1)</div>
+            <div onclick="selectLang('C# (Mono 6.6.0.161)',51)">C# (Mono 6.6.0.161)</div>
+            <div onclick="selectLang('COBOL (GnuCOBOL 2.2)',77)">COBOL (GnuCOBOL 2.2)</div>
+            <div onclick="selectLang('Common Lisp (SBCL 2.0.0)',55)">Common Lisp (SBCL 2.0.0)</div>
+            <div onclick="selectLang('D (DMD 2.089.1)',56)">D (DMD 2.089.1)</div>
+            <div onclick="selectLang('Elixir (1.9.4)',57)">Elixir (1.9.4)</div>
+            <div onclick="selectLang('Erlang (OTP 22.2)',58)">Erlang (OTP 22.2)</div>
+            <div onclick="selectLang('Executable',44)">Executable</div>
+            <div onclick="selectLang('F# (.NET Core SDK 3.1.202)',87)">F# (.NET Core SDK 3.1.202)</div>
+            <div onclick="selectLang('Fortran (GFortran 9.2.0)',59)">Fortran (GFortran 9.2.0)</div>
+            <div onclick="selectLang('Go (1.13.5)',60)">Go (1.13.5)</div>
+            <div onclick="selectLang('Groovy (3.0.3)',88)">Groovy (3.0.3)</div>
+            <div onclick="selectLang('Haskell (GHC 8.8.1)',61)">Haskell (GHC 8.8.1)</div>
+            <div onclick="selectLang('Java (OpenJDK 13.0.1)',62)">Java (OpenJDK 13.0.1)</div>
+            <div onclick="selectLang('JavaScript (Node.js 12.14.0)',63)">JavaScript (Node.js 12.14.0)</div>
+            <div onclick="selectLang('Kotlin (1.3.70)',78)">Kotlin (1.3.70)</div>
+            <div onclick="selectLang('Lua (5.3.5)',64)">Lua (5.3.5)</div>
+            <div onclick="selectLang('Multi-file program',89)">Multi-file program</div>
+            <div onclick="selectLang('Objective-C (Clang 7.0.1)',79)">Objective-C (Clang 7.0.1)</div>
+            <div onclick="selectLang('OCaml (4.09.0)',65)">OCaml (4.09.0)</div>
+            <div onclick="selectLang('Octave (5.1.0)',66)">Octave (5.1.0)</div>
+            <div onclick="selectLang('Pascal (FPC 3.0.4)',67)">Pascal (FPC 3.0.4)</div>
+            <div onclick="selectLang('Perl (5.28.1)',85)">Perl (5.28.1)</div>
+            <div onclick="selectLang('PHP (7.4.1)',68)">PHP (7.4.1)</div>
+            <div onclick="selectLang('Plain Text',43)">Plain Text</div>
+            <div onclick="selectLang('Prolog (GNU Prolog 1.4.5)',69)">Prolog (GNU Prolog 1.4.5)</div>
+            <div onclick="selectLang('Python (2.7.17)',70)">Python (2.7.17)</div>
+            <div onclick="selectLang('Python (3.8.1)',71)">Python (3.8.1)</div>
+            <div onclick="selectLang('R (4.0.0)',80)">R (4.0.0)</div>
+            <div onclick="selectLang('Ruby (2.7.0)',72)">Ruby (2.7.0)</div>
+            <div onclick="selectLang('Rust (1.40.0)',73)">Rust (1.40.0)</div>
+            <div onclick="selectLang('Scala (2.13.2)',81)">Scala (2.13.2)</div>
+            <div onclick="selectLang('SQL (SQLite 3.27.2)',82)">SQL (SQLite 3.27.2)</div>
+            <div onclick="selectLang('Swift (5.2.3)',83)">Swift (5.2.3)</div>
+            <div onclick="selectLang('TypeScript (3.7.4)',74)">TypeScript (3.7.4)</div>
+            <div onclick="selectLang('Visual Basic.Net (vbnc 0.0.0.5943)',84)">Visual Basic.Net (vbnc 0.0.0.5943)</div>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <input type="hidden" name="language_id" id="language_id">
+
+    <div class="code-editor">
+        <div class="editor-header">
+            <span>main.py</span>
+            <span id="status">Ready</span>
+        </div>
+
+        <textarea class="code-area" name="source_code" id="code" spellcheck="false"></textarea>
+    </div>
+
+    <div class="actions">
+        <button class="code-submit-btn" type="submit">Submit Code</button>
+    </div>
+
+</form>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<script>
+
+const isAdmin = {{ is_admin|yesno:"true,false" }};
+
+if (isAdmin) {
+    const problemSettingsModal = document.getElementById("problemSettingsModal");
+
+    const problemSettingsBtn = document.getElementById("problemSettingsBtn");
+
+    problemSettingsBtn.onclick = () => {
+        problemSettingsModal.classList.add("active");
+    };
+
+    problemSettingsModal.onclick = (e) => {
+        if (e.target === problemSettingsModal) problemSettingsModal.classList.remove("active");
+    };
+}
+
+
+
+// Back/Forward
+
+// window.addEventListener("pageshow", function (event) {
+//     const navigationEntries = performance.getEntriesByType("navigation");
+
+//     if (navigationEntries.length > 0) {
+//     if (navigationEntries[0].type === "back_forward") {
+//         console.log("User came using Back/Forward button");
+//         // location.reload();
+//     }
+//     }
+// });
+
+window.addEventListener("pageshow", function(event) {
+    if (event.persisted) {
+        // console.log("User came using back/forward button");
+        // location.reload();
+
+        document.getElementById('status').innerText = 'Solution Submitted';
+
+        setTimeout(() => {
+            document.getElementById('status').innerText = 'Ready';
+        }, 3000);
+    }
+});
+
+// Back/Forward
+
+
+const defaultName = "{{ language_name }}";
+const defaultId = "{{ language_id }}";
+
+const fileMap = {
+  "Assembly": "main.asm",
+  "Bash": "script.sh",
+  "Basic": "main.bas",
+  "C": "main.c",
+  "C++": "main.cpp",
+  "Clojure": "main.clj",
+  "C#": "main.cs",
+  "COBOL": "main.cob",
+  "Common Lisp": "main.lisp",
+  "D": "main.d",
+  "Elixir": "main.ex",
+  "Erlang": "main.erl",
+  "Executable": "main.out",
+  "F#": "main.fs",
+  "Fortran": "main.f90",
+  "Go": "main.go",
+  "Groovy": "main.groovy",
+  "Haskell": "main.hs",
+  "Java": "Main.java",
+  "JavaScript": "main.js",
+  "Kotlin": "Main.kt",
+  "Lua": "main.lua",
+  "Objective-C": "main.m",
+  "OCaml": "main.ml",
+  "Octave": "main.m",
+  "Pascal": "main.pas",
+  "Perl": "main.pl",
+  "PHP": "main.php",
+  "Plain Text": "main.txt",
+  "Prolog": "main.pl",
+  "Python": "main.py",
+  "R": "main.r",
+  "Ruby": "main.rb",
+  "Rust": "main.rs",
+  "Scala": "Main.scala",
+  "SQL": "main.sql",
+  "Swift": "main.swift",
+  "TypeScript": "main.ts",
+  "Visual Basic.Net": "main.vb",
+  "Multi-file program": "project"
+};
+    
+
+function toggleDropdown(){
+  const d = document.getElementById('dropdown');
+  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
+
+
+const code_snippet = document.getElementById('code');
+
+
+function selectLang(name, id){
+  document.getElementById('selectedLang').innerText = name;
+  document.getElementById('language_id').value = id;
+  document.getElementById('dropdown').style.display = 'none';
+
+  const baseLang = name.split('(')[0].trim();
+
+  const fileName = fileMap[baseLang] || "main.txt";
+
+  document.querySelector('.editor-header span').innerText = fileName;
+
+  fetch(`/problems/language_snippet/?language_id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            code_snippet.placeholder = data.snippet;
+        })
+        .catch(err => console.error(err));
+
+
+}
+
+function setStatus(){
+  document.getElementById('status').innerText = 'Submitting...';
+}
+
+
+document.getElementById('code').addEventListener('keydown', function(e){
+  if(e.key === 'Tab'){
+    e.preventDefault();
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+
+    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+    this.selectionStart = this.selectionEnd = start + 4;
+  }
+});
+
+
+window.addEventListener('click', function(e){
+  if(!e.target.closest('.language-select')){
+    document.getElementById('dropdown').style.display = 'none';
+  }
+});
+
+
+function validateForm() {
+    let current_source_code = document.getElementById("code").value.trim();
+
+    if (!current_source_code) {
+        const errorBox = document.getElementById("floatingError");
+        errorBox.textContent = "Solution cannot be empty.";
+        errorBox.classList.add("show");
+
+        setTimeout(() => {
+            errorBox.classList.remove("show");
+        }, 3000);
+
+        return false;
+    }
+
+    setStatus();
+
+    return true;
+}
+
+
+
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  selectLang(defaultName,defaultId);
+});
+
+
+
+
+// Source Code File Upload
+const fileInput   = document.getElementById('fileUpload');
+const uploadChip  = document.getElementById('uploadChip');
+const uploadLabel = document.getElementById('uploadLabel');
+const clearBtn    = document.getElementById('clearUpload');
+const codeArea    = document.getElementById('code');
+const statusEl    = document.getElementById('status');
+
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    uploadLabel.textContent = file.name;
+    uploadChip.classList.add('has-file');
+    clearBtn.hidden = false;
+    codeArea.readOnly = true;
+    statusEl.textContent = 'File attached';
+
+    const reader = new FileReader();
+    reader.onload = e => { codeArea.value = e.target.result; };
+    reader.readAsText(file);
+});
+
+clearBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    uploadLabel.textContent = 'Upload file';
+    uploadChip.classList.remove('has-file');
+    clearBtn.hidden = true;
+    codeArea.readOnly = false;
+    codeArea.value = '';
+    statusEl.textContent = 'Ready';
+});
+
+// Source Code File Upload
+
+
+           
+</script>
+
+
+{% endblock %}

@@ -1051,6 +1051,26 @@ function copyCredential(sourceId, btnId) {
     });
 }
 
+// ==================== AUTO-OPEN TAB FROM QUERY PARAM ====================
+(function initTabFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+
+    if (tab === 'submissions') {
+        viewSubmissions(document.getElementById('tabSubmissions'));
+    } else if (tab === 'standings') {
+        showTab('standings', document.getElementById('tabStandings'));
+        buildStandings();
+    }
+
+    // clean the URL so a refresh doesn't keep forcing the tab
+    if (tab) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+})();
+
+
+
 </script>
 
 {% endblock %}

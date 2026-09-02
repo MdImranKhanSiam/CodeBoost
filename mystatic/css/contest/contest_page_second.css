@@ -155,7 +155,7 @@
     border-radius: 18px;
     margin-bottom: 24px;
     position: relative;
-    /* overflow: hidden; */
+    overflow: hidden;
 }
 .contest-header::before {
     content: "";

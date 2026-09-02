@@ -1,5 +1,6 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required, login_required
@@ -587,7 +588,8 @@ def contest_problem_detail(request, contest_id, problem_id):
         if is_admin:
             return redirect('submission')
         else:
-            return redirect('contest-page', id=contest_id)
+            url = reverse('contest-page', args=[contest_id])
+            return redirect(f'{url}?tab=submissions')
         
     context = {
         'is_admin': is_admin,
@@ -598,7 +600,7 @@ def contest_problem_detail(request, contest_id, problem_id):
         'language_name': language_name,
     }
 
-    return render(request, 'problem/problem_detail.html', context)
+    return render(request, 'contest/contest_problem_detail.html', context)
 
 
 
