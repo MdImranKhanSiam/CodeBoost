@@ -1,4 +1,3 @@
-
 /* Modal */
 .problem-settings-modal {
     position: fixed;
@@ -127,7 +126,6 @@
 
 .problem-section {
     padding: 25px;
-    /* font-family: Inter, system-ui, sans-serif; */
     font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
 
@@ -230,7 +228,6 @@
 
 
 .code_editor_container{
-  /* max-width:1100px; */
   margin:auto;
   padding:20px;
 }
@@ -346,8 +343,13 @@
 
 .actions{
   margin-top:14px;
-  display:flex;
-  justify-content:flex-end;
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+}
+
+.actions-spacer {
+    width: 1px;
 }
 
 .code-submit-btn{
@@ -357,6 +359,7 @@
   border-radius:10px;
   color:white;
   cursor:pointer;
+  justify-self:end;
 }
 
 .code-submit-btn:hover{
@@ -440,7 +443,8 @@
 
 
 
-/* Ai */
+/* ================= AI ================= */
+
 /* AI Explain Button (top, sidebar) */
 
 .ai-explain-btn {
@@ -467,54 +471,7 @@
     box-shadow: 0 0 0 rgba(139, 92, 246, 0);
 }
 
-.ai-explain-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #06b6d4, #8b5cf6, #06b6d4);
-    background-size: 200% 200%;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: aiBorderFlow 3s linear infinite;
-}
-
-@keyframes aiBorderFlow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-}
-
-.ai-explain-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 16px rgba(139, 92, 246, 0.45);
-}
-
-.ai-explain-btn .ai-icon {
-    font-size: 15px;
-    display: inline-block;
-    transition: transform 0.4s ease;
-}
-
-.ai-explain-btn:hover .ai-icon {
-    transform: rotate(15deg) scale(1.25);
-    filter: drop-shadow(0 0 4px #a78bfa);
-}
-
-
 /* AI Review Button (bottom, centered) */
-
-.actions {
-    margin-top: 14px;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-}
-
-.actions-spacer {
-    width: 1px;
-}
 
 .ai-review-btn {
     justify-self: center;
@@ -539,6 +496,7 @@
     transition: all 0.3s ease;
 }
 
+.ai-explain-btn::before,
 .ai-review-btn::before {
     content: "";
     position: absolute;
@@ -553,28 +511,39 @@
     animation: aiBorderFlow 3s linear infinite;
 }
 
+@keyframes aiBorderFlow {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.ai-explain-btn:hover,
 .ai-review-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 16px rgba(139, 92, 246, 0.45);
 }
 
+.ai-explain-btn .ai-icon,
 .ai-review-btn .ai-icon {
     font-size: 15px;
     display: inline-block;
     transition: transform 0.4s ease;
 }
 
+.ai-explain-btn:hover .ai-icon,
 .ai-review-btn:hover .ai-icon {
     transform: rotate(15deg) scale(1.25);
     filter: drop-shadow(0 0 4px #a78bfa);
 }
 
-.code-submit-btn {
-    justify-self: end;
+.ai-explain-btn:disabled,
+.ai-review-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 
-/* AI Modal */
+/* AI Modal shell */
 
 .ai-modal {
     position: fixed;
@@ -595,225 +564,22 @@
 }
 
 .ai-modal-content {
+    position: relative;
     width: 900px;
     max-width: 92vw;
     max-height: 80vh;
 
-    background: #111a2e;
+    background: linear-gradient(180deg, #0d1526, #111a2e 60%);
     border-radius: 20px;
     border: 1px solid rgba(139, 92, 246, 0.25);
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
-
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.ai-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 18px 24px;
-    border-bottom: 1px solid #1e293b;
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(139, 92, 246, 0.08));
-}
-
-.ai-modal-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    font-size: 17px;
-    color: #e6edf7;
-}
-
-.ai-modal-icon {
-    font-size: 18px;
-    animation: aiSparklePulse 2s ease-in-out infinite;
-}
-
-@keyframes aiSparklePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.15); }
-}
-
-.ai-modal-close {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e6edf7;
-    font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.ai-modal-close:hover {
-    background: rgba(239, 68, 68, 0.35);
-}
-
-.ai-modal-body {
-    padding: 24px;
-    overflow-y: auto;
-    color: #d4d4d4;
-    font-size: 14.5px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.ai-modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.ai-modal-body::-webkit-scrollbar-thumb {
-    background: #4f8cff;
-    border-radius: 10px;
-}
-
-.ai-loading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #94a3b8;
-    font-size: 14px;
-    padding: 10px 0;
-}
-
-.ai-loading[hidden] {
-    display: none;
-}
-
-.ai-spinner {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid rgba(139, 92, 246, 0.25);
-    border-top-color: #8b5cf6;
-    animation: aiSpin 0.8s linear infinite;
-}
-
-@keyframes aiSpin {
-    to { transform: rotate(360deg); }
-}
-
-
-.ai-explain-btn:disabled,
-.ai-review-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-
-.ai-content h1, .ai-content h2, .ai-content h3, .ai-content h4 {
-    font-family: "Lora", serif;
-    font-weight: 600;
-    color: #e6edf7;
-    margin: 22px 0 10px 0;
-}
-.ai-content h1 { font-size: 22px; }
-.ai-content h2 { font-size: 19px; }
-.ai-content h3 { font-size: 17px; }
-.ai-content h4 { font-size: 15.5px; }
-
-.ai-content em {
-    font-style: italic;
-    color: #e0e7ff;
-}
-
-.ai-content ol {
-    margin: 4px 0 14px 0;
-    padding-left: 22px;
-}
-
-.ai-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0 18px 0;
-    font-size: 14px;
-}
-
-.ai-content th, .ai-content td {
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    padding: 8px 10px;
-    text-align: left;
-}
-
-.ai-content th {
-    background: rgba(139, 92, 246, 0.1);
-    color: #c4b5fd;
-    font-weight: 600;
-}
-
-.ai-content pre {
-    background: #0a0f1c;
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    border-radius: 8px;
-    padding: 12px 14px;
-    overflow-x: auto;
-    margin: 10px 0 16px 0;
-}
-
-.ai-content pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #d4d4d4;
-}
-
-.ai-content blockquote {
-    border-left: 3px solid rgba(139, 92, 246, 0.5);
-    padding-left: 14px;
-    margin: 10px 0;
-    color: #a5b4c9;
-    font-style: italic;
-}
-
-
-/* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
-    .ai-modal-content {
-        width: 100%;
-        max-height: 85vh;
-        border-radius: 16px;
-    }
-
-    .actions {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .ai-review-btn,
-    .code-submit-btn {
-        justify-self: stretch;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ===== AI Modal — Magical Upgrade ===== */
-
-.ai-modal-content {
-    position: relative;
-    background: linear-gradient(180deg, #0d1526, #111a2e 60%);
     box-shadow:
         0 0 60px rgba(139, 92, 246, 0.18),
         0 0 120px rgba(6, 182, 212, 0.08),
         inset 0 0 40px rgba(139, 92, 246, 0.03);
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* soft animated aura behind the modal */
@@ -839,15 +605,36 @@
     100% { background-position: 0% 50%; }
 }
 
+.ai-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 24px;
+    border-bottom: 1px solid #1e293b;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(139, 92, 246, 0.08));
+}
+
+.ai-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 17px;
+    color: #e6edf7;
+}
+
 /* gradient shimmer title text */
 .ai-modal-title span:last-child {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3px;
     background: linear-gradient(90deg, #a5b4fc, #f0abfc, #67e8f9, #a5b4fc);
     background-size: 300% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     animation: aiTitleShimmer 4s linear infinite;
-    font-weight: 600;
 }
 
 @keyframes aiTitleShimmer {
@@ -855,18 +642,65 @@
 }
 
 .ai-modal-icon {
+    font-size: 18px;
     filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.8));
+    animation: aiSparklePulse 2s ease-in-out infinite;
+}
+
+@keyframes aiSparklePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.6; transform: scale(1.15); }
+}
+
+.ai-modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6edf7;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ai-modal-close:hover {
+    background: rgba(239, 68, 68, 0.35);
+}
+
+/* NOTE: no white-space: pre-wrap here — the response is real HTML now,
+   pre-wrap was what produced the stray gaps and broken spacing. */
+.ai-modal-body {
+    padding: 24px 26px 30px;
+    overflow-y: auto;
+    overflow-wrap: break-word;
+    color: #dbe4f3;
+}
+
+.ai-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-modal-body::-webkit-scrollbar-thumb {
+    background: #4f8cff;
+    border-radius: 10px;
 }
 
 
-/* Loading state — glowing orb instead of plain spinner */
+/* Loading state — glowing orb */
 
 .ai-loading {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 18px;
     padding: 40px 0 30px;
+    color: #94a3b8;
+}
+
+.ai-loading[hidden] {
+    display: none;
 }
 
 .ai-spinner {
@@ -887,6 +721,8 @@
 }
 
 .ai-loading span {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
     font-size: 13.5px;
     letter-spacing: 0.3px;
     background: linear-gradient(90deg, #94a3b8, #e0e7ff, #94a3b8);
@@ -902,85 +738,104 @@
 }
 
 
-/* Content typography — feels written, not dumped */
-
-.ai-content {
-    font-size: 14.5px;
-    line-height: 1.85;
-    color: #dbe4f3;
-}
-
-.ai-content strong {
-    color: #c4b5fd;
-    font-weight: 600;
-}
-
-.ai-content code {
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-size: 13px;
-    color: #67e8f9;
-}
-
-.ai-content ul {
-    margin: 8px 0;
-    padding-left: 20px;
-}
-
-.ai-content li {
-    margin-bottom: 6px;
-}
-
-/* blinking cursor at the end of typed text */
-.ai-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 15px;
-    background: #a78bfa;
-    margin-left: 2px;
-    vertical-align: middle;
-    box-shadow: 0 0 6px rgba(167, 139, 250, 0.9);
-    animation: aiCursorBlink 0.85s step-start infinite;
-}
-
-@keyframes aiCursorBlink {
-    50% { opacity: 0; }
-}
-
-
-
-
-
-
-
-.ai-modal-title span:last-child {
-    font-family: "Space Grotesk", sans-serif;
-    letter-spacing: 0.3px;
-}
+/* ---------- AI response typography ---------- */
 
 .ai-content {
     font-family: "Space Grotesk", sans-serif;
     font-size: 15px;
     font-weight: 400;
-    line-height: 1.9;
+    line-height: 1.85;
     letter-spacing: 0.15px;
     color: #dbe4f3;
 }
 
+.ai-content > *:first-child {
+    margin-top: 0;
+}
+
+.ai-content > *:last-child {
+    margin-bottom: 0;
+}
+
+.ai-content h1,
+.ai-content h2,
+.ai-content h3,
+.ai-content h4 {
+    font-family: "Lora", serif;
+    font-weight: 600;
+    color: #e6edf7;
+    line-height: 1.35;
+    margin: 26px 0 10px;
+}
+
+.ai-content h1 { font-size: 22px; }
+.ai-content h2 { font-size: 19px; }
+.ai-content h3 { font-size: 17px; }
+.ai-content h4 { font-size: 15.5px; }
+
+.ai-content h2 {
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.18);
+}
+
 .ai-content p {
-    margin: 0 0 14px 0;
+    margin: 0 0 14px;
 }
 
 .ai-content strong {
-    font-family: "Space Grotesk", sans-serif;
     font-weight: 600;
     color: #c4b5fd;
 }
 
+.ai-content em {
+    font-style: italic;
+    color: #e0e7ff;
+}
+
+.ai-content a {
+    color: #67e8f9;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.ai-content hr {
+    border: none;
+    border-top: 1px solid rgba(139, 92, 246, 0.22);
+    margin: 22px 0;
+}
+
+/* Lists — markdown "loose" list items wrap text in <p>, which used to add
+   a double gap between every bullet. */
+.ai-content ul,
+.ai-content ol {
+    margin: 4px 0 16px;
+    padding-left: 22px;
+}
+
+.ai-content li {
+    margin-bottom: 8px;
+}
+
+.ai-content li > p {
+    margin: 0 0 6px;
+}
+
+.ai-content li > p:last-child {
+    margin-bottom: 0;
+}
+
+.ai-content li > ul,
+.ai-content li > ol {
+    margin: 6px 0 4px;
+}
+
+.ai-content li::marker {
+    color: #a78bfa;
+}
+
+/* Inline code + code blocks */
 .ai-content code {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px;
     background: rgba(139, 92, 246, 0.12);
     border: 1px solid rgba(139, 92, 246, 0.25);
@@ -988,28 +843,93 @@
     border-radius: 5px;
     color: #67e8f9;
     letter-spacing: 0;
+    white-space: nowrap;
 }
 
-.ai-loading span {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 500;
+.ai-content pre {
+    background: #0a0f1c;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 10px 0 16px;
+}
+
+.ai-content pre code {
+    display: block;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #d4d4d4;
+    white-space: pre;
+    line-height: 1.6;
+}
+
+/* Tables scroll instead of stretching the modal */
+.ai-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0 18px;
+}
+
+.ai-table-wrap::-webkit-scrollbar {
+    height: 6px;
+}
+
+.ai-table-wrap::-webkit-scrollbar-thumb {
+    background: #4f8cff;
+    border-radius: 10px;
+}
+
+.ai-content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.ai-content th,
+.ai-content td {
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+.ai-content th {
+    background: rgba(139, 92, 246, 0.1);
+    color: #c4b5fd;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ai-content blockquote {
+    border-left: 3px solid rgba(139, 92, 246, 0.5);
+    padding-left: 14px;
+    margin: 10px 0 16px;
+    color: #a5b4c9;
+    font-style: italic;
+}
+
+.ai-content input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #8b5cf6;
+}
+
+/* KaTeX formulas inherit the surrounding text size */
+.ai-content .katex {
+    font-size: 1.02em;
+    color: #e0e7ff;
+}
+
+.ai-content .katex-display {
+    margin: 12px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 
-
-
-
-
-
-
-.ai-content {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 1.9;
-    letter-spacing: 0.15px;
-    color: #dbe4f3;
-}
+/* Reveal animation */
 
 .ai-line {
     opacity: 0;
@@ -1034,52 +954,52 @@
     }
 }
 
-.ai-content p.ai-line {
-    margin: 0 0 14px 0;
+@media (prefers-reduced-motion: reduce) {
+    .ai-line {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
 }
 
-.ai-content ul {
-    margin: 4px 0 14px 0;
-    padding-left: 20px;
-}
-
-.ai-content li.ai-line {
-    margin-bottom: 8px;
-}
-
-.ai-content strong {
-    font-weight: 600;
-    color: #c4b5fd;
-}
-
-.ai-content code {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 13px;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    padding: 2px 6px;
-    border-radius: 5px;
-    color: #67e8f9;
-}
-
-
-
-
-/* Ai */
+/* ================= AI ================= */
 
 
 
 /* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
-    
+    .ai-modal-content {
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 16px;
+    }
 
-    .code-area{
-        height:60vh;
+    .ai-modal-body {
+        padding: 18px 16px 24px;
+    }
+
+    .ai-content {
+        font-size: 14.5px;
+        line-height: 1.8;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .ai-review-btn,
+    .code-submit-btn {
+        justify-self: stretch;
+    }
+
+    .code-area {
+        height: 60vh;
     }
 
     .problem-settings-modal-content {
         padding: 20px;
         width: 350px;
     }
-
 }

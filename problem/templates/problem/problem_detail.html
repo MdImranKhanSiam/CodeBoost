@@ -4,8 +4,14 @@
 
 <link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- Fonts actually referenced by the AI modal CSS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Lora:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Math rendering for the AI response -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
 <div id="floatingError" class="floating-error"></div>
 
@@ -40,7 +46,7 @@
             <button type="button" class="ai-modal-close" id="aiModalClose">✕</button>
         </div>
 
-        <div class="ai-modal-body">
+        <div class="ai-modal-body" id="aiModalBody">
             <div class="ai-loading" id="aiLoading">
                 <div class="ai-spinner"></div>
                 <span>Analyzing your code...</span>
@@ -269,6 +275,9 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
 <script>
 
@@ -289,25 +298,8 @@ if (isAdmin) {
 }
 
 
-
-// Back/Forward
-
-// window.addEventListener("pageshow", function (event) {
-//     const navigationEntries = performance.getEntriesByType("navigation");
-
-//     if (navigationEntries.length > 0) {
-//     if (navigationEntries[0].type === "back_forward") {
-//         console.log("User came using Back/Forward button");
-//         // location.reload();
-//     }
-//     }
-// });
-
 window.addEventListener("pageshow", function(event) {
     if (event.persisted) {
-        // console.log("User came using back/forward button");
-        // location.reload();
-
         document.getElementById('status').innerText = 'Solution Submitted';
 
         setTimeout(() => {
@@ -315,8 +307,6 @@ window.addEventListener("pageshow", function(event) {
         }, 3000);
     }
 });
-
-// Back/Forward
 
 
 const defaultName = "{{ language_name }}";
@@ -441,10 +431,6 @@ function validateForm() {
 }
 
 
-
-
-
-
 window.addEventListener('DOMContentLoaded', () => {
   selectLang(defaultName,defaultId);
 });
@@ -492,11 +478,12 @@ clearBtn.addEventListener('click', () => {
 
 // ===== AI Modal Logic =====
 
-const aiModal        = document.getElementById('aiModal');
-const aiModalTitle    = document.getElementById('aiModalTitleText');
-const aiModalClose    = document.getElementById('aiModalClose');
-const aiLoading       = document.getElementById('aiLoading');
-const aiContent       = document.getElementById('aiContent');
+const aiModal      = document.getElementById('aiModal');
+const aiModalBody  = document.getElementById('aiModalBody');
+const aiModalTitle = document.getElementById('aiModalTitleText');
+const aiModalClose = document.getElementById('aiModalClose');
+const aiLoading    = document.getElementById('aiLoading');
+const aiContent    = document.getElementById('aiContent');
 
 const explainBtn = document.getElementById('explainBtn');
 const reviewBtn  = document.getElementById('reviewBtn');
@@ -511,6 +498,7 @@ const loadingMessages = [
 ];
 
 let loadingInterval = null;
+let revealTimeouts  = [];
 
 function getCookie(name) {
     const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -519,9 +507,10 @@ function getCookie(name) {
 
 function openAiModal(title) {
     aiModalTitle.innerText = title;
-    aiContent.innerText = '';
+    aiContent.innerHTML = '';
     aiContent.style.display = 'none';
     aiLoading.hidden = false;
+    aiModalBody.scrollTop = 0;
 
     let i = 0;
     const loadingText = aiLoading.querySelector('span');
@@ -540,17 +529,83 @@ function closeAiModal() {
     clearReveal();
 }
 
-let revealTimeouts = [];
-let scrollInterval = null;
-
 function clearReveal() {
     revealTimeouts.forEach(t => clearTimeout(t));
     revealTimeouts = [];
-    if (scrollInterval) {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-    }
 }
+
+
+/* ---------- Markdown / math preparation ---------- */
+
+// Strips the shared leading indentation the model copies from the prompt,
+// removes trailing spaces and collapses long blank runs. Without this,
+// indented lines are parsed as markdown code blocks and the output shows
+// stray gaps and boxes.
+function normalizeAiText(raw) {
+    let text = String(raw || '').replace(/\r\n?/g, '\n');
+
+    const lines = text.split('\n');
+    let indent = Infinity;
+    for (const line of lines) {
+        if (!line.trim()) continue;
+        const lead = line.match(/^[ \t]*/)[0].replace(/\t/g, '    ').length;
+        if (lead < indent) indent = lead;
+    }
+    if (indent && indent !== Infinity) {
+        text = lines.map(l => l.replace(/\t/g, '    ').slice(indent)).join('\n');
+    }
+
+    return text
+        .split('\n')
+        .map(l => l.replace(/[ \t]+$/, ''))
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+// Pull $...$ / $$...$$ out before markdown parsing so backslashes,
+// underscores and asterisks inside formulas survive intact.
+const MATH_OPEN = '@@AIMATH', MATH_CLOSE = '@@';
+
+function extractMath(text, store) {
+    return text
+        .split(/(```[\s\S]*?```|`[^`\n]*`)/g)
+        .map((chunk, i) => {
+            if (i % 2 === 1) return chunk;              // untouched code
+            return chunk.replace(/\$\$[\s\S]+?\$\$|\$[^$\n]+?\$/g, m => {
+                store.push(m);
+                return MATH_OPEN + (store.length - 1) + MATH_CLOSE;
+            });
+        })
+        .join('');
+}
+
+function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function restoreMath(html, store) {
+    return html.replace(/@@AIMATH(\d+)@@/g, (m, i) => escapeHtml(store[Number(i)] || ''));
+}
+
+function renderAiMath(el) {
+    if (typeof window.renderMathInElement !== 'function') return;
+    try {
+        window.renderMathInElement(el, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\[', right: '\\]', display: true },
+                { left: '$',  right: '$',  display: false },
+                { left: '\\(', right: '\\)', display: false }
+            ],
+            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            throwOnError: false
+        });
+    } catch (e) { /* leave the raw text if KaTeX fails */ }
+}
+
+
+/* ---------- Rendering ---------- */
 
 function showAiResult(text) {
     clearInterval(loadingInterval);
@@ -559,52 +614,59 @@ function showAiResult(text) {
     aiLoading.hidden = true;
     aiContent.style.display = 'block';
     aiContent.innerHTML = '';
+    aiModalBody.scrollTop = 0;
 
-    // Parse full markdown (bold, italic, lists, tables, code blocks, headers, etc.)
-    const html = marked.parse(text, { breaks: true, gfm: true });
+    const mathStore = [];
+    const prepared  = extractMath(normalizeAiText(text), mathStore);
+
+    let html = marked.parse(prepared, { gfm: true, breaks: false });
+    html = restoreMath(html, mathStore);
+    html = DOMPurify.sanitize(html);
+
     const temp = document.createElement('div');
     temp.innerHTML = html;
 
+    // tables scroll horizontally instead of stretching the modal
+    temp.querySelectorAll('table').forEach(table => {
+        const wrap = document.createElement('div');
+        wrap.className = 'ai-table-wrap';
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
+    });
+
+    const blocks = Array.from(temp.children);
+
+    // keep the whole reveal under ~2.2s no matter how long the answer is
+    const units = blocks.reduce(
+        (n, b) => n + ((b.tagName === 'UL' || b.tagName === 'OL') ? b.children.length : 1), 0
+    ) || 1;
+    const step = Math.max(18, Math.min(70, 2200 / units));
+
     let delay = 0;
-    let idx = 0;
+    const nextDelay = () => (delay += step);
 
-    const nextDelay = () => {
-        const step = 90 + Math.sin(idx * 0.7) * 25; // wave stagger, ~65-115ms
-        delay += step;
-        idx++;
-        return delay;
-    };
-
-    Array.from(temp.children).forEach(node => {
+    blocks.forEach(node => {
         if (node.tagName === 'UL' || node.tagName === 'OL') {
-            // reveal each list item individually for the wave effect
             const list = document.createElement(node.tagName);
+            if (node.hasAttribute('start')) list.setAttribute('start', node.getAttribute('start'));
             aiContent.appendChild(list);
+
             Array.from(node.children).forEach(li => {
                 const item = document.createElement('li');
-                item.classList.add('ai-line');
+                item.className = 'ai-line';
                 item.innerHTML = li.innerHTML;
-                item.style.animationDelay = `${nextDelay()}ms`;
+                item.style.animationDelay = nextDelay() + 'ms';
                 list.appendChild(item);
             });
         } else {
-            // paragraphs, headers, tables, code blocks, blockquotes — one block each
             const clone = node.cloneNode(true);
             clone.classList.add('ai-line');
-            clone.style.animationDelay = `${nextDelay()}ms`;
+            clone.style.animationDelay = nextDelay() + 'ms';
             aiContent.appendChild(clone);
         }
     });
 
-    // auto-scroll while lines are revealing
-    scrollInterval = setInterval(() => {
-        aiContent.scrollTop = aiContent.scrollHeight;
-    }, 150);
-    const stopScroll = setTimeout(() => {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-    }, delay + 300);
-    revealTimeouts.push(stopScroll);
+    renderAiMath(aiContent);
 }
 
 function showAiError(message) {
@@ -612,10 +674,15 @@ function showAiError(message) {
     clearReveal();
     aiLoading.hidden = true;
     aiContent.style.display = 'block';
-    aiContent.innerHTML = `<p class="ai-line">${message}</p>`;
+    aiContent.textContent = '';
+
+    const p = document.createElement('p');
+    p.className = 'ai-line';
+    p.textContent = message;
+    aiContent.appendChild(p);
 }
 
-const MIN_LOADING_MS = 2200; // tweak between 2000-3000 as you like
+const MIN_LOADING_MS = 2200;
 
 async function requestAI(mode) {
     let payload = {};
@@ -664,7 +731,6 @@ async function requestAI(mode) {
             data = {};
         }
 
-        // enforce a minimum loading time for dramatic effect
         const elapsed = Date.now() - startTime;
         if (elapsed < MIN_LOADING_MS) {
             await new Promise(r => setTimeout(r, MIN_LOADING_MS - elapsed));
@@ -706,9 +772,6 @@ document.addEventListener('keydown', (e) => {
 
 // ===== AI Modal Logic =====
 
-
-
-           
 </script>
 
 
