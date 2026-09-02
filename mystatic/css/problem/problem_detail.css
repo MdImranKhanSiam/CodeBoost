@@ -439,6 +439,574 @@
 
 
 
+
+/* Ai */
+/* AI Explain Button (top, sidebar) */
+
+.ai-explain-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 170px;
+    height: 45px;
+
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, #0e1b3a, #16213f);
+    color: #e0e7ff;
+
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 rgba(139, 92, 246, 0);
+}
+
+.ai-explain-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6, #06b6d4);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: aiBorderFlow 3s linear infinite;
+}
+
+@keyframes aiBorderFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.ai-explain-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.45);
+}
+
+.ai-explain-btn .ai-icon {
+    font-size: 15px;
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+
+.ai-explain-btn:hover .ai-icon {
+    transform: rotate(15deg) scale(1.25);
+    filter: drop-shadow(0 0 4px #a78bfa);
+}
+
+
+/* AI Review Button (bottom, centered) */
+
+.actions {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+}
+
+.actions-spacer {
+    width: 1px;
+}
+
+.ai-review-btn {
+    justify-self: center;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, #0e1b3a, #16213f);
+    color: #e0e7ff;
+
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ai-review-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6, #06b6d4);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: aiBorderFlow 3s linear infinite;
+}
+
+.ai-review-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.45);
+}
+
+.ai-review-btn .ai-icon {
+    font-size: 15px;
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+
+.ai-review-btn:hover .ai-icon {
+    transform: rotate(15deg) scale(1.25);
+    filter: drop-shadow(0 0 4px #a78bfa);
+}
+
+.code-submit-btn {
+    justify-self: end;
+}
+
+
+/* AI Modal */
+
+.ai-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 100;
+}
+
+.ai-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ai-modal-content {
+    width: 700px;
+    max-width: 90vw;
+    max-height: 80vh;
+
+    background: #111a2e;
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ai-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 24px;
+    border-bottom: 1px solid #1e293b;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(139, 92, 246, 0.08));
+}
+
+.ai-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 17px;
+    color: #e6edf7;
+}
+
+.ai-modal-icon {
+    font-size: 18px;
+    animation: aiSparklePulse 2s ease-in-out infinite;
+}
+
+@keyframes aiSparklePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.15); }
+}
+
+.ai-modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6edf7;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ai-modal-close:hover {
+    background: rgba(239, 68, 68, 0.35);
+}
+
+.ai-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    color: #d4d4d4;
+    font-size: 14.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.ai-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-modal-body::-webkit-scrollbar-thumb {
+    background: #4f8cff;
+    border-radius: 10px;
+}
+
+.ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #94a3b8;
+    font-size: 14px;
+    padding: 10px 0;
+}
+
+.ai-loading[hidden] {
+    display: none;
+}
+
+.ai-spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(139, 92, 246, 0.25);
+    border-top-color: #8b5cf6;
+    animation: aiSpin 0.8s linear infinite;
+}
+
+@keyframes aiSpin {
+    to { transform: rotate(360deg); }
+}
+
+
+.ai-explain-btn:disabled,
+.ai-review-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+
+
+
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+    .ai-modal-content {
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 16px;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .ai-review-btn,
+    .code-submit-btn {
+        justify-self: stretch;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== AI Modal — Magical Upgrade ===== */
+
+.ai-modal-content {
+    position: relative;
+    background: linear-gradient(180deg, #0d1526, #111a2e 60%);
+    box-shadow:
+        0 0 60px rgba(139, 92, 246, 0.18),
+        0 0 120px rgba(6, 182, 212, 0.08),
+        inset 0 0 40px rgba(139, 92, 246, 0.03);
+}
+
+/* soft animated aura behind the modal */
+.ai-modal-content::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(120deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: aiAuraFlow 6s ease infinite;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@keyframes aiAuraFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* gradient shimmer title text */
+.ai-modal-title span:last-child {
+    background: linear-gradient(90deg, #a5b4fc, #f0abfc, #67e8f9, #a5b4fc);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aiTitleShimmer 4s linear infinite;
+    font-weight: 600;
+}
+
+@keyframes aiTitleShimmer {
+    to { background-position: 300% center; }
+}
+
+.ai-modal-icon {
+    filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.8));
+}
+
+
+/* Loading state — glowing orb instead of plain spinner */
+
+.ai-loading {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 40px 0 30px;
+}
+
+.ai-spinner {
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #c4b5fd, #8b5cf6 45%, #06b6d4 100%);
+    box-shadow:
+        0 0 20px rgba(139, 92, 246, 0.7),
+        0 0 40px rgba(6, 182, 212, 0.4);
+    animation: aiOrbPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes aiOrbPulse {
+    0%, 100% { transform: scale(0.85); opacity: 0.85; }
+    50%      { transform: scale(1.15); opacity: 1; }
+}
+
+.ai-loading span {
+    font-size: 13.5px;
+    letter-spacing: 0.3px;
+    background: linear-gradient(90deg, #94a3b8, #e0e7ff, #94a3b8);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aiTextShimmer 2.2s linear infinite;
+}
+
+@keyframes aiTextShimmer {
+    to { background-position: -200% center; }
+}
+
+
+/* Content typography — feels written, not dumped */
+
+.ai-content {
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: #dbe4f3;
+}
+
+.ai-content strong {
+    color: #c4b5fd;
+    font-weight: 600;
+}
+
+.ai-content code {
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #67e8f9;
+}
+
+.ai-content ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.ai-content li {
+    margin-bottom: 6px;
+}
+
+/* blinking cursor at the end of typed text */
+.ai-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 15px;
+    background: #a78bfa;
+    margin-left: 2px;
+    vertical-align: middle;
+    box-shadow: 0 0 6px rgba(167, 139, 250, 0.9);
+    animation: aiCursorBlink 0.85s step-start infinite;
+}
+
+@keyframes aiCursorBlink {
+    50% { opacity: 0; }
+}
+
+
+
+
+
+
+
+.ai-modal-title span:last-child {
+    font-family: "Space Grotesk", sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.ai-content {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.9;
+    letter-spacing: 0.15px;
+    color: #dbe4f3;
+}
+
+.ai-content p {
+    margin: 0 0 14px 0;
+}
+
+.ai-content strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    color: #c4b5fd;
+}
+
+.ai-content code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: #67e8f9;
+    letter-spacing: 0;
+}
+
+.ai-loading span {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+}
+
+
+
+
+
+
+
+
+.ai-content {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.9;
+    letter-spacing: 0.15px;
+    color: #dbe4f3;
+}
+
+.ai-line {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(3px);
+    animation: aiLineIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes aiLineIn {
+    0% {
+        opacity: 0;
+        transform: translateY(14px);
+        filter: blur(3px);
+    }
+    60% {
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0px);
+    }
+}
+
+.ai-content p.ai-line {
+    margin: 0 0 14px 0;
+}
+
+.ai-content ul {
+    margin: 4px 0 14px 0;
+    padding-left: 20px;
+}
+
+.ai-content li.ai-line {
+    margin-bottom: 8px;
+}
+
+.ai-content strong {
+    font-weight: 600;
+    color: #c4b5fd;
+}
+
+.ai-content code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: #67e8f9;
+}
+
+
+
+
+/* Ai */
+
+
+
 /* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
     

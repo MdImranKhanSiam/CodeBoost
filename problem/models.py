@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class Tags(models.Model):
     name = models.CharField(max_length=100, unique=True)
-
+    
     def __str__(self):
         return self.name
     
@@ -16,7 +16,7 @@ class Problem(models.Model):
         ('easy', 'Easy'),
         ('medium', 'Medium'),
         ('hard', 'Hard'),
-        ('challenging', 'Challenging'),
+        ('challenging', 'Challenging'), 
     ]
 
     title = models.CharField(max_length=255)

@@ -4,7 +4,8 @@
 
 <link rel="stylesheet" href="{% static 'css/problem/problem_detail.css' %}" />
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <div id="floatingError" class="floating-error"></div>
 
@@ -28,6 +29,26 @@
         </div>
     </div>
 {% endif %}
+
+<div class="ai-modal" id="aiModal">
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <div class="ai-modal-title">
+                <span class="ai-modal-icon">✨</span>
+                <span id="aiModalTitleText">AI Explanation</span>
+            </div>
+            <button type="button" class="ai-modal-close" id="aiModalClose">✕</button>
+        </div>
+
+        <div class="ai-modal-body">
+            <div class="ai-loading" id="aiLoading">
+                <div class="ai-spinner"></div>
+                <span>Analyzing your code...</span>
+            </div>
+            <div class="ai-content" id="aiContent"></div>
+        </div>
+    </div>
+</div>
 
 <!-- LEFT SIDE -->
 <div class="problem-section">
@@ -57,6 +78,12 @@
             <i class="fa-solid fa-code"></i>
         </span>
         <span class="text">Submissions</span>
+    </button>
+    <br><br>
+
+    <button class="ai-explain-btn" type="button" id="explainBtn">
+        <span class="ai-icon">✨</span>
+        <span class="text">AI Explain</span>
     </button>
     <br><br>
 
@@ -220,8 +247,16 @@
     </div>
 
     <div class="actions">
+        <div class="actions-spacer"></div>
+        <button type="button" class="ai-review-btn" id="reviewBtn">
+            <span class="ai-icon">✨</span>
+            <span class="text">AI Review</span>
+        </button>
         <button class="code-submit-btn" type="submit">Submit Code</button>
     </div>
+
+
+    
 
 </form>
 
@@ -452,6 +487,231 @@ clearBtn.addEventListener('click', () => {
 });
 
 // Source Code File Upload
+
+
+
+
+// ===== AI Modal Logic =====
+
+const aiModal        = document.getElementById('aiModal');
+const aiModalTitle    = document.getElementById('aiModalTitleText');
+const aiModalClose    = document.getElementById('aiModalClose');
+const aiLoading       = document.getElementById('aiLoading');
+const aiContent       = document.getElementById('aiContent');
+
+const explainBtn = document.getElementById('explainBtn');
+const reviewBtn  = document.getElementById('reviewBtn');
+
+const problemId = {{ problem.id }};
+
+const loadingMessages = [
+    "Analyzing the problem...",
+    "Thinking it through...",
+    "Forming an explanation...",
+    "Almost there..."
+];
+
+let loadingInterval = null;
+
+function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? match.pop() : '';
+}
+
+function openAiModal(title) {
+    aiModalTitle.innerText = title;
+    aiContent.innerText = '';
+    aiContent.style.display = 'none';
+    aiLoading.hidden = false;
+
+    let i = 0;
+    const loadingText = aiLoading.querySelector('span');
+    loadingText.innerText = loadingMessages[0];
+    loadingInterval = setInterval(() => {
+        i = (i + 1) % loadingMessages.length;
+        loadingText.innerText = loadingMessages[i];
+    }, 1800);
+
+    aiModal.classList.add('active');
+}
+
+function closeAiModal() {
+    aiModal.classList.remove('active');
+    clearInterval(loadingInterval);
+    clearReveal();
+}
+
+let revealTimeouts = [];
+
+function parseAiBlocks(raw) {
+    // returns an array of { tag: 'p'|'li', html: '...' } blocks
+    let text = raw
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`(.+?)`/g, '<code>$1</code>');
+
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const blocks = [];
+
+    for (const line of lines) {
+        if (line.startsWith('- ')) {
+            blocks.push({ tag: 'li', html: line.slice(2) });
+        } else {
+            blocks.push({ tag: 'p', html: line });
+        }
+    }
+    return blocks;
+}
+
+function clearReveal() {
+    revealTimeouts.forEach(t => clearTimeout(t));
+    revealTimeouts = [];
+}
+
+function showAiResult(text) {
+    clearInterval(loadingInterval);
+    clearReveal();
+
+    aiLoading.hidden = true;
+    aiContent.style.display = 'block';
+    aiContent.innerHTML = '';
+
+    const blocks = parseAiBlocks(text);
+
+    let container = aiContent;
+    let openList = null;
+    let delay = 0;
+
+    blocks.forEach((block, idx) => {
+        if (block.tag === 'li') {
+            if (!openList) {
+                openList = document.createElement('ul');
+                aiContent.appendChild(openList);
+            }
+        } else {
+            openList = null;
+        }
+
+        const el = document.createElement(block.tag);
+        el.classList.add('ai-line');
+        el.innerHTML = block.html;
+        el.style.animationDelay = `${delay}ms`;
+
+        (block.tag === 'li' ? openList : aiContent).appendChild(el);
+
+        // wave stagger: slightly uneven timing feels more organic than a fixed interval
+        const step = 90 + Math.sin(idx * 0.7) * 25; // varies ~65-115ms
+        delay += step;
+
+        // auto-scroll as each line becomes visible
+        const t = setTimeout(() => {
+            aiContent.scrollTop = aiContent.scrollHeight;
+        }, delay);
+        revealTimeouts.push(t);
+    });
+}
+
+function showAiError(message) {
+    clearInterval(loadingInterval);
+    clearReveal();
+    aiLoading.hidden = true;
+    aiContent.style.display = 'block';
+    aiContent.innerHTML = `<p class="ai-line">${message}</p>`;
+}
+
+const MIN_LOADING_MS = 2200; // tweak between 2000-3000 as you like
+
+async function requestAI(mode) {
+    let payload = {};
+
+    if (mode === 'review') {
+        const code = document.getElementById('code').value.trim();
+        const language = document.getElementById('selectedLang').innerText;
+
+        if (!code) {
+            const errorBox = document.getElementById("floatingError");
+            errorBox.textContent = "Write your solution before requesting a review.";
+            errorBox.classList.add("show");
+            setTimeout(() => errorBox.classList.remove("show"), 3000);
+            return;
+        }
+
+        payload = { code, language };
+    }
+
+    const title = mode === 'explain' ? 'AI Explanation' : 'AI Review';
+    openAiModal(title);
+
+    explainBtn.disabled = true;
+    reviewBtn.disabled = true;
+
+    const url = mode === 'explain'
+        ? `/api/problems/ai/explain/${problemId}/`
+        : `/api/problems/ai/review/${problemId}/`;
+
+    const startTime = Date.now();
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            data = {};
+        }
+
+        // enforce a minimum loading time for dramatic effect
+        const elapsed = Date.now() - startTime;
+        if (elapsed < MIN_LOADING_MS) {
+            await new Promise(r => setTimeout(r, MIN_LOADING_MS - elapsed));
+        }
+
+        if (!res.ok) {
+            showAiError(data.error || 'Something went wrong. Please try again.');
+            return;
+        }
+
+        showAiResult(data.result);
+
+    } catch (err) {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < MIN_LOADING_MS) {
+            await new Promise(r => setTimeout(r, MIN_LOADING_MS - elapsed));
+        }
+        showAiError('Network error, please try again.');
+    } finally {
+        explainBtn.disabled = false;
+        reviewBtn.disabled = false;
+    }
+}
+
+explainBtn.addEventListener('click', () => requestAI('explain'));
+reviewBtn.addEventListener('click', () => requestAI('review'));
+
+aiModalClose.addEventListener('click', closeAiModal);
+
+aiModal.addEventListener('click', (e) => {
+    if (e.target === aiModal) closeAiModal();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && aiModal.classList.contains('active')) {
+        closeAiModal();
+    }
+});
+
+// ===== AI Modal Logic =====
+
 
 
            
