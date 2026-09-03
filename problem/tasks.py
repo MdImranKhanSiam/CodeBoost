@@ -153,6 +153,7 @@ def code_submission(self, submission_id):
     invalidate_submission_api(user_id)
     invalidate_user_problems_page(user_id)
     invalidate_submission_problem_api(user_id, problem.id)
+    invalidate_submission_api(user_id)
     
     
 
