@@ -10,7 +10,14 @@ def normalize_line_endings(code):
     if code is None:
         return ""
     
-    return code.replace('\r\n', '\n')
+    # normalize all line ending styles to \n
+    code = code.replace('\r\n', '\n').replace('\r', '\n')
+    
+    # strip trailing whitespace from each line
+    lines = code.split('\n')
+    lines = [line.rstrip() for line in lines]
+    
+    return '\n'.join(lines)
 
 
 
