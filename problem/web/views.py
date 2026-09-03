@@ -162,7 +162,12 @@ def create_problem(request):
         memory_limit = request.POST.get('memory_limit')
 
         tags_json = request.POST.get("tags", "[]")
-        tags_ids = json.loads(tags_json)
+
+        try:
+            tags_ids = json.loads(tags_json) if tags_json else []
+        except (json.JSONDecodeError, TypeError):
+            tags_ids = []
+            
         selected_tags = Tags.objects.filter(id__in=tags_ids)
 
         testcases = json.loads(request.POST.get('testcases'))
