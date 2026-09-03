@@ -74,11 +74,11 @@ def code_submission(self, submission_id):
 
             status = data.get('status', {}).get('description')
 
-            time = float(data.get('time') or 0)
-            memory = float(data.get('memory') or 0)
+            The_Time = float(data.get('time') or 0)
+            The_Memory = float(data.get('memory') or 0)
 
-            execution_time = max(execution_time, time)
-            memory_used = max(memory_used, memory)
+            execution_time = max(execution_time, The_Time)
+            memory_used = max(memory_used, The_Memory)
 
 
             if status != 'Accepted':
@@ -90,8 +90,8 @@ def code_submission(self, submission_id):
                         "input": given_input,
                         "expected_output": expected_output,
                         "status": final_verdict,
-                        "time": time,
-                        "memory": memory,
+                        "time": The_Time,
+                        "memory": The_Memory,
                     }
                 )
 
@@ -114,8 +114,8 @@ def code_submission(self, submission_id):
                     "expected_output": expected_output,
                     "output": current_output,
                     "status": final_verdict,
-                    "time": time,
-                    "memory": memory,
+                    "time": The_Time,
+                    "memory": The_Memory,
                 }
             )
                 
