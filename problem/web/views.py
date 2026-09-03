@@ -167,7 +167,7 @@ def create_problem(request):
             tags_ids = json.loads(tags_json) if tags_json else []
         except (json.JSONDecodeError, TypeError):
             tags_ids = []
-            
+
         selected_tags = Tags.objects.filter(id__in=tags_ids)
 
         testcases = json.loads(request.POST.get('testcases'))
@@ -262,8 +262,13 @@ def edit_problem(request, problem_id):
         time_limit = request.POST.get('time_limit')
         memory_limit = request.POST.get('memory_limit')
 
-        tags_json = request.POST.get("tags")
-        tags_ids = json.loads(tags_json)
+        tags_json = request.POST.get("tags", "[]")
+
+        try:
+            tags_ids = json.loads(tags_json) if tags_json else []
+        except (json.JSONDecodeError, TypeError):
+            tags_ids = []
+
         selected_tags = Tags.objects.filter(id__in=tags_ids)
         
         testcases = json.loads(request.POST.get('testcases'))
