@@ -161,7 +161,7 @@ def create_problem(request):
         time_limit = request.POST.get('time_limit')
         memory_limit = request.POST.get('memory_limit')
 
-        tags_json = request.POST.get("tags")
+        tags_json = request.POST.get("tags", "[]")
         tags_ids = json.loads(tags_json)
         selected_tags = Tags.objects.filter(id__in=tags_ids)
 
@@ -195,8 +195,9 @@ def create_problem(request):
 
             TestCase.objects.bulk_create(testcase_objects)
 
-        if problem:
             problem.tags.add(*selected_tags)
+
+        if problem:
             invalidate_homepage()
             invalidate_problems_page()
 
