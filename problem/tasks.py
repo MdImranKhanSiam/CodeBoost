@@ -23,6 +23,10 @@ def normalize_line_endings(code):
 
 @shared_task(ignore_result=True, bind=True, max_retries=3, default_retry_delay=5, acks_late=True, reject_on_worker_lost=True,)
 def code_submission(self, submission_id):
+    user_id = None
+    problem = None
+    submission = None
+
     try:
         submission = Submission.objects.get(id=submission_id)
         source_code = submission.code
@@ -58,6 +62,8 @@ def code_submission(self, submission_id):
             ]
         }
 
+        tokens = None
+
         try:
             batch_response = requests.post(
                 url,
@@ -67,94 +73,93 @@ def code_submission(self, submission_id):
             tokens_data = batch_response.json()
             tokens = [item['token'] for item in tokens_data]
         except Exception:
-            submission.verdict = 'Internal Error'
-            submission.save()
-            return
+            final_verdict = 'Internal Error'
 
-        # 2. poll until every submission is done, with a safety cap on attempts
-        tokens_param = ','.join(tokens)
         results_by_token = {}
-        max_polls = 600          # e.g. 60 * 0.5s = 30s max wait
-        polls = 0
 
-        while polls < max_polls:
-            try:
-                get_response = requests.get(
-                    f'{base_url}/submissions/batch',
-                    params={
-                        "tokens": tokens_param,
-                        "base64_encoded": "false",
-                        "fields": "token,stdout,status,time,memory",
-                    },
-                    headers=headers,
-                )
-                results = get_response.json().get('submissions', [])
-            except Exception:
-                submission.verdict = 'Internal Error'
-                submission.save()
-                return
+        if tokens is not None:
+            tokens_param = ','.join(tokens)
+            max_polls = 600
+            polls = 0
 
-            still_pending = False
-            for r in results:
-                status_id = r.get('status', {}).get('id')
-                if status_id in (1, 2):  # 1 = In Queue, 2 = Processing
-                    still_pending = True
-                results_by_token[r['token']] = r
+            while polls < max_polls:
+                try:
+                    get_response = requests.get(
+                        url,
+                        params={
+                            "tokens": tokens_param,
+                            "base64_encoded": "false",
+                            "fields": "token,stdout,status,time,memory",
+                        },
+                        headers=headers,
+                    )
+                    results = get_response.json().get('submissions', [])
+                except Exception:
+                    final_verdict = 'Internal Error'
+                    tokens = None  # signal failure to skip judging below
+                    break
 
-            if not still_pending:
-                break
+                still_pending = False
+                for r in results:
+                    status_id = r.get('status', {}).get('id')
+                    if status_id in (1, 2):
+                        still_pending = True
+                    results_by_token[r['token']] = r
 
-            polls += 1
-            time.sleep(0.5)
-        else:
-            submission.verdict = 'Internal Error'
-            submission.save()
-            return
+                if not still_pending:
+                    break
 
-        
-        for (testcase, given_input, expected_output), token in zip(prepared, tokens):
-            data = results_by_token.get(token, {})
-            total_testcases += 1
+                polls += 1
+                time.sleep(0.5)
+            else:
+                final_verdict = 'Internal Error'
+                tokens = None
 
-            status = data.get('status', {}).get('description')
-            exec_time = float(data.get('time') or 0)
-            memory = float(data.get('memory') or 0)
+        # only judge if submission + polling actually succeeded
+        if tokens is not None:
+            for (testcase, given_input, expected_output), token in zip(prepared, tokens):
+                data = results_by_token.get(token, {})
+                total_testcases += 1
 
-            execution_time = max(execution_time, exec_time)
-            memory_used = max(memory_used, memory)
+                status = data.get('status', {}).get('description')
+                exec_time = float(data.get('time') or 0)
+                memory = float(data.get('memory') or 0)
 
-            if status != 'Accepted':
-                final_verdict = status or 'Invalid'
+                execution_time = max(execution_time, exec_time)
+                memory_used = max(memory_used, memory)
+
+                if status != 'Accepted':
+                    final_verdict = status or 'Invalid'
+                    testcase_details.append({
+                        "id": testcase.id,
+                        "input": given_input,
+                        "expected_output": expected_output,
+                        "status": final_verdict,
+                        "time": exec_time,
+                        "memory": memory,
+                    })
+                    break
+
+                current_output = normalize_line_endings(data.get('stdout'))
+
+                if current_output == expected_output:
+                    final_verdict = 'Accepted'
+                    passed_testcases += 1
+                else:
+                    final_verdict = 'Wrong Answer'
+
                 testcase_details.append({
                     "id": testcase.id,
                     "input": given_input,
                     "expected_output": expected_output,
+                    "output": current_output,
                     "status": final_verdict,
                     "time": exec_time,
                     "memory": memory,
                 })
-                break
 
-            current_output = normalize_line_endings(data.get('stdout'))
-
-            if current_output == expected_output:
-                final_verdict = 'Accepted'
-                passed_testcases += 1
-            else:
+            if final_verdict == 'Accepted' and passed_testcases < total_testcases:
                 final_verdict = 'Wrong Answer'
-
-            testcase_details.append({
-                "id": testcase.id,
-                "input": given_input,
-                "expected_output": expected_output,
-                "output": current_output,
-                "status": final_verdict,
-                "time": exec_time,
-                "memory": memory,
-            })
-
-        if final_verdict == 'Accepted' and passed_testcases < total_testcases:
-            final_verdict = 'Wrong Answer'
 
         submission.total_testcases = total_testcases
         submission.passed_testcases = passed_testcases
@@ -182,8 +187,6 @@ def code_submission(self, submission_id):
     invalidate_individual_current_submission_details(user_id, submission.id)
     invalidate_user_problems_page(user_id)
     invalidate_submission_problem_api(user_id, problem.id)
-
-
 
 
 
