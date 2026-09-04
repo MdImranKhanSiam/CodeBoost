@@ -114,7 +114,7 @@ def problem_detail(request, problem_id):
             countdown=1
         )
 
-        return redirect('submission')
+        return redirect('submission-problem', problem_id)
         
     context = {
         'is_admin': is_admin,
