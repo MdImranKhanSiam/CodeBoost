@@ -11,7 +11,7 @@ services:
         sleep 5;
       done;
       echo 'Judge0 is up. Starting worker.';
-      celery -A CodeBoost worker --loglevel=info --pool=threads
+      celery -A CodeBoost worker --loglevel=info --pool=threads --concurrency=1 -n worker@%h
       "
     env_file:
       - .env
