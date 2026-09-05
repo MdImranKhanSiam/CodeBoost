@@ -237,15 +237,26 @@ function addTestcase(tc = null){
 
 function toggleTestcase(header){
     const body = header.nextElementSibling;
-    const isOpen = body.classList.contains('show');
+    const willOpen = !body.classList.contains('show');
 
-    body.classList.toggle('show');
-    header.classList.toggle('open');
+    // instant feedback so the user sees the click register right away,
+    // even before the (possibly slow) content below finishes rendering
+    header.classList.add('pressed');
+    header.classList.toggle('open', willOpen);
+    setTimeout(() => header.classList.remove('pressed'), 150);
 
-    // recalc textarea height now that it's visible (scrollHeight is 0 while hidden)
-    if (!isOpen) {
-        body.querySelectorAll('.form-textarea').forEach(t => autoResize(t));
-    }
+    // wait a frame so the browser actually paints the feedback above
+    // before doing the heavier show/resize work on large content
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            body.classList.toggle('show', willOpen);
+
+            // recalc textarea height now that it's visible (scrollHeight is 0 while hidden)
+            if (willOpen) {
+                body.querySelectorAll('.form-textarea').forEach(t => autoResize(t));
+            }
+        });
+    });
 }
 
 function renumberTestcases(){

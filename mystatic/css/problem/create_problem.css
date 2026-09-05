@@ -520,7 +520,28 @@ input[type="number"] {
     justify-content: space-between;
     cursor: pointer;
     user-select: none;
-    padding: 2px 2px 10px 2px;
+    padding: 8px 10px;
+    margin: -8px -10px 2px -10px;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.testcase-header:hover {
+    background: rgba(148,163,184,0.06);
+}
+
+/* immediate click feedback */
+.testcase-header:active,
+.testcase-header.pressed {
+    background: rgba(59,130,246,0.18);
+    transform: scale(0.995);
+}
+
+/* persistent state so it's clear whether this testcase is expanded */
+.testcase-header.open {
+    background: rgba(59,130,246,0.08);
+    border-left-color: #3b82f6;
 }
 
 .testcase-header .testcase-number {
@@ -535,6 +556,7 @@ input[type="number"] {
 
 .testcase-header.open .testcase-toggle-icon {
     transform: rotate(180deg);
+    color: #3b82f6;
 }
 
 .testcase-body {
