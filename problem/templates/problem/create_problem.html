@@ -368,7 +368,10 @@ function updateHiddenInputs() {
     document.getElementById("tagsInput").value = JSON.stringify(selectedTags);
 }
 
-initSearch({ inputId: "tagSearch", dropdownId: "tagsDropdown", selectedBoxId: "selectedTags", data: tags, selectedArray: selectedTags, labelKey: "name"});
+
+{% if problem_type == "public" %}
+    initSearch({ inputId: "tagSearch", dropdownId: "tagsDropdown", selectedBoxId: "selectedTags", data: tags, selectedArray: selectedTags, labelKey: "name"});
+{% endif %}
 //Tags
 
 
