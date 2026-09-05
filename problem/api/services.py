@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from problem.models import Problem
 
+from problem.web.cache import get_problem_details, set_problem_details
+
 PROMPTS = {
     "EXPLAIN": """You are an expert competitive programming instructor with 10+ years of teaching experience, from absolute beginners to ICPC finalists. You are explaining a problem to a student who has NOT solved it yet.
 
@@ -12,6 +14,7 @@ PROMPTS = {
                 Note: {note}
                 Time Limit: {time_limit} Seconds
                 Memory Limit: {memory_limit} Megabyte
+                Test Cases: {test_cases}
 
                 OUTPUT FORMAT — follow this exact structure, using these exact markdown headings:
 
@@ -71,6 +74,7 @@ PROMPTS = {
             Note: {note}
             Time Limit: {time_limit} Seconds
             Memory Limit: {memory_limit} Megabyte
+            Test Cases: {test_cases}
             Language: {language}
             Code: ```{code}```
 
@@ -116,7 +120,27 @@ PROMPTS = {
 
 
 def build_explain_prompt(problem_id):
-    problem = get_object_or_404(Problem, id=problem_id)
+    problem_details = get_problem_details(problem_id)
+
+    if not problem_details:
+        problem = get_object_or_404(Problem, id=problem_id)
+        testcases = problem.testcases.filter(is_hidden=False)
+
+        problem_details = {
+            'problem': problem,
+            'testcases': testcases,
+        }
+
+        set_problem_details(problem_id, problem_details)
+
+    problem = problem_details['problem']
+    testcases = problem_details['testcases']
+
+    testcases_str = "\n\n".join(
+        f"Input:\n{tc.input_data}\nOutput:\n{tc.expected_output}"
+        for tc in testcases
+    ) or "No visible test cases available."
+
     tags_joined = ", ".join(problem.tags.values_list("name", flat=True))
 
     prompt = PROMPTS["EXPLAIN"].format(
@@ -127,15 +151,37 @@ def build_explain_prompt(problem_id):
         output=problem.problem_output,
         note=problem.note,
         time_limit=problem.time_limit,
-        memory_limit=problem.memory_limit
+        memory_limit=problem.memory_limit,
+        test_cases=testcases_str
     )
 
     return prompt
 
 
 
+
 def build_review_prompt(problem_id, language, code):
-    problem = get_object_or_404(Problem, id=problem_id)
+    problem_details = get_problem_details(problem_id)
+    
+    if not problem_details:
+        problem = get_object_or_404(Problem, id=problem_id)
+        testcases = problem.testcases.filter(is_hidden=False)
+
+        problem_details = {
+            'problem': problem,
+            'testcases': testcases,
+        }
+
+        set_problem_details(problem_id, problem_details)
+
+    problem = problem_details['problem']
+    testcases = problem_details['testcases']
+    
+    testcases_str = "\n\n".join(
+        f"Input:\n{tc.input_data}\nOutput:\n{tc.expected_output}"
+        for tc in testcases
+    ) or "No visible test cases available."
+
     tags_joined = ", ".join(problem.tags.values_list("name", flat=True))
 
     prompt = PROMPTS["REVIEW"].format(
@@ -147,6 +193,7 @@ def build_review_prompt(problem_id, language, code):
         note=problem.note,
         time_limit=problem.time_limit,
         memory_limit=problem.memory_limit,
+        test_cases=testcases_str,
         language=language,
         code=code
     )
