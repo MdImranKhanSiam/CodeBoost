@@ -397,6 +397,7 @@ function showTags() {
 
     const tagContainer = document.getElementById("selectedTags");
 
+    updateHiddenInputsTags();
     renderSelected(tagContainer, selectedTags, tags, "name");
 }
 
@@ -421,7 +422,7 @@ function initSearch({ inputId, dropdownId, selectedBoxId, data, selectedArray, l
                 renderSelected(selectedBox, selectedArray, data, labelKey);
                 dropdown.innerHTML = "";
                 input.value = "";
-                updateHiddenInputs();
+                updateHiddenInputsTags();
             };
             dropdown.appendChild(option);
         });
@@ -441,13 +442,13 @@ function renderSelected(container, selectedArray, data, labelKey) {
             const index = selectedArray.indexOf(id);
             if (index > -1) selectedArray.splice(index, 1);
             renderSelected(container, selectedArray, data, labelKey);
-            updateHiddenInputs();
+            updateHiddenInputsTags();
         };
         container.appendChild(tag);
     });
 }
 
-function updateHiddenInputs() {
+function updateHiddenInputsTags() {
     document.getElementById("tagsInput").value = JSON.stringify(selectedTags);
 }
 
