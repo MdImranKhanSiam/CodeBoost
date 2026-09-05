@@ -196,16 +196,23 @@ function addTestcase(tc = null){
     div.classList.add("testcase")
 
     div.innerHTML = `
-        <div class="testcase-number">Test Case #${testcaseNumber}</div>
-
-        <div class="form-group">
-            <textarea class="form-input form-textarea testcase_input" id="${inputId}" placeholder=" " required>${input_data}</textarea>
-            <label for="${inputId}" class="form-label">Input</label>
+        <div class="testcase-header" onclick="toggleTestcase(this)">
+            <div class="testcase-number">Test Case #${testcaseNumber}</div>
+            <span class="testcase-toggle-icon">▾</span>
         </div>
 
-        <div class="form-group">
-            <textarea class="form-input form-textarea testcase_output" id="${outputId}" placeholder=" " required>${expected_output}</textarea>
-            <label for="${outputId}" class="form-label">Expected Output</label>
+        <div class="testcase-body">
+
+            <div class="form-group">
+                <textarea class="form-input form-textarea testcase_input" id="${inputId}" placeholder=" " required>${input_data}</textarea>
+                <label for="${inputId}" class="form-label">Input</label>
+            </div>
+
+            <div class="form-group">
+                <textarea class="form-input form-textarea testcase_output" id="${outputId}" placeholder=" " required>${expected_output}</textarea>
+                <label for="${outputId}" class="form-label">Expected Output</label>
+            </div>
+
         </div>
 
         <div class="testcase-footer">
@@ -226,6 +233,19 @@ function addTestcase(tc = null){
 
     // keep textarea height correct for prefilled edit-page content
     div.querySelectorAll('.form-textarea').forEach(t => autoResize(t));
+}
+
+function toggleTestcase(header){
+    const body = header.nextElementSibling;
+    const isOpen = body.classList.contains('show');
+
+    body.classList.toggle('show');
+    header.classList.toggle('open');
+
+    // recalc textarea height now that it's visible (scrollHeight is 0 while hidden)
+    if (!isOpen) {
+        body.querySelectorAll('.form-textarea').forEach(t => autoResize(t));
+    }
 }
 
 function renumberTestcases(){

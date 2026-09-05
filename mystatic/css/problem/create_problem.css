@@ -512,3 +512,36 @@ input[type="number"] {
     background: rgba(255,95,126,.08);
 }
 /* Testcase Zip */
+
+/* Testcase Collapse/Expand */
+.testcase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 2px 10px 2px;
+}
+
+.testcase-header .testcase-number {
+    margin-bottom: 0;
+}
+
+.testcase-toggle-icon {
+    font-size: 13px;
+    color: #8b95a7;
+    transition: transform 0.2s ease;
+}
+
+.testcase-header.open .testcase-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.testcase-body {
+    display: none;
+}
+
+.testcase-body.show {
+    display: block;
+}
+/* Testcase Collapse/Expand */
