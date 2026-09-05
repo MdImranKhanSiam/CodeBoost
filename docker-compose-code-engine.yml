@@ -26,3 +26,6 @@ services:
 
 # To rebuild the container after git pull
 # sudo docker compose -f docker-compose-code-engine.yml up -d --build
+
+# To see the logs
+# sudo docker logs -f codeboost_celery_worker

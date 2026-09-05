@@ -64,7 +64,7 @@
         <label for="note" class="form-label">Note (optional)</label>
     </div>
 
-     
+    {% if problem_type == "public" %}
     <div class="selector">
         <div class="form-group">
             <input class="form-input" type="text" name="tags" id="tagSearch" placeholder=" ">
@@ -76,6 +76,7 @@
     <input type="hidden" name="tags" id="tagsInput">
         
     <br>
+    {% endif %}
 
 
     <label for="difficulty">Difficulty:</label>
