@@ -27,7 +27,8 @@ PROMPTS = {
                 Then one sentence on exactly what must be printed and in what format.
 
                 ## 🔍 Walking Through the Example
-                Take the FIRST sample input and trace it by hand, step by step, showing why the sample output is what it is. Use a numbered list or a small table. This is the most important section for beginners — make it concrete with real numbers, never abstract.
+                There are few examples. Take one or two at most which seems important and good enough for explaining. For every example:
+                Take the sample input and trace it by hand, step by step, showing why the sample output is what it is. Use a numbered list or a small table. This is the most important section for beginners — make it concrete with real numbers, never abstract.
 
                 ## 💡 Key Observations
                 A numbered list of 2-5 insights that unlock the problem, ordered from most obvious to most clever. For each, phrase it as a discovery ("Notice that..." / "Since X is at most 10^5, we can afford...") and explain WHY it is true in one or two lines. Bold the single most critical observation.
