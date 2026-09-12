@@ -93,10 +93,6 @@ def problem_detail(request, problem_id):
     language_name = LANGUAGES[language_id]
 
     if request.method == 'POST':
-        invalidate_homepage()
-        invalidate_submission_api(user.id)
-        invalidate_submission_problem_api(user.id, problem_id)
-
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
 
@@ -113,6 +109,9 @@ def problem_detail(request, problem_id):
             args=[current_submission.id],
             countdown=1
         )
+
+        request.session['submissionUserId'] = user.id
+        request.session['submissionRedirected'] = True
 
         return redirect('submission-problem', problem_id)
         
@@ -396,6 +395,15 @@ def submissions_api(request):
 @ratelimit(key='user', rate='40/m', method='GET', block=True)
 @login_required(login_url='/accounts/google/login/')
 def submission_problem(request, problem_id):
+    redirected = request.session.pop('submissionRedirected', False)
+
+    if redirected:
+        user_id = request.session.pop('submissionUserId')
+
+        invalidate_homepage()
+        invalidate_submission_api(user_id)
+        invalidate_submission_problem_api(user_id, problem_id)
+
     context = {
         'problem_id': problem_id,
     }

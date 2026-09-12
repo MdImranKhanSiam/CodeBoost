@@ -182,12 +182,12 @@ def code_submission(self, submission_id):
     except Exception as exc:
         raise self.retry(exc=exc)
 
-    time.sleep(1)
+    # time.sleep(1)
     invalidate_submission_api(user_id)
     invalidate_individual_current_submission_details(user_id, submission.id)
     invalidate_user_problems_page(user_id)
     invalidate_submission_problem_api(user_id, problem.id)
-    time.sleep(1)
+    # time.sleep(1)
     invalidate_submission_api(user_id)
 
 
