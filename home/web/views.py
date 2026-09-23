@@ -22,7 +22,7 @@ from . cache import get_homepage, set_homepage, invalidate_homepage
 
 
 
-@ratelimit(key='user_or_ip', rate='100/m', method='GET', block=True)
+# @ratelimit(key='user_or_ip', rate='100/m', method='GET', block=True)
 def home(request):
     context = get_homepage()
 
