@@ -253,7 +253,7 @@ ERR_CONNECTION = -2
 ERR_CLIENT = -3
 ERR_UNKNOWN = -99
 
-MAX_CONCURRENT = 20000
+MAX_CONCURRENT = 200
 
 async def _fetch(session: aiohttp.ClientSession, url: str, sem: asyncio.Semaphore) -> int:
     async with sem:
